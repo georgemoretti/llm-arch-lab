@@ -71,7 +71,8 @@ def _read(path: Path) -> str | None:
 def create_app(root: Path | None = None) -> FastAPI:
     root = (root or project_root()).resolve()
     ws_root = workspace_dir(root).resolve()
-    dbfile = db_path(root)
+    def dbfile() -> Path:
+        return db_path(root)  # каждый раз: state_dir() пересоздаст папку, если её удалили
     run_locks: dict[str, threading.Lock] = {}
     locks_guard = threading.Lock()
 
@@ -126,7 +127,7 @@ def create_app(root: Path | None = None) -> FastAPI:
         return st or {"status": "new", "attempts": 0, "solved_at": None, "last_at": None}
 
     def diff_unlocked(task: Task) -> tuple[bool, int]:
-        attempts = db.attempts(task.id, dbfile)
+        attempts = db.attempts(task.id, dbfile())
         failed = sum(a["status"] != "passed" and a["impl"] == "workspace" for a in attempts)
         solved = any(a["status"] == "passed" and a["impl"] == "workspace" for a in attempts)
         return solved or failed >= DIFF_UNLOCK_FAILED_ATTEMPTS, failed
@@ -149,7 +150,7 @@ def create_app(root: Path | None = None) -> FastAPI:
     def get_course() -> dict:
         """Карта курса: блоки → модули → задачи со статусами."""
         c = course()
-        statuses = db.task_statuses(dbfile)
+        statuses = db.task_statuses(dbfile())
         order = c.topo_order()
         blocks = []
         for block in c.blocks.values():
@@ -168,14 +169,14 @@ def create_app(root: Path | None = None) -> FastAPI:
     @app.get("/api/tasks")
     def list_tasks() -> list[dict]:
         c = course()
-        statuses = db.task_statuses(dbfile)
+        statuses = db.task_statuses(dbfile())
         return [task_summary(c.tasks[t], statuses) for t in c.topo_order()]
 
     @app.get("/api/tasks/{task_id}")
     def get_task_detail(task_id: str) -> dict:
         c = course()
         task = get_task(c, task_id)
-        statuses = db.task_statuses(dbfile)
+        statuses = db.task_statuses(dbfile())
         unlocked, failed = diff_unlocked(task) if task.has_code else (False, 0)
         baselines = {k: v for b in c.blocks.values() for k, v in b.baselines.items()}
         diff_from = None
@@ -256,7 +257,7 @@ def create_app(root: Path | None = None) -> FastAPI:
     def get_attempts(task_id: str) -> list[dict]:
         """История попыток (новые сверху). Полный RunResult — только у последней."""
         task = get_task(course(), task_id)
-        rows = db.attempts(task.id, dbfile)
+        rows = db.attempts(task.id, dbfile())
         out = []
         for i, row in enumerate(reversed(rows)):
             result_json = row.pop("result_json")
@@ -278,7 +279,7 @@ def create_app(root: Path | None = None) -> FastAPI:
     @app.get("/api/progress")
     def get_progress() -> dict:
         c = course()
-        statuses = db.task_statuses(dbfile)
+        statuses = db.task_statuses(dbfile())
         tasks = {tid: task_progress(tid, statuses) for tid in c.tasks}
         return {
             "total": len(tasks),

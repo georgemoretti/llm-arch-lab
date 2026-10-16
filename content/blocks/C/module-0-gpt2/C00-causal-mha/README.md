@@ -51,6 +51,10 @@ Multi-head: $\operatorname{MHA}(X) = \operatorname{Concat}(\text{head}_1, \dots,
 где $\text{head}_h = \operatorname{Attn}(X W_Q^{(h)}, X W_K^{(h)}, X W_V^{(h)})$. На практике все
 $W_Q^{(h)}$ (и K, V) склеены в одну матрицу `c_attn` размера $C \times 3C$.
 
+Покрути визуализацию: включи и выключи маску, увеличь $D$ без деления на $\sqrt{D}$.
+
+:::viz causal-mask:::
+
 ## Формы тензоров
 
 ```

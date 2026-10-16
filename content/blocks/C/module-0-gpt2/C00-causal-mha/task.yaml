@@ -15,5 +15,5 @@ reading:
     url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
   - title: "PyTorch: torch.nn.functional.scaled_dot_product_attention (документация)"
     url: https://pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html
-viz: []
+viz: [causal-mask]
 questions: [attention-*]
