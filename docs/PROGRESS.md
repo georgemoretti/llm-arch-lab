@@ -3,22 +3,27 @@
 > Обновляется в конце КАЖДОЙ сессии Claude Code. Пиши кратко и конкретно.
 
 ## Текущая фаза
-Фаза 5b — **завершена** (2026-10-16). Модуль 3 (MoE и DeepSeek) закрыт целиком. Следующая:
-Фаза 6a — модуль 4, эффективное внимание (C18–C20). `data/interview_raw/` по-прежнему пуст.
+Фаза 6a — **завершена** (2026-10-17). Модуль 4, часть 1: C18 (DSA), C19 (gated attention), C20 (линейное
+внимание) + C20d. Следующая: Фаза 6b — C21–C23, статьи/квиз модуля 4, V-hybrid. `data/interview_raw/` по-прежнему пуст.
 
 ## Следующий шаг (точный)
-Запустить Фазу 6a по шаблону «фазы с контентом» из `docs/PROMPTS.md` в `content/blocks/C/module-4-efficient/`:
-- C18 упрощённое sparse attention в стиле DSA (DeepSeek-V3.2): индексатор (лёгкие оценки q·k) + top-k
-  селектор ключей → маска; свойство: при k ≥ S — обычное causal attention; C19 gated attention (выходной
-  гейт σ(W_g x) ⊙ out, partial RoPE — RoPE только на части измерений головы); C20 линейное внимание
-  (kernel trick φ(q)(φ(k)ᵀv), рекуррентная форма == параллельная causal-форма);
-- debug 6a: «неверная нормировка в линейном внимании» (C20d); «утечка будущего в рекуррентной форме» — в 6b
-  (C21) или тоже C20d2 — решить по ходу;
-- гиперпараметры: DeepSeek-V3.2-Exp (index_topk, index_n_heads, index_head_dim), Qwen3-Next
-  (gated attention, partial_rotary_factor, layer_types / full_attention_interval) — из config.json на HF,
-  указывать источник; строка `qwen3-next` в `content/architectures.yaml` уже есть;
-- эталоны — `llmlab/core/efficient.py` + `tests/test_core_efficient.py`; вопросы — `content/questions/efficient.yaml`;
-- V-masks: добавить режим sparse-маски (после C18).
+Запустить Фазу 6b по шаблону «фазы с контентом» из `docs/PROMPTS.md` в `content/blocks/C/module-4-efficient/`:
+- C21 DeltaNet → Gated DeltaNet (рекуррентная форма, игрушечный размер): правило дельты
+  S_t = S_{t−1}(I − β k kᵀ) + β v kᵀ, затем гейт забывания α_t; L2-норма q/k; сравнение с C20 (линейное внимание
+  только накапливает). Сверить с `modeling_qwen3_next.py` (`torch_recurrent_gated_delta_rule`) и статьёй
+  Gated DeltaNet (Yang et al., ICLR 2025 — arXiv id проверить);
+- debug из PLAN «утечка будущего в рекуррентной форме» → C21d (например, чтение состояния до/после обновления
+  или чанковая форма с маской не той диагонали) — решить по ходу;
+- C22 гибридный стек 3:1 (linear : full, правило `(i + 1) % 4 == 0` → full — проверено по
+  `configuration_qwen3_next.py`), сравнение памяти: KV-cache full-слоёв + состояние linear-слоёв vs все full;
+  брать `GatedAttention` и `linear_attention_recurrent` из `llmlab/core/efficient.py`;
+- C23* (hard, опц.) упрощённый Mamba-2 / SSM-скан — делать, если укладывается;
+- гиперпараметры Qwen3-Next linear-слоёв (config.json, уже скачан и сверен): `linear_num_key_heads 16`,
+  `linear_num_value_heads 32`, `linear_key_head_dim 128`, `linear_value_head_dim 128`, `linear_conv_kernel_dim 4`;
+  ячейки `qwen3-next.norm/ffn/moe` пока не заняты (attention, position — C19);
+- C-P4 (статьи: Transformers are RNNs, Gated DeltaNet, Gated Attention, Mamba-2, DeepSeek-V3.2/DSA) в
+  `papers-module-4.yaml`, C-Q4 — квиз модуля по глобам (sparse-*, gated-attn-*, partial-rope-*, linear-attn-*, + 6b);
+- V-hybrid: схема стека и кривая памяти по длине контекста для full / SWA / hybrid.
 
 ## Сделано
 **Фаза 0:**
@@ -223,6 +228,31 @@
   консоли; сквозной сценарий: C16b → конспект, ячейки DeepSeek-V3 открыты.
 - Тесты платформы: 76.
 
+**Фаза 6a:**
+- `llmlab/core/efficient.py` — эталоны C18–C20 (`LightningIndexer`, `topk_mask`, `sparse_attention`, `DSAttention`,
+  `apply_partial_rope`, `GatedAttention`, `feature_map`, `linear_attention_noncausal`, `linear_attention`,
+  `linear_attention_recurrent`); `tests/test_core_efficient.py`.
+- `C18-sparse-attention` (10 тестов): индексатор Σ_h w·ReLU(q·k)/√(H_I·d_I) с −inf для будущего; `topk_mask`
+  (ровно min(k, t+1) ключей, только прошлое, лучшие по оценке; при k ≥ S = causal); `sparse_attention` не зависит
+  от невыбранных ключей; `DSAttention` при k ≥ T == плотное causal MHA, при k = 3 == attention по выбранным.
+- `C19-gated-attention` (7): `apply_partial_rope` (первые R каналов, частоты для R, остальное без изменений, R = D →
+  обычный RoPE, относительность); `GatedAttention` (раскладка `[запрос | гейт]` по головам как в HF, QK-Norm,
+  GQA, σ-гейт до o_proj); нулевые веса гейта → выход ровно ½; гейт закрывает голову для одного запроса.
+- `C20-linear-attention` (8): φ = elu + 1; некаузальная через φ(K)ᵀV; causal параллельная (v = const → const,
+  без утечки); рекуррентная == параллельной, S = φ(K)ᵀV, z = Σφ(k), кусками с переносом state; размер state не
+  растёт. Softmax запрещён monkeypatch-ем.
+- Debug: `C20d` (знаменатель параллельной формы по ВСЕМ ключам: совпадает с рекуррентной только в последней
+  позиции; падает 3/8).
+- Статьи: `deepseek-v32` (arXiv 2512.02556), `gated-attention` (2505.06708), `transformers-are-rnns` (2006.16236).
+  Вопросы: `efficient.yaml` — 12 (sparse-*, gated-attn-*, partial-rope-*, linear-attn-*).
+- Таблица: новая строка `deepseek-v3.2` (attention — C18); `qwen3-next.attention`, `qwen3-next.position` (C19).
+- V-masks: режим «Sparse (DSA)» — игрушечные оценки (якорные токены + близость + шум), слайдеры T, k, вес близости,
+  подсчёт «выбрано дальше окна W = k»; встроен в README C18.
+- Проверено: мутации C18 (без ReLU), C19 (гейт по всей проекции; cos/sin от D с обрезкой) ловятся диагностами с
+  точным названием ошибки; скриншоты README C19/C20 и V-masks/Sparse — без ошибок в консоли (нашёл и исправил `|`
+  внутри кода в таблице C19).
+- Тесты платформы: 79.
+
 ## Не сделано / долги
 - E2E-сценарий UI не в репозитории (Playwright ставился во временную папку). Если UI начнёт
   ломаться — завести `web/e2e/` с Playwright и отдельный CI-job.
@@ -263,6 +293,12 @@
   синхронизировать. `llmlab/core/moe.py` дублирует эталоны C12–C15 (страховка — `tests/test_core_moe.py`).
 - Тест C14 `test_bias_balancing_simulation` статистический (сид фиксирован; фактически max 0.145 / min 0.113
   при порогах 0.18 / 0.08) — при смене версии torch пересчитать запас.
+- Фаза 6a: тесты C20d — копия тестов C20 без диагноста `_diagnose`; при правке тестов C20 синхронизировать.
+  `llmlab/core/efficient.py` дублирует эталоны C18–C20 (страховка — `tests/test_core_efficient.py`).
+- C18 без KV-cache индексатора и без инкрементального декодирования (только prefill/обучение); RoPE в индексаторе
+  и MLA-основа DSA не реализованы — описаны в README. Обучение индексатора (KL к плотному attention) — только текст
+  и вопрос, кода нет.
+- C19 без KV-cache; RMSNorm Qwen3-Next вида (1 + w) не реализован (как у Gemma, C08) — учесть в Фазе 8.
 - Визуальную проверку UI в 5a не делал (новых viz нет); README отдаются API, KaTeX проверен скриптом.
 
 ## Решения (почему сделано так, а не иначе)
@@ -429,6 +465,21 @@
 - **V-kvcache для MLA**: «эквивалентное» число KV-голов (576 / 320), чтобы не менять общую формулу; MQA
   для этого пресета не показан (подписи наезжали, а главное сравнение — с MHA тех же голов).
 
+- **Фаза 6a: DSA без MLA и RoPE** — основное attention в C18 обычное MHA, индексатор без RoPE/LayerNorm/Адамара/FP8:
+  суть задачи — индексатор и выбор top-k; формула и масштабы (`n_heads ** -0.5`, `softmax_scale`) — по
+  `inference/model.py` DeepSeek-V3.2-Exp (`Indexer`, `fp8_index`: ReLU(q·k) · вес головы, сумма по головам).
+  Схема обучения индексатора (прогрев: только индексатор, KL к сумме весов голов; затем detach) сверена по
+  тексту arXiv 2512.02556.
+- **DSA в таблице — отдельная строка `deepseek-v3.2`**: ячейку `deepseek-v3.attention` уже открывает C16, а DSA —
+  это другая модель (V3.2-Exp).
+- **C18 зависит от C07** (diff_from — «фиксированное окно → выбор по содержанию»), а не от C16.
+- **C19: QK-Norm и GQA оставлены** (как в Qwen3-Next), diff_from = C09; раскладка гейта по головам — главный
+  подвох задачи, на него два теста (оракул с диагностом и «обнулённые строки гейта → ½»).
+- **C20 с некаузальной формой** — четвёртая функция, чтобы ассоциативность (kernel trick) была реализована явно, а
+  не только упомянута. Чанковая форма — в C21 (DeltaNet).
+- **Debug 6a — только C20d** (нормировка); «утечка будущего в рекуррентной форме» из PLAN — в 6b (C21d).
+- **V-masks: оценки индексатора игрушечные** (не обученная модель) — оговорено в подписи.
+
 ## Известные проблемы
 - Холодный старт subprocess с torch ≈ 1–1.5 с на прогон — приемлемо для UI, но заметно.
 
@@ -443,3 +494,4 @@
 | 2026-10-16 | 4 | C07 SWA, C08 нормы, C09 QK-Norm, C10 NoPE, C11 кольцевой KV-cache + 3 debug, C-P2, C-Q2, V-masks, SWA в V-kvcache, core/gemma_olmo.py, 69 тестов | см. `git log` |
 | 2026-10-16 | 5a | C12 роутер, C13 MoE-слой, C14 балансировка, C15 DeepSeekMoE + 3 debug, 10 статей, 15 вопросов, core/moe.py, 73 теста | см. `git log` |
 | 2026-10-16 | 5b | C16 MLA, C16b decoupled RoPE, C17 MTP + C16d, C-P3, C-Q3, V-moe-routing, MLA в V-kvcache, core/mla.py, 76 тестов | см. `git log` |
+| 2026-10-17 | 6a | C18 DSA, C19 gated attention + partial RoPE, C20 линейное внимание + C20d, 3 статьи, 12 вопросов, строка DeepSeek-V3.2, sparse-режим V-masks, core/efficient.py, 79 тестов | см. `git log` |
