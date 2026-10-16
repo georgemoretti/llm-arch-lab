@@ -1,4 +1,4 @@
-"""llmlab/core/efficient.py совпадает с эталонами задач C18–C21 (страховка от расхождения копий)."""
+"""llmlab/core/efficient.py совпадает с эталонами задач C18–C23 (страховка от расхождения копий)."""
 
 from __future__ import annotations
 
@@ -65,3 +65,31 @@ def test_gated_deltanet_matches_c21():
         (ya, sa), (yb, sb) = a(x), b(x)
     assert_close(ya, yb)
     assert_close(sa, sb)
+
+
+def test_hybrid_matches_c22():
+    sol = _solution("C22-hybrid-stack")
+    cfg = (32, 4, 2, 48, 4, 2, 8, 2, 8, 8)
+    torch.manual_seed(0)
+    a, b = core.HybridStack(*cfg), sol.HybridStack(*cfg)
+    b.load_state_dict(a.state_dict())
+    x = torch.randn(2, 7, 32)
+    with torch.no_grad():
+        assert_close(a(x), b(x))
+    types = core.hybrid_layer_types(48, 4)
+    assert types == sol.hybrid_layer_types(48, 4)
+    assert core.hybrid_cache_bytes(types, 1000, 2, 256, 32, 128, 128) == sol.hybrid_cache_bytes(types, 1000, 2, 256, 32, 128, 128)
+
+
+def test_ssd_matches_c23():
+    sol = _solution("C23-mamba2-ssd")
+    g = torch.Generator().manual_seed(0)
+    x = torch.randn(2, 7, 3, 4, generator=g)
+    dt = torch.rand(2, 7, 3, generator=g)
+    A = -torch.rand(3, generator=g)
+    B, C = torch.randn(2, 7, 5, generator=g), torch.randn(2, 7, 5, generator=g)
+    D = torch.randn(3, generator=g)
+    assert_close(core.ssd_quadratic(x, dt, A, B, C, D), sol.ssd_quadratic(x, dt, A, B, C, D))
+    (ya, ha), (yb, hb) = core.ssd_recurrent(x, dt, A, B, C, D), sol.ssd_recurrent(x, dt, A, B, C, D)
+    assert_close(ya, yb)
+    assert_close(ha, hb)

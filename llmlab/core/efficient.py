@@ -1,12 +1,12 @@
-"""Готовые компоненты эффективного внимания (модуль 4 блока C) — эталоны задач C18–C21.
+"""Готовые компоненты эффективного внимания (модуль 4 блока C) — эталоны задач C18–C23.
 
 C18 sparse attention в стиле DSA (DeepSeek-V3.2: lightning indexer + top-k ключей), C19 gated attention и
-partial RoPE (Qwen3-Next), C20 линейное внимание (Katharopoulos et al., 2020), C21 Gated DeltaNet.
-Поздние задачи (гибридный стек C22) и финальная модель (Фаза 8) импортируют их отсюда.
+partial RoPE (Qwen3-Next), C20 линейное внимание (Katharopoulos et al., 2020), C21 Gated DeltaNet, C22 гибридный
+стек 3 : 1 и память кеша, C23 Mamba-2 (SSD). Задача C22 и финальная модель (Фаза 8) импортируют их отсюда.
 
-⚠️ Это готовые ответы на задачи C18–C21. Если ещё не решил их — не подглядывай.
+⚠️ Это готовые ответы на задачи C18–C23. Если ещё не решил их — не подглядывай.
 
-Код намеренно совпадает с ``solution.py`` задач C18–C21 в ``content/blocks/C/module-4-efficient/``;
+Код намеренно совпадает с ``solution.py`` задач C18–C23 в ``content/blocks/C/module-4-efficient/``;
 расхождение ловит ``tests/test_core_efficient.py``. Имена параметров C19 и C21 — как в Hugging Face
 ``transformers`` (``modeling_qwen3_next.py``: ``q_proj`` с гейтом, ``q_norm``, ``k_norm``, ``A_log``, ``dt_bias``).
 """
@@ -19,7 +19,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from llmlab.core.llama import RMSNorm, apply_rope, repeat_kv, rope_cos_sin
+from llmlab.core.llama import RMSNorm, SwiGLUFFN, apply_rope, repeat_kv, rope_cos_sin
 
 # ---------------------------------------------------------------------------- C18 DSA
 
@@ -252,3 +252,102 @@ class GatedDeltaNet(nn.Module):
         beta, g = self.gates(x)
         out, state = gated_delta_rule(q, k, v, beta, g, state)
         return self.o_proj(out.transpose(1, 2).reshape(B, T, H * dv)), state
+
+
+# ---------------------------------------------------------------------------- C22 гибридный стек
+
+
+def hybrid_layer_types(n_layers: int, full_attention_interval: int) -> list[str]:
+    """Qwen3-Next: слой i — "full_attention", если (i + 1) делится на interval, иначе "linear_attention"."""
+    return ["full_attention" if (i + 1) % full_attention_interval == 0 else "linear_attention"
+            for i in range(n_layers)]
+
+
+class HybridBlock(nn.Module):
+    """Pre-Norm блок: x + mixer(norm(x)), затем x + ffn(norm(x)). Mixer — GatedAttention или GatedDeltaNet."""
+
+    def __init__(self, mixer: nn.Module, d_model: int, d_ff: int):
+        super().__init__()
+        self.input_layernorm = RMSNorm(d_model)
+        self.mixer = mixer
+        self.post_attention_layernorm = RMSNorm(d_model)
+        self.mlp = SwiGLUFFN(d_model, d_ff)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        h = self.mixer(self.input_layernorm(x))
+        if isinstance(h, tuple):                      # GatedDeltaNet возвращает (y, state)
+            h = h[0]
+        x = x + h
+        return x + self.mlp(self.post_attention_layernorm(x))
+
+
+class HybridStack(nn.Module):
+    """Стек из n_layers блоков: каждый interval-й — gated attention (C19), остальные — Gated DeltaNet (C21)."""
+
+    def __init__(self, d_model: int, n_layers: int, full_attention_interval: int, d_ff: int,
+                 n_heads: int, n_kv_heads: int, head_dim: int,
+                 linear_heads: int, linear_k_dim: int, linear_v_dim: int):
+        super().__init__()
+        self.layer_types = hybrid_layer_types(n_layers, full_attention_interval)
+        self.layers = nn.ModuleList()
+        for kind in self.layer_types:
+            mixer = (GatedAttention(d_model, n_heads, n_kv_heads, head_dim) if kind == "full_attention"
+                     else GatedDeltaNet(d_model, linear_heads, linear_k_dim, linear_v_dim))
+            self.layers.append(HybridBlock(mixer, d_model, d_ff))
+        self.norm = RMSNorm(d_model)
+
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        for layer in self.layers:
+            x = layer(x)
+        return self.norm(x)
+
+
+def hybrid_cache_bytes(layer_types: list[str], seq_len: int, n_kv_heads: int, head_dim: int,
+                       linear_heads: int, linear_k_dim: int, linear_v_dim: int,
+                       batch: int = 1, bytes_per_elem: int = 2) -> int:
+    """Память инференса: KV-cache full-слоёв (растёт с seq_len) + состояния linear-слоёв (константа)."""
+    full = layer_types.count("full_attention")
+    linear = layer_types.count("linear_attention")
+    kv = 2 * n_kv_heads * head_dim * seq_len                  # K и V на один full-слой
+    state = linear_heads * linear_k_dim * linear_v_dim        # S [H, dk, dv] на один linear-слой
+    return (full * kv + linear * state) * batch * bytes_per_elem
+
+
+# ---------------------------------------------------------------------------- C23 Mamba-2 (SSD)
+
+
+def segsum(a: torch.Tensor) -> torch.Tensor:
+    """a [..., T] → [..., T, T]: out[t, s] = a_{s+1} + … + a_t при s ≤ t (пустая сумма = 0), −inf при s > t."""
+    T = a.shape[-1]
+    cs = torch.cumsum(a, dim=-1)                                     # cs_t = a_0 + … + a_t
+    out = cs[..., :, None] - cs[..., None, :]                        # cs_t − cs_s = a_{s+1} + … + a_t
+    causal = torch.ones(T, T, dtype=torch.bool, device=a.device).tril()
+    return out.masked_fill(~causal, float("-inf"))
+
+
+def ssd_recurrent(x, dt, A, B, C, D, state=None):
+    """Скан Mamba-2 по времени (как при генерации).
+
+    x [b, T, H, P], dt [b, T, H] > 0, A [H] < 0, B и C [b, T, N] (общие для голов), D [H],
+    state [b, H, N, P] или None → (y [b, T, H, P], state [b, H, N, P]).
+    """
+    b, T, H, P = x.shape
+    N = B.shape[-1]
+    h = x.new_zeros(b, H, N, P) if state is None else state
+    ys = []
+    for t in range(T):
+        decay = torch.exp(dt[:, t] * A)                                          # [b, H]: e^{Δ_t A} ∈ (0, 1)
+        write = (dt[:, t, :, None, None] * B[:, t, None, :, None]) * x[:, t, :, None, :]   # Δ_t · B_t ⊗ x_t
+        h = decay[..., None, None] * h + write                                   # [b, H, N, P]
+        y = (C[:, t, None, :, None] * h).sum(dim=-2)                            # C_tᵀ h_t  [b, H, P]
+        ys.append(y + D[:, None] * x[:, t])
+    return torch.stack(ys, dim=1), h
+
+
+def ssd_quadratic(x, dt, A, B, C, D):
+    """Та же модель целиком: y = (L ⊙ C Bᵀ)(Δ·x) + D·x, где L[t, s] = exp(Σ_{r=s+1..t} Δ_r A) — маска с затуханием."""
+    L = torch.exp(segsum((dt * A).transpose(1, 2)))                          # [b, H, T, T], 0 выше диагонали
+    scores = C @ B.transpose(1, 2)                                            # [b, T, T]: C_t · B_s
+    M = L * scores[:, None]                                                   # [b, H, T, T]
+    y = torch.einsum("bhts,bshp->bthp", M, dt[..., None] * x)               # [b, T, H, P]
+    return y + D[:, None] * x
