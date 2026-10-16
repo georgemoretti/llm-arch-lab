@@ -41,4 +41,8 @@ jobs:
         working-directory: web
         run: npm ci && npm run build
       - name: Bundle is up to date
-        run: git diff --exit-code --stat llmlab/static || (echo "Пересобери фронтенд: cd web && npm run build" && exit 1)
+        run: |
+          git diff --exit-code --stat llmlab/static || {
+            echo "Бандл устарел. Пересобери фронтенд: cd web && npm run build"
+            exit 1
+          }
