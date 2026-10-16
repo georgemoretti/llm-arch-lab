@@ -310,7 +310,7 @@ llmlab list                         # задачи в порядке завис�
 llmlab init-workspace <id> [--force]
 llmlab test <id> [--impl reference|starter|buggy] [--impl-path file.py] [--timeout 60]
 llmlab validate <id> | --all [-j 4]
-llmlab serve                        # Фаза 1
+llmlab serve [--port 8765] [--no-open]   # веб-интерфейс на 127.0.0.1
 ```
 
 ### 4.6 Инварианты `llmlab validate`

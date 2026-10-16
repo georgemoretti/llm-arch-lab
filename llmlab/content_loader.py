@@ -5,7 +5,8 @@
 - ``content/blocks/<B>/block.yaml``            — метаданные блока, модулей и базовых архитектур;
 - ``content/blocks/<B>/<module>/<task>/task.yaml`` — задача;
 - ``content/questions/*.yaml``                 — список вопросов;
-- ``content/papers/*.yaml``                    — по одной статье в файле.
+- ``content/papers/*.yaml``                    — по одной статье в файле;
+- ``content/viz/*.yaml``                       — по одной визуализации в файле (компонент — в web/src/viz).
 
 ``load_course()`` никогда не падает на ошибках контента: он собирает их в ``Course.issues``,
 чтобы ``llmlab validate`` мог показать всё сразу. Падает только на битом YAML/схеме,
@@ -39,6 +40,9 @@ REQUIRED_FILES: dict[str, tuple[str, ...]] = {
 
 # Типы задач, у которых есть код и тесты.
 CODE_TASK_TYPES = frozenset({"implement", "debug", "project"})
+
+# Директива вставки визуализации в README: строка ``:::viz rope-rotation:::``.
+VIZ_DIRECTIVE_RE = re.compile(r"^:::viz\s+([a-z0-9][a-z0-9-]*)\s*:::\s*$", re.MULTILINE)
 
 TASK_ID_RE = re.compile(r"^[A-Z]\d{2}[a-z]?(-[a-z0-9]+)+$|^[A-Z]-[A-Z]\d+(-[a-z0-9]+)*$")
 
@@ -118,6 +122,14 @@ class Paper(_Strict):
     tags: list[str] = Field(default_factory=list)
 
 
+class Viz(_Strict):
+    """Описание визуализации. Сам интерактивный компонент — ``web/src/viz/<id>``."""
+
+    id: str
+    title: str
+    description: str = ""
+
+
 class Module(_Strict):
     id: str
     title: str
@@ -155,6 +167,7 @@ class Course:
     tasks: dict[str, Task] = field(default_factory=dict)
     questions: dict[str, Question] = field(default_factory=dict)
     papers: dict[str, Paper] = field(default_factory=dict)
+    viz: dict[str, Viz] = field(default_factory=dict)
     issues: list[Issue] = field(default_factory=list)
 
     @property
@@ -298,6 +311,21 @@ def load_course(root: Path | None = None) -> Course:
             continue
         course.papers[paper.id] = paper
 
+    # --- визуализации ---
+    vdir = cdir / "viz"
+    for vfile in sorted(vdir.glob("*.yaml")) if vdir.is_dir() else []:
+        data = _read_yaml(vfile, course)
+        if data is None:
+            continue
+        try:
+            viz = Viz.model_validate(data)
+        except ValidationError as exc:
+            _schema_error(vfile, exc, course)
+            continue
+        if viz.id != vfile.stem:
+            course.issues.append(Issue("error", _rel(vfile, course.root), f"id '{viz.id}' не совпадает с именем файла"))
+        course.viz[viz.id] = viz
+
     _check_references(course)
     return course
 
@@ -318,6 +346,11 @@ def _check_references(course: Course) -> None:
         for pid in task.papers:
             if pid not in course.papers:
                 course.issues.append(Issue("error", where, f"papers: нет content/papers/{pid}.yaml"))
+        readme = task.dir / "README.md"
+        directives = VIZ_DIRECTIVE_RE.findall(readme.read_text(encoding="utf-8")) if readme.exists() else []
+        for vid in [*task.viz, *directives]:
+            if vid not in course.viz:
+                course.issues.append(Issue("error", where, f"viz: нет content/viz/{vid}.yaml"))
         for pat in task.questions:
             if not any(fnmatch.fnmatchcase(qid, pat) for qid in course.questions):
                 course.issues.append(Issue("warning", where, f"questions: глоб '{pat}' не нашёл ни одного вопроса"))

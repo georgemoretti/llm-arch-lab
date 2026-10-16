@@ -47,6 +47,11 @@ testpaths = ["tests"]
 pythonpath = ["tests"]
 # Все тесты задач называются test_task.py — без importlib-режима они конфликтуют по имени.
 addopts = "--import-mode=importlib -p no:cacheprovider"
+filterwarnings = ["ignore:Using `httpx` with `starlette.testclient` is deprecated"]
 markers = [
     "weights: тест скачивает реальные веса с Hugging Face (по умолчанию не запускается)",
 ]
+
+[dependency-groups]
+# Только для тестов платформы (fastapi.testclient требует httpx). `uv sync` ставит их по умолчанию.
+dev = ["httpx>=0.27"]

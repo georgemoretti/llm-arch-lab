@@ -150,11 +150,28 @@ def validate_cmd(
 
 
 @app.command("serve")
-def serve(port: int = typer.Option(8765, help="порт на 127.0.0.1")) -> None:
-    """Веб-интерфейс (появится в Фазе 1)."""
-    console.print(f"[yellow]Веб-интерфейс появится в Фазе 1 (будет на http://127.0.0.1:{port}). "
-                  "Пока используй `llmlab test <id>`.[/]")
-    raise typer.Exit(1)
+def serve(
+    port: int = typer.Option(8765, help="порт на 127.0.0.1"),
+    open_browser: bool = typer.Option(True, "--open/--no-open", help="открыть браузер после запуска"),
+) -> None:
+    """Веб-интерфейс курса на http://127.0.0.1:<port> (только локально)."""
+    import threading
+    import webbrowser
+
+    import uvicorn
+
+    from llmlab.server import STATIC_DIR, create_app
+
+    course = _course()
+    if not (STATIC_DIR / "index.html").exists():
+        console.print("[yellow]Фронтенд не собран (нет llmlab/static/index.html). "
+                      "Собери его: `cd web && npm install && npm run build`.[/]")
+    url = f"http://127.0.0.1:{port}"
+    console.print(f"LLM Arch Lab: [bold]{url}[/]  [dim](Ctrl+C — остановить)[/]")
+    if open_browser:
+        threading.Timer(1.0, webbrowser.open, args=(url,)).start()
+    # Только 127.0.0.1: сервер исполняет код, наружу его открывать нельзя.
+    uvicorn.run(create_app(course.root), host="127.0.0.1", port=port, log_level="warning")
 
 
 if __name__ == "__main__":
