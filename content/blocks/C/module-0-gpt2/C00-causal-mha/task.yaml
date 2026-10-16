@@ -17,3 +17,12 @@ reading:
     url: https://pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html
 viz: [causal-mask]
 questions: [attention-*]
+# Строка GPT-2 в таблице архитектур (источник: статья GPT-2, §2.3, и config.json
+# openai-community/gpt2: n_positions=1024, activation_function=gelu_new, n_inner=null → 4·n_embd).
+arch:
+  gpt2:
+    norm: "LayerNorm, Pre-Norm + финальный LN"
+    position: "Обучаемые абсолютные эмбеддинги (1024 позиции)"
+    attention: "MHA, полная causal-маска"
+    ffn: "GELU-MLP, скрытый слой 4·d"
+    moe: "Нет (dense)"

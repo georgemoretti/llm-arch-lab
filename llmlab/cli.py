@@ -1,7 +1,8 @@
-"""CLI курса: ``llmlab list | test | validate | init-workspace | serve``."""
+"""CLI курса: ``llmlab list | test | validate | init-workspace | serve | notes``."""
 
 from __future__ import annotations
 
+import sys
 from pathlib import Path
 from typing import Optional
 
@@ -17,6 +18,8 @@ from llmlab.workspace import init_workspace, workspace_file
 app = typer.Typer(help="LLM Arch Lab — интерактивный курс по архитектурам LLM.", no_args_is_help=True,
                   add_completion=False)
 console = Console()
+notes_app = typer.Typer(help="Конспекты: пересборка и экспорт.", no_args_is_help=True)
+app.add_typer(notes_app, name="notes")
 
 STATUS_STYLE = {"solved": "[green]✓ решена[/]", "attempted": "[yellow]… в процессе[/]", "new": "[dim]· новая[/]"}
 
@@ -107,7 +110,42 @@ def test_cmd(
     result = run_task_tests(task, impl=impl, impl_path=impl_path.resolve() if impl_path else None,
                             timeout_s=timeout, root=course.root)
     _print_result(result)
+    if result["status"] == "passed" and impl == "workspace" and impl_path is None:
+        _after_solve(course, task)
     raise typer.Exit(0 if result["status"] == "passed" else 1)
+
+
+def _after_solve(course: Course, task) -> None:
+    """Зелёный прогон: обновить конспект или (впервые) спросить «Главное, что я понял»."""
+    from llmlab import notes
+
+    try:
+        info = notes.build_note(course, task, course.root)
+        console.print(f"[green]Конспект обновлён:[/] notes/{info['path']}")
+        return
+    except notes.NoteError as exc:
+        if exc.code != "needs_insight":
+            console.print(f"[yellow]{escape(str(exc))}[/]")
+            return
+    if not sys.stdin.isatty():
+        console.print(f"[cyan]Задача решена! Создай конспект:[/] llmlab notes build {task.id} --insight \"…\"")
+        return
+    console.print(f"[cyan]Задача решена! Что главное ты понял? (1–3 строки, пустая строка — закончить; "
+                  f"пропустить — сразу Enter)[/]")
+    lines: list[str] = []
+    while len(lines) < notes.generator.INSIGHT_MAX_LINES:
+        line = input("> ").strip()
+        if not line:
+            break
+        lines.append(line)
+    if not lines:
+        console.print(f"[dim]Позже: llmlab notes build {task.id} --insight \"…\" или в веб-интерфейсе.[/]")
+        return
+    try:
+        info = notes.build_note(course, task, course.root, insight="\n".join(lines))
+        console.print(f"[green]Конспект создан:[/] notes/{info['path']}")
+    except notes.NoteError as exc:
+        console.print(f"[red]{escape(str(exc))}[/]")
 
 
 @app.command("validate")
@@ -147,6 +185,52 @@ def validate_cmd(
         console.print(f"[red]Нарушены инварианты: {', '.join(bad) or 'контент'}[/]")
         raise typer.Exit(1)
     console.print(f"[green]Все инварианты соблюдены (задач: {len(reports)}).[/]")
+
+
+@notes_app.command("build")
+def notes_build(
+    task_id: Optional[str] = typer.Argument(None, help="id задачи; без аргумента — все конспекты"),
+    insight: Optional[str] = typer.Option(None, "--insight", "-i",
+                                          help="«Главное, что я понял» (1–3 строки, перенос — \\n)"),
+) -> None:
+    """Создать или пересобрать конспект. Вывод «Главное, что я понял» сохраняется."""
+    from llmlab import notes
+
+    course = _course()
+    if task_id is None:
+        if insight:
+            console.print("[yellow]--insight задаётся только вместе с id задачи.[/]")
+            raise typer.Exit(2)
+        built, skipped = notes.build_all(course, course.root)
+        for b in built:
+            console.print(f"[green]✓[/] notes/{b['path']}")
+        for tid, reason in skipped:
+            console.print(f"[yellow]· {tid}: {escape(reason)}[/]")
+        console.print(f"Пересобрано конспектов: {len(built)}" + (f", пропущено: {len(skipped)}" if skipped else ""))
+        return
+    task = _get_task(course, task_id)
+    try:
+        info = notes.build_note(course, task, course.root,
+                                insight=insight.replace("\\n", "\n") if insight else None)
+    except notes.NoteError as exc:
+        console.print(f"[red]{escape(str(exc))}[/]")
+        if exc.code == "needs_insight":
+            console.print(f'[dim]Добавь: llmlab notes build {task.id} --insight "…"[/]')
+        raise typer.Exit(1) from None
+    console.print(f"[green]{'Создан' if info['created'] else 'Пересобран'}:[/] notes/{info['path']}")
+
+
+@notes_app.command("export")
+def notes_export(
+    out: Path = typer.Option(Path("llmlab-notes.zip"), "--out", "-o", help="куда положить zip"),
+) -> None:
+    """Выгрузить все конспекты в zip (распакуй и открой папку в Obsidian как vault)."""
+    from llmlab import notes
+
+    course = _course()
+    notes.write_index_note(course, course.root)
+    out.write_bytes(notes.export_zip(course.root))
+    console.print(f"[green]Готово:[/] {out}")
 
 
 @app.command("serve")

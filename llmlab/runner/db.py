@@ -16,8 +16,23 @@
         result_json  TEXT    NOT NULL    -- полный RunResult (см. TASK_FORMAT.md)
     )
 
-Таблицы для конспектов и SRS-карточек добавятся в фазах 2 и 7 через миграции
-(``PRAGMA user_version``).
+Версия 2 (Фаза 2, конспекты):
+
+    notes(
+        task_id      TEXT PRIMARY KEY,
+        insight      TEXT NOT NULL,      -- «Главное, что я понял» (ввод пользователя)
+        code         TEXT,               -- снимок кода последнего зелёного прогона
+        code_sha256  TEXT,
+        path         TEXT NOT NULL,      -- путь конспекта относительно notes/
+        created_at   TEXT NOT NULL,
+        updated_at   TEXT NOT NULL
+    )
+    notes_index(path TEXT PRIMARY KEY, task_id TEXT, mtime_ns INTEGER NOT NULL)
+
+Полнотекстовый индекс ``notes_fts`` (FTS5) создаётся отдельно в ``llmlab/notes/index.py``:
+если SQLite собран без FTS5, поиск деградирует до LIKE, а не ломает всю базу.
+
+Таблицы SRS-карточек добавятся в Фазе 7 следующей миграцией (``PRAGMA user_version``).
 """
 
 from __future__ import annotations
@@ -29,7 +44,7 @@ from pathlib import Path
 
 from llmlab.paths import db_path
 
-SCHEMA_VERSION = 1
+SCHEMA_VERSION = 2
 
 _MIGRATIONS: dict[int, str] = {
     1: """
@@ -47,6 +62,22 @@ _MIGRATIONS: dict[int, str] = {
         result_json  TEXT    NOT NULL
     );
     CREATE INDEX IF NOT EXISTS idx_attempts_task ON attempts(task_id, created_at);
+    """,
+    2: """
+    CREATE TABLE IF NOT EXISTS notes (
+        task_id      TEXT PRIMARY KEY,
+        insight      TEXT NOT NULL,
+        code         TEXT,
+        code_sha256  TEXT,
+        path         TEXT NOT NULL,
+        created_at   TEXT NOT NULL,
+        updated_at   TEXT NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS notes_index (
+        path         TEXT PRIMARY KEY,
+        task_id      TEXT,
+        mtime_ns     INTEGER NOT NULL
+    );
     """,
 }
 
@@ -109,3 +140,33 @@ def task_statuses(path: Path | None = None) -> dict[str, dict]:
         }
         for r in rows
     }
+
+
+# ---------- конспекты ----------
+
+
+def get_note(task_id: str, path: Path | None = None) -> dict | None:
+    with closing(connect(path)) as conn:
+        row = conn.execute("SELECT * FROM notes WHERE task_id = ?", (task_id,)).fetchone()
+    return dict(row) if row else None
+
+
+def all_notes(path: Path | None = None) -> dict[str, dict]:
+    with closing(connect(path)) as conn:
+        rows = conn.execute("SELECT * FROM notes").fetchall()
+    return {r["task_id"]: dict(r) for r in rows}
+
+
+def upsert_note(task_id: str, *, insight: str, code: str | None, code_sha256: str | None,
+                note_path: str, now: str, path: Path | None = None) -> None:
+    with closing(connect(path)) as conn:
+        conn.execute(
+            """INSERT INTO notes (task_id, insight, code, code_sha256, path, created_at, updated_at)
+               VALUES (?, ?, ?, ?, ?, ?, ?)
+               ON CONFLICT(task_id) DO UPDATE SET
+                   insight = excluded.insight, code = excluded.code,
+                   code_sha256 = excluded.code_sha256, path = excluded.path,
+                   updated_at = excluded.updated_at""",
+            (task_id, insight, code, code_sha256, note_path, now, now),
+        )
+        conn.commit()

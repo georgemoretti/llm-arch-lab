@@ -24,11 +24,12 @@ import threading
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from llmlab import __version__
+from llmlab import notes
 from llmlab.content_loader import Course, Task, load_course
 from llmlab.paths import PACKAGE_DIR, db_path, notes_dir, project_root, workspace_dir
 from llmlab.runner import db, run_task_tests
@@ -49,6 +50,16 @@ class CodeIn(BaseModel):
     # во внешнем IDE), сервер вернёт 409, чтобы не затереть чужие правки молча.
     base_sha256: str | None = None
     force: bool = False
+
+
+class NoteIn(BaseModel):
+    # None — пересобрать с уже сохранённым выводом; строка — задать/заменить вывод.
+    insight: str | None = None
+
+
+# Код причины NoteError → HTTP-статус.
+NOTE_ERROR_STATUS = {"needs_insight": 409, "not_solved": 409, "insight_empty": 422,
+                     "insight_too_long": 422, "no_tests": 400, "no_code": 409}
 
 
 def _sha256(data: bytes) -> str:
@@ -132,6 +143,17 @@ def create_app(root: Path | None = None) -> FastAPI:
         solved = any(a["status"] == "passed" and a["impl"] == "workspace" for a in attempts)
         return solved or failed >= DIFF_UNLOCK_FAILED_ATTEMPTS, failed
 
+    def note_info(task: Task) -> dict | None:
+        """Есть ли конспект: {path} или None."""
+        path = notes.note_file(task, root)
+        return {"path": path.relative_to(notes_dir(root)).as_posix()} if path.exists() else None
+
+    def build_note(task: Task, insight: str | None = None) -> dict:
+        try:
+            return notes.build_note(course(), task, root, insight=insight)
+        except notes.NoteError as exc:
+            raise HTTPException(NOTE_ERROR_STATUS.get(exc.code, 400), {"message": str(exc), "code": exc.code}) from None
+
     def task_summary(task: Task, statuses: dict[str, dict]) -> dict:
         return {
             "id": task.id, "title": task.title, "block": task.block, "module": task.module,
@@ -199,6 +221,7 @@ def create_app(root: Path | None = None) -> FastAPI:
             "diff_unlocked": unlocked,
             "failed_attempts": failed,
             "diff_unlock_after": DIFF_UNLOCK_FAILED_ATTEMPTS,
+            "note": note_info(task),
         }
 
     @app.get("/api/tasks/{task_id}/code")
@@ -249,9 +272,20 @@ def create_app(root: Path | None = None) -> FastAPI:
         if not lock.acquire(blocking=False):
             raise HTTPException(409, "Тесты этой задачи уже запущены")
         try:
-            return run_task_tests(task, impl="workspace", root=root)
+            result = run_task_tests(task, impl="workspace", root=root)
         finally:
             lock.release()
+        if result["status"] == "passed":
+            # Первый зелёный прогон → фронтенд спрашивает «Главное, что я понял» и создаёт
+            # конспект. Если конспект уже есть — молча обновляем его свежим кодом и историей.
+            if note_info(task) is None and db.get_note(task.id, dbfile()) is None:
+                result["note"] = {"status": "needs_insight"}
+            else:
+                try:
+                    result["note"] = {"status": "updated", **notes.build_note(course(), task, root)}
+                except notes.NoteError as exc:
+                    result["note"] = {"status": exc.code, "message": str(exc)}
+        return result
 
     @app.get("/api/tasks/{task_id}/attempts")
     def get_attempts(task_id: str) -> list[dict]:
@@ -289,13 +323,55 @@ def create_app(root: Path | None = None) -> FastAPI:
         }
 
     @app.get("/api/notes")
-    def list_notes() -> list[dict]:
-        """Конспекты (Markdown в notes/). Генерация появится в Фазе 2, пока — только список."""
-        ndir = notes_dir(root)
-        if not ndir.is_dir():
-            return []
-        return [{"path": str(p.relative_to(ndir)), "id": p.stem, "mtime_ns": p.stat().st_mtime_ns}
-                for p in sorted(ndir.rglob("*.md"))]
+    def list_notes() -> dict:
+        """Все конспекты (по файлам в notes/) и облако тегов."""
+        items = notes.list_notes(root)
+        tags: dict[str, int] = {}
+        for n in items:
+            for t in n["tags"]:
+                tags[t] = tags.get(t, 0) + 1
+        return {
+            "notes": items,
+            "tags": [{"tag": t, "count": c} for t, c in sorted(tags.items(), key=lambda kv: (-kv[1], kv[0]))],
+            "dir": str(notes_dir(root)),
+        }
+
+    @app.get("/api/notes/search")
+    def search_notes(q: str = "") -> dict:
+        """Полнотекстовый поиск (SQLite FTS5, префиксы слов)."""
+        return {"query": q, "results": notes.search(root, q), "highlight": [notes.index.HL_START, notes.index.HL_END]}
+
+    @app.get("/api/notes/export.zip")
+    def export_notes() -> Response:
+        notes.write_index_note(course(), root)
+        return Response(notes.export_zip(root), media_type="application/zip",
+                        headers={"Content-Disposition": 'attachment; filename="llmlab-notes.zip"'})
+
+    @app.get("/api/notes/{task_id}")
+    def get_note(task_id: str) -> dict:
+        task = get_task(course(), task_id)
+        path = notes.note_file(task, root)
+        if not path.exists():
+            raise HTTPException(404, f"Конспекта {task.id} ещё нет")
+        n = notes.read_note(path, root)
+        stored = db.get_note(task.id, dbfile())
+        return {**n, "abs_path": str(path), "insight": notes.generator.insight_from_file(path)
+                or (stored or {}).get("insight")}
+
+    @app.post("/api/notes/{task_id}")
+    def post_note(task_id: str, body: NoteIn) -> dict:
+        """Создать/пересобрать конспект. Для первого создания нужен ``insight``."""
+        return build_note(get_task(course(), task_id), body.insight)
+
+    @app.post("/api/notes")
+    def rebuild_all_notes() -> dict:
+        built, skipped = notes.build_all(course(), root)
+        return {"built": [b["task_id"] for b in built], "skipped": [{"task_id": t, "reason": r} for t, r in skipped]}
+
+    @app.get("/api/architectures")
+    def get_architectures() -> dict:
+        statuses = db.task_statuses(dbfile())
+        return notes.arch_table(course(), {t for t, st in statuses.items() if st["status"] == "solved"})
 
     @app.get("/api/viz")
     def list_viz() -> list[dict]:

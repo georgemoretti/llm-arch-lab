@@ -1,0 +1,41 @@
+# Таблица архитектур для вкладки Notes: строки — модели, столбцы — компоненты.
+# Значения ячеек здесь НЕ пишутся: их задаёт задача, которая объясняет компонент
+# (поле `arch` в task.yaml), и ячейка открывается, когда задача решена.
+# Факты для ячеек сверять с `source` (config.json на Hugging Face или статья).
+columns:
+  - {id: norm, title: "Нормализация"}
+  - {id: position, title: "Позиции"}
+  - {id: attention, title: "Attention"}
+  - {id: ffn, title: "FFN"}
+  - {id: moe, title: "MoE"}
+models:
+  - id: gpt2
+    title: GPT-2
+    year: 2019
+    module: module-0-gpt2
+    source: https://huggingface.co/openai-community/gpt2/blob/main/config.json
+  - id: llama-3
+    title: Llama 3 (8B)
+    year: 2024
+    module: module-1-llama
+    source: https://huggingface.co/meta-llama/Meta-Llama-3-8B/blob/main/config.json
+  - id: gemma-3
+    title: Gemma 3
+    year: 2025
+    module: module-2-gemma-olmo
+    source: https://huggingface.co/google/gemma-3-27b-pt/blob/main/config.json
+  - id: olmo-2
+    title: OLMo 2
+    year: 2024
+    module: module-2-gemma-olmo
+    source: https://huggingface.co/allenai/OLMo-2-1124-7B/blob/main/config.json
+  - id: deepseek-v3
+    title: DeepSeek-V3
+    year: 2024
+    module: module-3-moe
+    source: https://huggingface.co/deepseek-ai/DeepSeek-V3/blob/main/config.json
+  - id: qwen3-next
+    title: Qwen3-Next
+    year: 2025
+    module: module-4-efficient
+    source: https://huggingface.co/Qwen/Qwen3-Next-80B-A3B-Instruct/blob/main/config.json

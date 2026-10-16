@@ -6,7 +6,8 @@
 - ``content/blocks/<B>/<module>/<task>/task.yaml`` — задача;
 - ``content/questions/*.yaml``                 — список вопросов;
 - ``content/papers/*.yaml``                    — по одной статье в файле;
-- ``content/viz/*.yaml``                       — по одной визуализации в файле (компонент — в web/src/viz).
+- ``content/viz/*.yaml``                       — по одной визуализации в файле (компонент — в web/src/viz);
+- ``content/architectures.yaml``               — строки и столбцы таблицы архитектур (ячейки — в task.yaml → arch).
 
 ``load_course()`` никогда не падает на ошибках контента: он собирает их в ``Course.issues``,
 чтобы ``llmlab validate`` мог показать всё сразу. Падает только на битом YAML/схеме,
@@ -72,6 +73,8 @@ class Task(_Strict):
     reading: list[ReadingLink] = Field(default_factory=list)
     viz: list[str] = Field(default_factory=list)
     questions: list[str] = Field(default_factory=list)
+    # Ячейки таблицы архитектур, которые открывает решение задачи: {модель: {столбец: значение}}.
+    arch: dict[str, dict[str, str]] = Field(default_factory=dict)
 
     # Заполняется загрузчиком, не берётся из YAML.
     dir: Path = Field(default=Path("."), exclude=True)
@@ -130,6 +133,26 @@ class Viz(_Strict):
     description: str = ""
 
 
+class ArchColumn(_Strict):
+    id: str
+    title: str
+
+
+class ArchModel(_Strict):
+    id: str
+    title: str
+    year: int | None = None
+    module: str | None = None   # в каком модуле курса строка начнёт заполняться
+    source: str | None = None   # откуда брать факты: config.json на HF или статья
+
+
+class Architectures(_Strict):
+    """Таблица «модель × компонент». Значения ячеек задают задачи (поле ``arch``)."""
+
+    columns: list[ArchColumn]
+    models: list[ArchModel]
+
+
 class Module(_Strict):
     id: str
     title: str
@@ -168,6 +191,7 @@ class Course:
     questions: dict[str, Question] = field(default_factory=dict)
     papers: dict[str, Paper] = field(default_factory=dict)
     viz: dict[str, Viz] = field(default_factory=dict)
+    architectures: Architectures | None = None
     issues: list[Issue] = field(default_factory=list)
 
     @property
@@ -326,6 +350,16 @@ def load_course(root: Path | None = None) -> Course:
             course.issues.append(Issue("error", _rel(vfile, course.root), f"id '{viz.id}' не совпадает с именем файла"))
         course.viz[viz.id] = viz
 
+    # --- таблица архитектур ---
+    afile = cdir / "architectures.yaml"
+    if afile.exists():
+        data = _read_yaml(afile, course)
+        if data is not None:
+            try:
+                course.architectures = Architectures.model_validate(data)
+            except ValidationError as exc:
+                _schema_error(afile, exc, course)
+
     _check_references(course)
     return course
 
@@ -355,6 +389,8 @@ def _check_references(course: Course) -> None:
             if not any(fnmatch.fnmatchcase(qid, pat) for qid in course.questions):
                 course.issues.append(Issue("warning", where, f"questions: глоб '{pat}' не нашёл ни одного вопроса"))
 
+    _check_arch(course)
+
     for q in course.questions.values():
         for tid in q.tasks:
             if tid not in course.tasks:
@@ -362,6 +398,33 @@ def _check_references(course: Course) -> None:
 
     for cycle in find_cycles({t.id: t.depends_on for t in course.tasks.values()}):
         course.issues.append(Issue("error", "depends_on", "цикл зависимостей: " + " → ".join(cycle)))
+
+
+def _check_arch(course: Course) -> None:
+    arch = course.architectures
+    models = {m.id for m in arch.models} if arch else set()
+    columns = {c.id for c in arch.columns} if arch else set()
+    owner: dict[tuple[str, str], str] = {}
+    for task in course.tasks.values():
+        where = _rel(task.dir / "task.yaml", course.root)
+        for model, cells in task.arch.items():
+            if model not in models:
+                course.issues.append(Issue("error", where, f"arch: модели '{model}' нет в content/architectures.yaml"))
+                continue
+            for col in cells:
+                if col not in columns:
+                    course.issues.append(Issue("error", where, f"arch: столбца '{col}' нет в content/architectures.yaml"))
+                elif (model, col) in owner:
+                    course.issues.append(Issue("error", where,
+                                               f"arch: ячейку {model}.{col} уже открывает {owner[model, col]}"))
+                else:
+                    owner[model, col] = task.id
+    if arch:
+        block_modules = {m.id for b in course.blocks.values() for m in b.modules}
+        for m in arch.models:
+            if m.module and m.module not in block_modules:
+                course.issues.append(Issue("error", "content/architectures.yaml",
+                                           f"модель {m.id}: неизвестный модуль '{m.module}'"))
 
 
 def find_cycles(graph: dict[str, list[str]]) -> list[list[str]]:

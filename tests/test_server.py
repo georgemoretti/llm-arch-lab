@@ -96,3 +96,44 @@ def test_reference_unlocks_after_three_failures(client):
 
 def test_unknown_api_is_json_404(client):
     assert client.get("/api/whatever").status_code == 404
+
+
+def test_first_pass_asks_for_insight_then_note_is_created_searched_exported(client, toy_root):
+    client.get("/api/tasks/Z01-add/code")
+    client.put("/api/tasks/Z01-add/code", json={"code": GOOD, "force": True}, headers=H)
+    ok = client.post("/api/tasks/Z01-add/run", headers=H).json()
+    assert ok["note"] == {"status": "needs_insight"}
+    assert client.get("/api/tasks/Z01-add").json()["note"] is None
+
+    # Вывод обязателен.
+    r = client.post("/api/notes/Z01-add", json={}, headers=H)
+    assert r.status_code == 409 and r.json()["detail"]["code"] == "needs_insight"
+    assert client.post("/api/notes/Z01-add", json={"insight": " \n "}, headers=H).status_code == 422
+    assert client.post("/api/notes/Z02-more", json={"insight": "x"}, headers=H).status_code == 409  # не решена
+
+    created = client.post("/api/notes/Z01-add", json={"insight": "Сложение — это просто"}, headers=H).json()
+    assert created["path"] == "Z/Z01-add.md" and created["created"] is True
+    assert client.get("/api/tasks/Z01-add").json()["note"] == {"path": "Z/Z01-add.md"}
+
+    note = client.get("/api/notes/Z01-add").json()
+    assert note["insight"] == "Сложение — это просто" and note["meta"]["id"] == "Z01-add"
+    assert "## Мой код" in note["body"] and not note["body"].startswith("---")
+    assert client.get("/api/notes/Z02-more").status_code == 404
+
+    listed = client.get("/api/notes").json()
+    assert [n["task_id"] for n in listed["notes"]] == ["Z01-add"] and listed["tags"] == [{"tag": "toy", "count": 1}]
+    hits = client.get("/api/notes/search", params={"q": "просто"}).json()["results"]
+    assert [h["task_id"] for h in hits] == ["Z01-add"]
+
+    # Повторный зелёный прогон обновляет конспект, вывод не теряется.
+    again = client.post("/api/tasks/Z01-add/run", headers=H).json()
+    assert again["note"]["status"] == "updated"
+    assert client.get("/api/notes/Z01-add").json()["insight"] == "Сложение — это просто"
+
+    z = client.get("/api/notes/export.zip")
+    assert z.status_code == 200 and z.headers["content-type"] == "application/zip"
+    assert client.post("/api/notes", headers=H).json()["built"] == ["Z01-add"]
+
+
+def test_architectures_endpoint_without_table(client):
+    assert client.get("/api/architectures").json() == {"columns": [], "rows": [], "opened": 0, "total": 0}
