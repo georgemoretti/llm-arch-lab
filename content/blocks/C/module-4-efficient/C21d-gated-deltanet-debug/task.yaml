@@ -1,0 +1,16 @@
+id: C21d-gated-deltanet-debug
+title: "Отладка: Gated DeltaNet генерирует верно, а при prefill подглядывает в будущее"
+block: C
+module: module-4-efficient
+type: debug
+difficulty: medium
+depends_on: [C21-gated-deltanet]
+diff_from: C21-gated-deltanet
+tags: [linear-attention, delta-rule, recurrent, causality, debug]
+entrypoint: [l2norm, gated_delta_rule, GatedDeltaNet]
+time_estimate_min: 15
+papers: [gated-deltanet]
+reading:
+  - title: "Hugging Face transformers: torch_recurrent_gated_delta_rule (где читается выход)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/qwen3_next/modeling_qwen3_next.py
+questions: [deltanet-leak-*]

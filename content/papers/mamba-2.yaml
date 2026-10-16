@@ -1,0 +1,7 @@
+id: mamba-2
+title: "Transformers are SSMs: Generalized Models and Efficient Algorithms Through Structured State Space Duality"
+authors: "Dao, Gu"
+year: 2024
+venue: ICML
+url: https://arxiv.org/abs/2405.21060
+tags: [ssm, mamba, state-space-duality, linear-attention]

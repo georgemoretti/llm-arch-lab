@@ -1,0 +1,7 @@
+id: gated-deltanet
+title: "Gated Delta Networks: Improving Mamba2 with Delta Rule"
+authors: "Yang, Kautz, Hatamizadeh"
+year: 2025
+venue: ICLR
+url: https://arxiv.org/abs/2412.06464
+tags: [linear-attention, delta-rule, gating, hybrid]

@@ -1,0 +1,20 @@
+id: C21-gated-deltanet
+title: "DeltaNet → Gated DeltaNet: правило дельты и гейт забывания"
+block: C
+module: module-4-efficient
+type: implement
+difficulty: hard
+depends_on: [C20-linear-attention]
+diff_from: C20-linear-attention
+tags: [linear-attention, delta-rule, gating, recurrent, qwen, hybrid]
+entrypoint: [l2norm, gated_delta_rule, GatedDeltaNet]
+time_estimate_min: 55
+papers: [deltanet, gated-deltanet]
+reading:
+  - title: "Songlin Yang — DeltaNet Explained (часть 1)"
+    url: https://sustcsonglin.github.io/blog/2024/deltanet-1/
+  - title: "Hugging Face transformers: modeling_qwen3_next.py (torch_recurrent_gated_delta_rule, Qwen3NextGatedDeltaNet)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/qwen3_next/modeling_qwen3_next.py
+questions: [deltanet-*]
+# Источник: Qwen/Qwen3-Next-80B-A3B-Instruct config.json: linear_num_key_heads 16, linear_num_value_heads 32,
+# linear_key_head_dim 128, linear_value_head_dim 128, linear_conv_kernel_dim 4; формулы β, g и шага — modeling_qwen3_next.py.

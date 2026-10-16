@@ -1,0 +1,7 @@
+id: deltanet
+title: "Parallelizing Linear Transformers with the Delta Rule over Sequence Length"
+authors: "Yang, Wang, Zhang, Shen, Kim"
+year: 2024
+venue: NeurIPS
+url: https://arxiv.org/abs/2406.06484
+tags: [linear-attention, delta-rule]
