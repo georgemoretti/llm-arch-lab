@@ -1,0 +1,16 @@
+id: C05d-kv-cache-debug
+title: "Отладка: с KV-cache генерация расходится с полным прогоном после промпта"
+block: C
+module: module-1-llama
+type: debug
+difficulty: medium
+depends_on: [C05-kv-cache]
+diff_from: C05-kv-cache
+tags: [attention, kv-cache, rope, debug]
+entrypoint: [KVCache, LlamaAttention]
+time_estimate_min: 20
+papers: [roformer]
+reading:
+  - title: "Hugging Face transformers: modeling_llama.py (LlamaAttention.forward)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/llama/modeling_llama.py
+questions: [kvcache-positions-*]
