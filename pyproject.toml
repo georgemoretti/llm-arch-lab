@@ -44,6 +44,7 @@ explicit = true
 [tool.pytest.ini_options]
 # По умолчанию `pytest` гоняет только тесты платформы. Тесты задач запускает `llmlab test`.
 testpaths = ["tests"]
+pythonpath = ["tests"]
 # Все тесты задач называются test_task.py — без importlib-режима они конфликтуют по имени.
 addopts = "--import-mode=importlib -p no:cacheprovider"
 markers = [

@@ -146,7 +146,7 @@ def validate_cmd(
     if bad or global_errors:
         console.print(f"[red]Нарушены инварианты: {', '.join(bad) or 'контент'}[/]")
         raise typer.Exit(1)
-    console.print(f"[green]Все инварианты соблюдены ({len(reports)} задач).[/]")
+    console.print(f"[green]Все инварианты соблюдены (задач: {len(reports)}).[/]")
 
 
 @app.command("serve")
