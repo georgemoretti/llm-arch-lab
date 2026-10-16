@@ -1683,3 +1683,104 @@ mark {
 .rope-axis {
   stroke: var(--border);
 }
+
+/* --- V-masks --- */
+.seg {
+  display: inline-flex;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  overflow: hidden;
+  margin-bottom: 10px;
+}
+.seg button {
+  font: 12.5px var(--sans);
+  padding: 4px 10px;
+  border: 0;
+  border-right: 1px solid var(--border);
+  background: var(--panel);
+  color: var(--muted);
+  cursor: pointer;
+}
+.seg button:last-child {
+  border-right: 0;
+}
+.seg button.active {
+  background: var(--panel-2);
+  color: var(--text);
+  font-weight: 600;
+}
+.mask-cell {
+  border-radius: 2px;
+  border: 1px solid var(--border);
+}
+.mask-cell.allowed {
+  background: color-mix(in srgb, var(--accent) 70%, transparent);
+  border-color: transparent;
+}
+.mask-cell.outside {
+  background: var(--panel-2);
+}
+.mask-cell.future {
+  background: repeating-linear-gradient(45deg, var(--panel-2), var(--panel-2) 3px, var(--panel) 3px, var(--panel) 6px);
+}
+.mask-cell.active {
+  border-color: var(--text);
+}
+.mask-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 8px;
+}
+.mask-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.mask-swatch {
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border-radius: 2px;
+  border: 1px solid var(--border);
+}
+.mask-swatch.allowed {
+  background: color-mix(in srgb, var(--accent) 70%, transparent);
+}
+.mask-swatch.outside {
+  background: var(--panel-2);
+}
+.mask-swatch.future {
+  background: repeating-linear-gradient(45deg, var(--panel-2), var(--panel-2) 2px, var(--panel) 2px, var(--panel) 4px);
+}
+.mask-swatch.layer-sliding,
+.layer-cell.sliding {
+  background: var(--series-1);
+}
+.mask-swatch.layer-full,
+.layer-cell.full {
+  background: var(--series-2);
+}
+.mask-swatch.layer-nope {
+  background: var(--panel);
+  box-shadow: inset 0 0 0 2px var(--text);
+}
+.layer-strip {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(18px, 34px));
+  gap: 2px;
+}
+.layer-cell {
+  height: 22px;
+  border-radius: 3px;
+  font: 9px var(--mono);
+  color: #fff;
+  display: grid;
+  place-items: end center;
+  padding-bottom: 1px;
+}
+.layer-cell.nope {
+  box-shadow: inset 0 0 0 2px var(--text);
+}
