@@ -3,23 +3,22 @@
 > Обновляется в конце КАЖДОЙ сессии Claude Code. Пиши кратко и конкретно.
 
 ## Текущая фаза
-Фаза 5a — **завершена** (2026-10-16). Модуль 3, часть 1 (MoE: C12–C15 + 3 debug). Следующая:
-Фаза 5b — MLA, MTP, paper/quiz модуля, V-moe-routing, V-kvcache + MLA. `data/interview_raw/` пуст.
+Фаза 5b — **завершена** (2026-10-16). Модуль 3 (MoE и DeepSeek) закрыт целиком. Следующая:
+Фаза 6a — модуль 4, эффективное внимание (C18–C20). `data/interview_raw/` по-прежнему пуст.
 
 ## Следующий шаг (точный)
-Запустить Фазу 5b по шаблону «фазы с контентом» из `docs/PROMPTS.md` в `content/blocks/C/module-3-moe/`:
-- C16 MLA (сжатие KV в латент `kv_lora_rank`, восстановление K/V; затем decoupled RoPE —
-  `qk_rope_head_dim` / `qk_nope_head_dim`; кешируется латент + общий rope-ключ); C17 MTP (дополнительные
-  головы t+2..t+k, суммарный loss; у DeepSeek-V3 `num_nextn_predict_layers = 1`);
-- debug: «в MLA кешируется не латент» (C16d); при желании — второй (например, RoPE на сжатой части);
-- гиперпараметры MLA — из config.json `deepseek-ai/DeepSeek-V3` (kv_lora_rank, q_lora_rank,
-  qk_rope_head_dim, qk_nope_head_dim, v_head_dim) и `DeepSeek-V2-Lite`; конфиги уже скачивались, открыты;
-- эталоны — дописать в `llmlab/core/moe.py` (или новый `core/mla.py`) + тест в `tests/test_core_moe.py`;
-- paper `C-P3` (Switch, DeepSeekMoE, DeepSeek-V2 (MLA), MTP/DeepSeek-V3), квиз `C-Q3` по глобам
-  `router-*`, `moe-layer-*`, `load-balance-*`, `shared-expert-*`, `moe-params-*` + новые mla-*/mtp-*;
-- V-moe-routing (heatmap токены × эксперты, гистограмма загрузки, эффект aux loss / bias — можно
-  считать в браузере на игрушечном роутере), V-kvcache: пресет DeepSeek-V3 с MLA (кеш = латент + rope-ключ);
-- ячейки таблицы: `deepseek-v3.attention` (C16), `deepseek-v3.position` (C16, decoupled RoPE).
+Запустить Фазу 6a по шаблону «фазы с контентом» из `docs/PROMPTS.md` в `content/blocks/C/module-4-efficient/`:
+- C18 упрощённое sparse attention в стиле DSA (DeepSeek-V3.2): индексатор (лёгкие оценки q·k) + top-k
+  селектор ключей → маска; свойство: при k ≥ S — обычное causal attention; C19 gated attention (выходной
+  гейт σ(W_g x) ⊙ out, partial RoPE — RoPE только на части измерений головы); C20 линейное внимание
+  (kernel trick φ(q)(φ(k)ᵀv), рекуррентная форма == параллельная causal-форма);
+- debug 6a: «неверная нормировка в линейном внимании» (C20d); «утечка будущего в рекуррентной форме» — в 6b
+  (C21) или тоже C20d2 — решить по ходу;
+- гиперпараметры: DeepSeek-V3.2-Exp (index_topk, index_n_heads, index_head_dim), Qwen3-Next
+  (gated attention, partial_rotary_factor, layer_types / full_attention_interval) — из config.json на HF,
+  указывать источник; строка `qwen3-next` в `content/architectures.yaml` уже есть;
+- эталоны — `llmlab/core/efficient.py` + `tests/test_core_efficient.py`; вопросы — `content/questions/efficient.yaml`;
+- V-masks: добавить режим sparse-маски (после C18).
 
 ## Сделано
 **Фаза 0:**
@@ -200,6 +199,29 @@
 - Проверено: мутации C12 (4), C13 (3), C14 (4), C15 (3) падают с понятными сообщениями; 108 формул —
   KaTeX без ошибок; сквозной сценарий в копии репо: C15 решена → конспект, ячейки MoE открыты.
 - Тесты платформы: 73.
+
+**Фаза 5b:**
+- `llmlab/core/mla.py` — эталоны C16, C16b, C17 (`LatentCache`, `causal_mask`, `MLAttention` с
+  `forward_absorbed`, `MLARopeAttention`, `mla_kv_cache_bytes`, `MTPModule`, `mtp_logits`, `mtp_loss`);
+  `tests/test_core_mla.py`.
+- `C16-mla` (8 тестов): латент c = norm(W_dkv x), K/V всех голов из c; в кеше латент [B, S, r]; по токену и
+  кусками == полный прогон; `forward_absorbed` (W_uk в запрос, W_uv в выход) == forward и не вызывает kv_b_proj.
+- `C16b-mla-rope` (6): decoupled RoPE (общий RoPE-ключ из `kv_a_proj_with_mqa`, масштаб 1/√(dn+dr)),
+  кеш = латент + повёрнутый k_rope без оси голов; `mla_kv_cache_bytes` (V3: 70 272 Б/токен, ×71 к MHA).
+- `C17-mtp` (7): модуль `eh_proj([enorm(emb); hnorm(h)])` → Pre-Norm блок, цепочка глубин, общие
+  embed/lm_head, причинность (токен j влияет на глубину k с позиции j − k), loss L_main + λ/D·Σ L_k,
+  градиент в h_main.
+- Debug: `C16d` (в кеш кладутся восстановленные K/V — выход верный, память ×H(d+dv)/r).
+- `C-P3-moe-deepseek` (Switch, DeepSeekMoE, DeepSeek-V2, DeepSeek-V3; 6 вопросов в `papers-module-3.yaml`),
+  `C-Q3-moe-quiz` (22 вопроса модуля по глобам). Вопросы: + 7 в `moe.yaml` (mla-*, mtp-*).
+- Таблица: `deepseek-v3.attention`, `deepseek-v3.position` (C16b). Строка DeepSeek-V3 заполнена, кроме `norm`.
+- Визуализации: `moe-routing` (V-moe-routing: 32 токена × 8 экспертов, top-k, гистограмма загрузки,
+  шаги aux loss / bias, всё считается в браузере) → C12, C13, C14 (встроена в README C14); V-kvcache:
+  пресет DeepSeek-V3 (MLA) — сравнение с MHA тех же голов (×71); встроен в README C16b.
+- Проверено: мутации C16 (2), C16b (3), C17 (4) падают с понятными сообщениями; 137 формул — KaTeX без ошибок;
+  скриншоты V-moe-routing (старт, 40 шагов aux, 60 шагов bias) и V-kvcache в обеих темах — без ошибок в
+  консоли; сквозной сценарий: C16b → конспект, ячейки DeepSeek-V3 открыты.
+- Тесты платформы: 76.
 
 ## Не сделано / долги
 - E2E-сценарий UI не в репозитории (Playwright ставился во временную папку). Если UI начнёт
@@ -394,6 +416,19 @@
 - **C15 открывает «moe: нет — dense»** у Gemma 3 / OLMo 2 / SmolLM3 — решение долга Фазы 4 без новой
   задачи (ячейку открывает задача, которая объясняет MoE vs dense).
 
+- **Фаза 5b: MLA разбит на две задачи** — `C16-mla` (латент, кеш, поглощение, без позиций) и `C16b-mla-rope`
+  (decoupled RoPE): вместе это > 60 минут, а PLAN называет их «затем». Id `C16b` (id C18+ заняты Фазой 6).
+- **MLA без сжатия запроса** (как DeepSeek-V2-Lite, `q_lora_rank = null`); `q_lora_rank` V3 описан в README
+  и в вопросе к статье. YaRN и `mscale` не реализованы — описаны.
+- **MTP: порядок конкатенации [emb; h]** — по vLLM `deepseek_mtp.py` (в формуле статьи наоборот); λ = 0.3 → 0.1
+  и 85–90 % / ×1.8 для спекулятивного декодирования — сверено по тексту отчёта DeepSeek-V3 (arXiv HTML).
+  MTP-блок — Pre-Norm блок из `core/gemma_olmo.py` (C08), не MoE-блок V3.
+- **Debug 5b — только C16d** (баг PLAN «в MLA кешируется не латент»); MTP без debug-задачи.
+- **V-moe-routing обучает только смещение логитов каждого эксперта** (вектор [E]), а не матрицу роутера:
+  наглядно и считается мгновенно; оговорено в подписи. Bias-режим выбирает по log p + bias (= логиты + bias).
+- **V-kvcache для MLA**: «эквивалентное» число KV-голов (576 / 320), чтобы не менять общую формулу; MQA
+  для этого пресета не показан (подписи наезжали, а главное сравнение — с MHA тех же голов).
+
 ## Известные проблемы
 - Холодный старт subprocess с torch ≈ 1–1.5 с на прогон — приемлемо для UI, но заметно.
 
@@ -407,3 +442,4 @@
 | 2026-10-16 | 3b | C04 GQA, C05 KV-cache, C06 Llama + 3 debug, C-P1, C-Q1, V-rope, V-kvcache, вкладка «Вопросы», core/llama.py, 64 теста | см. `git log` |
 | 2026-10-16 | 4 | C07 SWA, C08 нормы, C09 QK-Norm, C10 NoPE, C11 кольцевой KV-cache + 3 debug, C-P2, C-Q2, V-masks, SWA в V-kvcache, core/gemma_olmo.py, 69 тестов | см. `git log` |
 | 2026-10-16 | 5a | C12 роутер, C13 MoE-слой, C14 балансировка, C15 DeepSeekMoE + 3 debug, 10 статей, 15 вопросов, core/moe.py, 73 теста | см. `git log` |
+| 2026-10-16 | 5b | C16 MLA, C16b decoupled RoPE, C17 MTP + C16d, C-P3, C-Q3, V-moe-routing, MLA в V-kvcache, core/mla.py, 76 тестов | см. `git log` |
