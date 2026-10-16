@@ -114,6 +114,8 @@ class Question(_Strict):
     options: list[str] = Field(default_factory=list)
     correct: int | None = None    # mcq: индекс верного варианта в options (с нуля)
     source: str = "course"
+    tags: list[str] = Field(default_factory=list)        # подтема: rag, agents, sampling, … (для фильтров)
+    source_ref: list[str] = Field(default_factory=list)  # user-db: хэши сырых вопросов (llmlab questions)
 
     @model_validator(mode="after")
     def _check_mcq(self) -> "Question":

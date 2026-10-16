@@ -1,4 +1,4 @@
-"""CLI курса: ``llmlab list | test | validate | init-workspace | serve | notes``."""
+"""CLI курса: ``llmlab list | test | validate | init-workspace | serve | notes | questions``."""
 
 from __future__ import annotations
 
@@ -20,6 +20,9 @@ app = typer.Typer(help="LLM Arch Lab — интерактивный курс п�
 console = Console()
 notes_app = typer.Typer(help="Конспекты: пересборка и экспорт.", no_args_is_help=True)
 app.add_typer(notes_app, name="notes")
+questions_app = typer.Typer(help="База вопросов с собеседований: импорт, статус разметки, проверки.",
+                            no_args_is_help=True)
+app.add_typer(questions_app, name="questions")
 
 STATUS_STYLE = {"solved": "[green]✓ решена[/]", "attempted": "[yellow]… в процессе[/]", "new": "[dim]· новая[/]"}
 
@@ -231,6 +234,85 @@ def notes_export(
     notes.write_index_note(course, course.root)
     out.write_bytes(notes.export_zip(course.root))
     console.print(f"[green]Готово:[/] {out}")
+
+
+@questions_app.command("import")
+def questions_import(
+    paths: list[Path] = typer.Argument(None, help="файлы или папки; по умолчанию data/interview_raw/"),
+) -> None:
+    """Разобрать сырую базу (md/txt/csv/json), убрать дубли, сохранить в .llmlab/questions_import/raw.jsonl."""
+    from llmlab.questions import importer
+
+    course = _course()
+    paths = paths or [course.root / "data" / "interview_raw"]
+    try:
+        res = importer.import_paths(paths, course.root)
+    except (ValueError, OSError) as exc:
+        console.print(f"[red]{escape(str(exc))}[/]")
+        raise typer.Exit(2) from None
+    console.print(f"Файлы: {', '.join(res.files) or '—'}" + (f"; пропущены: {', '.join(res.skipped)}" if res.skipped else ""))
+    console.print(f"Вопросов: {res.parsed}, уникальных: {res.unique}, точных дублей: {res.duplicates}")
+    console.print(f"[dim]Сохранено: {res.out} (в git не попадает)[/]")
+    st = importer.import_status(course, course.root)
+    console.print(f"Размечено: {st.labeled} / {st.total}. Дальше: [bold]llmlab questions batch[/] — "
+                  "следующая пачка для разметки (см. docs/QUESTIONS_IMPORT.md).")
+
+
+@questions_app.command("status")
+def questions_status() -> None:
+    """Сколько сырых вопросов уже размечено в content/questions (по source_ref)."""
+    from llmlab.questions import importer
+
+    course = _course()
+    st = importer.import_status(course, course.root)
+    if not st.total:
+        console.print("[yellow]Импорта ещё не было: llmlab questions import[/]")
+        return
+    user = [q for q in course.questions.values() if q.source == "user-db"]
+    console.print(f"Сырых уникальных: {st.total}; покрыто разметкой: {st.labeled}; осталось: {len(st.remaining)}")
+    console.print(f"Вопросов user-db в content/questions: {len(user)} "
+                  f"(по темам: {', '.join(f'{t}={n}' for t, n in _count(q.topic for q in user))})")
+    if st.unknown_refs:
+        console.print(f"[yellow]source_ref без сырого вопроса: {len(st.unknown_refs)} (база изменилась?)[/]")
+
+
+def _count(items) -> list[tuple[str, int]]:
+    from collections import Counter
+
+    return sorted(Counter(items).items(), key=lambda kv: -kv[1])
+
+
+@questions_app.command("batch")
+def questions_batch(size: int = typer.Option(50, "--size", "-n", help="сколько вопросов в пачке")) -> None:
+    """Следующая пачка неразмеченных сырых вопросов (ref, раздел, текст) — вход для разметки."""
+    from llmlab.questions import importer
+
+    course = _course()
+    batch = importer.next_batch(course, size, course.root)
+    if not batch:
+        console.print("[green]Всё размечено.[/]")
+        return
+    for q in batch:
+        console.print(f"{q.ref}  [dim]{escape(' / '.join(q.section))}[/]\n    {escape(q.text)}")
+    console.print(f"[dim]В пачке {len(batch)}. Размеченные вопросы клади в content/questions/interview-*.yaml "
+                  "с source: user-db и source_ref: [<ref>, …].[/]")
+
+
+@questions_app.command("check")
+def questions_check() -> None:
+    """Проверить, что размеченные вопросы и ответы не копируют сырой текст (репозиторий публичный)."""
+    from llmlab.questions import importer
+
+    course = _course()
+    hits = importer.verbatim_matches(course, course.root)
+    if not importer.load_raw(course.root):
+        console.print("[yellow]Нет импорта — сравнивать не с чем (llmlab questions import).[/]")
+        return
+    for h in hits:
+        console.print(f"[red]✗ {h['id']}.{h['field']} ≈ сырой {h['ref']} (сходство {h['ratio']})[/]")
+    if hits:
+        raise typer.Exit(1)
+    console.print("[green]Совпадений с сырым текстом нет.[/]")
 
 
 @app.command("serve")
