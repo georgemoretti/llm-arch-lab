@@ -16,7 +16,7 @@
     раздел, дата, права доступа); покрывающей реальные вопросы пользователей; в формате, который нормально
     парсится (текст и таблицы, а не картинки).
   source: user-db
-  source_ref: [71605b36fd, 2d0c12923c]
+  source_ref: ["71605b36fd", "2d0c12923c"]
 - id: iv-rag-02
   topic: other
   tags: [rag]
@@ -35,7 +35,7 @@
     (BeautifulSoup, unstructured, docling), модель эмбеддингов, векторная база (Qdrant, pgvector), LLM, при
     желании фреймворк (LangChain, LlamaIndex) и трассировка (Langfuse и т. п.).
   source: user-db
-  source_ref: [7ce30114d0, 6dfb6af08e, cad12c17d1, 23f14b1281, 354f9cc0af, 20db7e253f, 2095f2ae6a, d721b9bd87]
+  source_ref: ["7ce30114d0", "6dfb6af08e", "cad12c17d1", "23f14b1281", "354f9cc0af", "20db7e253f", "2095f2ae6a", "d721b9bd87"]
 - id: iv-rag-03
   topic: other
   tags: [rag, data]
@@ -50,7 +50,7 @@
     Markdown с сохранением заголовков и таблиц, страницу резать по разделам, вложения парсить отдельно (OCR при
     необходимости), сохранять метаданные (автор, дата, путь, доступ), отфильтровывать архивное.
   source: user-db
-  source_ref: [897a3e6a7b, d82c7c2786, 74359756c1, 0b1a9efafd, 9c25f3c959]
+  source_ref: ["897a3e6a7b", "d82c7c2786", "74359756c1", "0b1a9efafd", "9c25f3c959"]
 - id: iv-rag-04
   topic: other
   tags: [rag, chunking]
@@ -65,7 +65,7 @@
     размывают эмбеддинг и тратят окно; размер согласовать с максимальной длиной модели эмбеддингов; хранить
     ссылку на исходный документ, чтобы можно было подтянуть соседние чанки (small-to-big).
   source: user-db
-  source_ref: [ed8604abf3, a358d3afb2, 380101d9d5]
+  source_ref: ["ed8604abf3", "a358d3afb2", "380101d9d5"]
 - id: iv-rag-05
   topic: other
   tags: [rag]
@@ -79,7 +79,7 @@
     структурированного вывода и цитирования. Часто достаточно модели среднего размера: основную работу делает
     поиск.
   source: user-db
-  source_ref: [1608eb6df0]
+  source_ref: ["1608eb6df0"]
 - id: iv-rag-06
   topic: other
   tags: [rag, retrieval]
@@ -94,7 +94,7 @@
     генерация для каждого чанка вопросов, на которые он отвечает, и индексация их; дообучение эмбеддингов на
     реальных запросах.
   source: user-db
-  source_ref: [8ee4d6daf2, b961cd32e1, c0c5daf95e, 00a6a51740]
+  source_ref: ["8ee4d6daf2", "b961cd32e1", "c0c5daf95e", "00a6a51740"]
 - id: iv-rag-07
   topic: other
   tags: [rag, prompting]
@@ -107,7 +107,7 @@
     в осмысленном порядке; при необходимости — сжатая история диалога; сам вопрос пользователя (лучше в конце);
     иногда пара примеров хорошего ответа. Неизменную часть ставят в начало, чтобы работал кеш промпта.
   source: user-db
-  source_ref: [d1b3752e2d]
+  source_ref: ["d1b3752e2d"]
 - id: iv-rag-08
   topic: other
   tags: [rag, vector-db]
@@ -123,7 +123,7 @@
     фильтров, искать query-запросом с фильтром и лимитом; HNSW-параметры и квантизацию векторов настраивать под
     объём.
   source: user-db
-  source_ref: [01ec95aaed, 184bbae542, 1d5c5b757d]
+  source_ref: ["01ec95aaed", "184bbae542", "1d5c5b757d"]
 - id: iv-rag-09
   topic: other
   tags: [rag, retrieval]
@@ -138,7 +138,7 @@
     векторами — Qdrant, Elasticsearch, Weaviate), top-N из каждого, слияние, затем reranker по объединённому
     списку.
   source: user-db
-  source_ref: [e772841cf4, 10f4cf355b, 83e8924e36, 8c56a526e2]
+  source_ref: ["e772841cf4", "10f4cf355b", "83e8924e36", "8c56a526e2"]
 - id: iv-rag-10
   topic: other
   tags: [rag, data]
@@ -153,7 +153,7 @@
     обновляется по расписанию или событию: удобно заранее собрать «плоскую» витрину текстов из многих таблиц и
     пересчитывать её, а не выполнять тяжёлый запрос при каждой выгрузке в индекс.
   source: user-db
-  source_ref: [08b0020b5f, 69c24756cb, c6cebc8678, b0b09d187f]
+  source_ref: ["08b0020b5f", "69c24756cb", "c6cebc8678", "b0b09d187f"]
 - id: iv-rag-11
   topic: other
   tags: [rag, faq]
@@ -167,7 +167,7 @@
     отказывать или звать оператора. День 1: очистка, дедупликация, индекс, простой интерфейс. День 2: golden set
     из отложенных и перефразированных вопросов, замер hit rate / MRR, подбор порога, промпт для LLM.
   source: user-db
-  source_ref: [a29ccd846b]
+  source_ref: ["a29ccd846b"]
 - id: iv-rag-12
   topic: other
   tags: [rag, faq, data]
@@ -184,7 +184,7 @@
     информации» и логировать. В метаданных хранить источник и полноту ответа, чтобы фильтровать и считать
     покрытие.
   source: user-db
-  source_ref: [cf5f0dd736, 51bccb74bd, d3bdbe02fe, 3cd9ac6856]
+  source_ref: ["cf5f0dd736", "51bccb74bd", "d3bdbe02fe", "3cd9ac6856"]
 - id: iv-rag-13
   topic: other
   tags: [rag, debugging]
@@ -199,7 +199,7 @@
     чанков, модель. Каждую найденную ошибку записывать в набор регрессионных примеров с категорией причины и
     после каждого изменения прогонять evals, чтобы не сломать уже работавшее.
   source: user-db
-  source_ref: [4e48e2a7c1, ef85a20d04, b6a065c642, ad32226918]
+  source_ref: ["4e48e2a7c1", "ef85a20d04", "b6a065c642", "ad32226918"]
 - id: iv-rag-14
   topic: other
   tags: [rag, data]
@@ -214,7 +214,7 @@
     устаревшего по дате; (6) выборочная проверка экспертами и метрики качества на каждом шаге; (7) индексация как
     FAQ-базы. Начать с небольшого среза, чтобы отладить конвейер.
   source: user-db
-  source_ref: [a7face7425, 5eac276d9c]
+  source_ref: ["a7face7425", "5eac276d9c"]
 - id: iv-evals-01
   topic: other
   tags: [evals, rag, agents]
@@ -229,7 +229,7 @@
     контекст, answer relevancy, корректность относительно эталона — LLM-as-a-judge или сверка). Для агентов ещё:
     успешность задачи целиком, правильность выбора инструментов и аргументов, число шагов, стоимость.
   source: user-db
-  source_ref: [66030628c0, 3680720323, 38e0796e36, 96c40f9654, ad36ee34eb]
+  source_ref: ["66030628c0", "3680720323", "38e0796e36", "96c40f9654", "ad36ee34eb"]
 - id: iv-evals-02
   topic: other
   tags: [evals]
@@ -244,7 +244,7 @@
     запросы; балансировать по категориям; версионировать набор, чтобы сравнения были честными; держать часть
     примеров отложенной, чтобы не подгонять систему под набор.
   source: user-db
-  source_ref: [8ec0cc3966, 5e5fb6fba6]
+  source_ref: ["8ec0cc3966", "5e5fb6fba6"]
 - id: iv-evals-03
   topic: other
   tags: [evals]
@@ -258,7 +258,7 @@
     ответы самому. Сравнить с простой базовой версией. Отдать с измеренными метриками, известными ограничениями
     и сбором обратной связи (кнопки оценки, логи), чтобы следующая итерация шла по данным.
   source: user-db
-  source_ref: [0a8f639144, 8d418356f5]
+  source_ref: ["0a8f639144", "8d418356f5"]
 - id: iv-evals-04
   topic: other
   tags: [evals, retrieval]
@@ -272,7 +272,7 @@
     стоит. Hit rate отвечает на вопрос «найдём ли мы вообще», MRR — «насколько близко к верху». Считают для разных
     k и сравнивают конфигурации поиска.
   source: user-db
-  source_ref: [19e76190b3, bf94d22fa1, ce25faaa8a, baf191c833, bff8e5c864]
+  source_ref: ["19e76190b3", "bf94d22fa1", "ce25faaa8a", "baf191c833", "bff8e5c864"]
 - id: iv-evals-05
   topic: other
   tags: [evals, retrieval]
@@ -284,7 +284,7 @@
   answer: >
     Hit rate@10 = 2 из 3 запросов нашли релевантный документ = 2/3. MRR = (1/1 + 1/4 + 0) / 3 = 1.25 / 3 ≈ 0.42.
   source: user-db
-  source_ref: []
+  source_ref: ["19e76190b3", "bf94d22fa1"]
 - id: iv-evals-06
   topic: other
   tags: [evals]
@@ -298,7 +298,7 @@
     RAG на первом этапе важнее recall@k (нужное должно попасть в кандидаты), на финальном контексте — precision
     (лишние чанки мешают генерации). F1 — их гармоническое среднее.
   source: user-db
-  source_ref: [3e6e5a2c82, b560403a66]
+  source_ref: ["3e6e5a2c82", "b560403a66"]
 - id: iv-evals-07
   topic: other
   tags: [evals, llm-judge]
@@ -313,7 +313,7 @@
     стабильнее), сверка с эталонным ответом (reference-based), проверка опоры на контекст (faithfulness: разбить
     ответ на утверждения и проверить каждое), бинарные проверки отдельных критериев.
   source: user-db
-  source_ref: [6a21b6f72f, 3ea1e591cc]
+  source_ref: ["6a21b6f72f", "3ea1e591cc"]
 - id: iv-evals-08
   topic: other
   tags: [evals, llm-judge]
@@ -329,7 +329,7 @@
     примеров с правильной оценкой; калибровка — сверка с ручной разметкой на сотне примеров и подсчёт согласия;
     более сильная или другая модель-судья, чем оцениваемая.
   source: user-db
-  source_ref: [9db04ec9b6, 31eaa54ffe]
+  source_ref: ["9db04ec9b6", "31eaa54ffe"]
 - id: iv-evals-09
   topic: other
   tags: [evals, rag]
@@ -344,7 +344,7 @@
     прочитать худшие случаи, проверить, не слишком ли простой набор, и использовать метрику прежде всего для
     сравнения версий системы на одном и том же наборе.
   source: user-db
-  source_ref: [ab5477cff3, a9e600dbed, 2692f80e5f]
+  source_ref: ["ab5477cff3", "a9e600dbed", "2692f80e5f"]
 - id: iv-evals-10
   topic: other
   tags: [evals]
@@ -358,7 +358,7 @@
     RAG — faithfulness, answer relevancy, context precision/recall (через LLM); для структурированного вывода —
     валидность схемы и точность полей; плюс задержка и стоимость.
   source: user-db
-  source_ref: [aea81daf7b, 67512a244e]
+  source_ref: ["aea81daf7b", "67512a244e"]
 - id: iv-prompting-01
   topic: other
   tags: [prompting]
@@ -374,7 +374,7 @@
     ошибки и предложить улучшенную версию, затем проверить её на evals (автоматизированно — DSPy и подобные
     оптимизаторы промптов).
   source: user-db
-  source_ref: [961867f80f, e479183a64]
+  source_ref: ["961867f80f", "e479183a64"]
 - id: iv-prompting-02
   topic: other
   tags: [prompting, structured-output]
@@ -394,4 +394,4 @@
     Если reasoning стоит первым, токены рассуждения становятся контекстом для ответа — это и есть chain-of-thought
     внутри структурированного вывода. Порядок полей в схеме важен; стоимость — больше выходных токенов.
   source: user-db
-  source_ref: [7040c2869f]
+  source_ref: ["7040c2869f"]

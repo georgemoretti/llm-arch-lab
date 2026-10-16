@@ -14,7 +14,7 @@
     сегмента. Генерировать текст слева направо он не умеет; его используют как кодировщик: классификация по [CLS],
     разметка токенов, извлечение ответов, эмбеддинги для поиска.
   source: user-db
-  source_ref: [760769bc0f]
+  source_ref: ["760769bc0f"]
 - id: iv-bert-02
   topic: training
   tags: [bert]
@@ -29,7 +29,7 @@
     представления лишь в позициях с маской. Случайные и нетронутые токены заставляют её держать полезное
     представление для каждого токена и не доверять слепо входу.
   source: user-db
-  source_ref: [d082422839, c457a679d3]
+  source_ref: ["d082422839", "c457a679d3"]
 - id: iv-bert-03
   topic: other
   tags: [bert, retrieval]
@@ -43,7 +43,7 @@
     «запрос — релевантный документ» (Sentence-BERT, E5, BGE и т. п.). Плюс ограничение 512 токенов — длинные
     документы надо резать.
   source: user-db
-  source_ref: [bc020dbe3d]
+  source_ref: ["bc020dbe3d"]
 - id: iv-bert-04
   topic: other
   tags: [bert]
@@ -57,7 +57,7 @@
     WordPiece режет на частые куски (##-подслова), поэтому неизвестных токенов почти нет, но смысл собирается
     из частей и для редких терминов, имён и опечаток получается хуже; помогает дообучение на доменном тексте.
   source: user-db
-  source_ref: [70cf148fa2, 3256fe2b75]
+  source_ref: ["70cf148fa2", "3256fe2b75"]
 - id: iv-bert-05
   topic: other
   tags: [bert]
@@ -70,7 +70,7 @@
     позициям начала и конца, на инференсе выбирают пару (start ≤ end, ограниченной длины) с максимальной суммой
     логитов; ответ — отрезок контекста. Если ответа нет, его кодируют как span на [CLS].
   source: user-db
-  source_ref: [bf8ce65027]
+  source_ref: ["bf8ce65027"]
 - id: iv-training-01
   topic: training
   difficulty: easy
@@ -83,7 +83,7 @@
     масштаба градиентов по слоям. Из альтернатив: Adafactor (меньше памяти под моменты), Lion, Muon (для матричных
     параметров), Shampoo/SOAP.
   source: user-db
-  source_ref: [47de2ed5c6]
+  source_ref: ["47de2ed5c6"]
 - id: iv-retrieval-01
   topic: other
   tags: [retrieval, embeddings]
@@ -98,7 +98,7 @@
     задержке и цене; возможности дообучения и лицензии. Для многих моделей важно правильно ставить префиксы
     «query:» / «passage:».
   source: user-db
-  source_ref: [0122afcffc, 241c477cce, 9f838d1613]
+  source_ref: ["0122afcffc", "241c477cce", "9f838d1613"]
 - id: iv-retrieval-02
   topic: other
   tags: [retrieval]
@@ -113,7 +113,7 @@
     документа, но каждый документ надо прогонять заново на каждый запрос. Поэтому типичная схема двухэтапная:
     bi-encoder (и/или BM25) достаёт top-50…100, cross-encoder пересортирует их (reranker).
   source: user-db
-  source_ref: [694c538168, 8491f6bb3f, 74c2cf9a47]
+  source_ref: ["694c538168", "8491f6bb3f", "74c2cf9a47"]
 - id: iv-retrieval-03
   topic: other
   tags: [retrieval, rag]
@@ -127,7 +127,7 @@
     каждого кандидата), стоимость GPU или API, ещё одну модель для поддержки и мониторинга; он не может вернуть
     то, чего не нашёл первый этап, поэтому полнота всё равно определяется первым этапом.
   source: user-db
-  source_ref: [27c9571273, d7138aa0b4, e23150bf53]
+  source_ref: ["27c9571273", "d7138aa0b4", "e23150bf53"]
 - id: iv-retrieval-04
   topic: other
   tags: [retrieval, rag]
@@ -141,7 +141,7 @@
     Гибридный — оба с объединением списков (RRF или взвешенная сумма): обычно лучший по полноте. Дополнительно:
     фильтры по метаданным, поиск по графу знаний, SQL для структурированных данных, reranker поверх всего.
   source: user-db
-  source_ref: [9f9ef9c45f, 3c092d9e41]
+  source_ref: ["9f9ef9c45f", "3c092d9e41"]
 - id: iv-retrieval-05
   topic: other
   tags: [retrieval]
@@ -155,7 +155,7 @@
     индексу и точно находит документы с редкими терминами, артикулами, аббревиатурами, где эмбеддинги часто
     промахиваются. Векторный поиск ловит перефразы. Вместе (гибрид) они покрывают слабые места друг друга.
   source: user-db
-  source_ref: [bfbeafe19f, 38a84a9e3e]
+  source_ref: ["bfbeafe19f", "38a84a9e3e"]
 - id: iv-retrieval-06
   topic: other
   tags: [retrieval, fine-tuning]
@@ -169,7 +169,7 @@
     MRR. Пары берут из логов, размеченных вопросов или генерируют синтетически LLM-ом по документам. Цена —
     переиндексация всех документов и риск переобучиться на узкий набор запросов; проверять на отложенной выборке.
   source: user-db
-  source_ref: [94760e1e09]
+  source_ref: ["94760e1e09"]
 - id: iv-tokenization-01
   topic: tokenization
   difficulty: easy
@@ -183,7 +183,7 @@
     256 байтов, но последовательности в разы длиннее и attention дороже. Трансформер без токенизации вообще
     возможен и для не-текстовых данных: патчи изображения (ViT), кадры аудио — там вход сразу векторный.
   source: user-db
-  source_ref: [a63efe9534, 71bef214a6, f8afd7914c, 60cae7fbe0]
+  source_ref: ["a63efe9534", "71bef214a6", "f8afd7914c", "60cae7fbe0"]
 - id: iv-tokenization-02
   topic: tokenization
   difficulty: medium
@@ -197,7 +197,7 @@
     порядки), их нужно нормировать. В обычной LLM число 12,77 токенизатор разобьёт на куски вроде «12», «,»,
     «77» — отсюда известные трудности LLM с арифметикой.
   source: user-db
-  source_ref: [28e6e4fa06, 0db60823bb]
+  source_ref: ["28e6e4fa06", "0db60823bb"]
 - id: iv-tokenization-03
   topic: tokenization
   difficulty: medium
@@ -211,4 +211,4 @@
     правдоподобие, а разбиение ищет как наиболее вероятное. Итог одинаковый по сути: частые слова — один токен,
     редкие — несколько частых кусков. Плюс предтокенизация (пробелы, цифры, пунктуация) и служебные токены.
   source: user-db
-  source_ref: [b70e1f110d, 9cc7f97aef]
+  source_ref: ["b70e1f110d", "9cc7f97aef"]

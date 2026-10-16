@@ -15,7 +15,7 @@
     уверенность модели: при уверенном распределении остаётся 1–2 токена, при размытом — много. Применяют их при
     генерации в чат-ботах, креативных задачах и при сэмплировании нескольких вариантов ответа.
   source: user-db
-  source_ref: [ee0246d866, 8066b52c27, ae80ca3405, db97737675, c1e507a724]
+  source_ref: ["ee0246d866", "8066b52c27", "ae80ca3405", "db97737675", "c1e507a724"]
 - id: iv-generation-02
   topic: generation
   tags: [sampling]
@@ -34,7 +34,7 @@
     Отношение вероятностей двух токенов равно exp((z₁ − z₂)/T): уменьшение T увеличивает разрыв, распределение
     становится острее; увеличение T приближает его к равномерному.
   source: user-db
-  source_ref: [c62afecc6e, 9ae8f387b3, 71c51cd52d]
+  source_ref: ["c62afecc6e", "9ae8f387b3", "71c51cd52d"]
 - id: iv-generation-03
   topic: generation
   tags: [sampling]
@@ -49,7 +49,7 @@
     вероятности оставшихся k токенов перенормируют, чтобы сумма была 1 (softmax по ним), и из этого распределения
     сэмплируют. Поэтому самый вероятный токен выпадает чаще, но не всегда; жадный выбор — это k = 1 или T → 0.
   source: user-db
-  source_ref: [b9a3ef8cd0, 0f9bafcda1]
+  source_ref: ["b9a3ef8cd0", "0f9bafcda1"]
 - id: iv-generation-04
   topic: generation
   tags: [sampling]
@@ -63,7 +63,7 @@
     распределения на каждом шаге, а порядок применения отличается между библиотеками и API. Поэтому обычно
     фиксируют один механизм (чаще top-p вместе с temperature), а второй оставляют нейтральным.
   source: user-db
-  source_ref: [d88f3f5df0, 6d7e0adff7, f3c8170c76]
+  source_ref: ["d88f3f5df0", "6d7e0adff7", "f3c8170c76"]
 - id: iv-generation-05
   topic: generation
   tags: [structured-output]
@@ -78,7 +78,7 @@
     гарантированно парсится. Даже с ограничениями стоит проверять смысловую валидность значений и держать поле
     для «не знаю».
   source: user-db
-  source_ref: [4093760c2c, 7d62e3ebda]
+  source_ref: ["4093760c2c", "7d62e3ebda"]
 - id: iv-generation-06
   topic: inference
   tags: [cost]
@@ -92,7 +92,7 @@
     выход: лимит max_tokens, структурированный ответ без «воды». Выбирать модель по задаче: дешёвую для простых
     шагов и маршрутизации, дорогую только где нужно; batch API для офлайн-задач.
   source: user-db
-  source_ref: [adb347b743]
+  source_ref: ["adb347b743"]
 - id: iv-generation-07
   topic: training
   tags: [autoregression]
@@ -107,7 +107,7 @@
     наперёд неявное. Частично это смягчают MTP (C17), beam search, reasoning, самопроверка.
   source: user-db
   tasks: [C17-mtp]
-  source_ref: [fa8f33a025, 62fb299376, 0b6fff290a]
+  source_ref: ["fa8f33a025", "62fb299376", "0b6fff290a"]
 - id: iv-generation-08
   topic: training
   tags: [autoregression]
@@ -123,7 +123,7 @@
     шагов уже 1 − 0.99¹⁰⁰ ≈ 63 %. На деле хуже: ошибка меняет префикс, модель попадает в непривычное состояние
     (exposure bias), и вероятность следующих ошибок растёт.
   source: user-db
-  source_ref: [03dbdd1d0e]
+  source_ref: ["03dbdd1d0e"]
 - id: iv-generation-09
   topic: training
   tags: [autoregression]
@@ -139,7 +139,7 @@
     к среднему. Помогают прямой многошаговый прогноз (сразу на горизонт), обучение на собственных прогнозах
     (scheduled sampling), вероятностный выход.
   source: user-db
-  source_ref: [0ac6fc89c6, 019645c59a, 525703bc4e]
+  source_ref: ["0ac6fc89c6", "019645c59a", "525703bc4e"]
 - id: iv-generation-10
   topic: other
   tags: [time-series]
@@ -153,7 +153,7 @@
     бустинг на лагах): на коротких одномерных рядах они часто не хуже. Плюсы трансформера — длинный контекст и
     много рядов сразу; минусы — данные, стоимость, накопление ошибки при авторегрессионном прогнозе.
   source: user-db
-  source_ref: [a1cabbdb90]
+  source_ref: ["a1cabbdb90"]
 - id: iv-quantization-01
   topic: inference
   tags: [quantization]
@@ -167,7 +167,7 @@
     объекту: только веса (weight-only, W4A16), веса и активации (W8A8), KV-cache, градиенты и состояния
     оптимизатора при обучении. По гранулярности масштаба: на тензор, на канал, на группу из 64–128 весов.
   source: user-db
-  source_ref: [7a28e7b613, 5d975bad94, fa2dfdbd1a]
+  source_ref: ["7a28e7b613", "5d975bad94", "fa2dfdbd1a"]
 - id: iv-quantization-02
   topic: inference
   tags: [quantization]
@@ -182,4 +182,4 @@
     умеет int8/fp8 матричные умножения; иначе веса деквантуются на лету и выигрыша почти нет. Качество обычно
     почти не падает до 8 бит, на 4 битах — заметно для маленьких моделей.
   source: user-db
-  source_ref: [b34a40c5eb]
+  source_ref: ["b34a40c5eb"]

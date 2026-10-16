@@ -295,7 +295,7 @@ def questions_batch(size: int = typer.Option(50, "--size", "-n", help="скол�
     for q in batch:
         console.print(f"{q.ref}  [dim]{escape(' / '.join(q.section))}[/]\n    {escape(q.text)}")
     console.print(f"[dim]В пачке {len(batch)}. Размеченные вопросы клади в content/questions/interview-*.yaml "
-                  "с source: user-db и source_ref: [<ref>, …].[/]")
+                  "с source: user-db и source_ref: [\"<ref>\", …] (ref — в кавычках).[/]")
 
 
 @questions_app.command("check")

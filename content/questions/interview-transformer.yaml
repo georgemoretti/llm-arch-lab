@@ -13,7 +13,7 @@
     веса, и выход токена i — взвешенная сумма значений: softmax(QKᵀ/√d)·V. Деление на √d держит scores в разумном
     диапазоне, чтобы softmax не насыщался. В декодере добавляется causal-маска: токен смотрит только на прошлое.
   source: user-db
-  source_ref: [acfdc0a8d6, e2b0bca93b, fe66635f78]
+  source_ref: ["acfdc0a8d6", "e2b0bca93b", "fe66635f78"]
 - id: iv-attention-02
   topic: attention
   tasks: [C00-causal-mha]
@@ -31,7 +31,7 @@
     V = XW_V — активации: другой текст даёт другие Q, K, V, а значит и другие веса внимания. Именно поэтому
     attention «динамический»: связи между токенами вычисляются заново для каждого входа.
   source: user-db
-  source_ref: [677d3207b7]
+  source_ref: ["677d3207b7"]
 - id: iv-attention-03
   topic: attention
   tasks: [C00-causal-mha, C04-gqa, C-Q1-llama-quiz]
@@ -45,7 +45,7 @@
     распределение внимания: одна может следить за синтаксисом, другая за соседними токенами, третья за
     кореференцией. Одна голова дала бы лишь один усреднённый «взгляд» на строку.
   source: user-db
-  source_ref: [fe56d8fa80, a5b0c0e64a]
+  source_ref: ["fe56d8fa80", "a5b0c0e64a"]
 - id: iv-attention-04
   topic: attention
   tasks: [C00-causal-mha]
@@ -59,7 +59,7 @@
     инициализировали одинаково, они так и остались бы копиями. На практике часть голов всё равно оказывается
     избыточной — их можно обрезать почти без потерь.
   source: user-db
-  source_ref: [19ace03975]
+  source_ref: ["19ace03975"]
 - id: iv-architecture-01
   topic: architecture
   tasks: [C00-causal-mha, C06-llama-block]
@@ -74,7 +74,7 @@
     двунаправленный, в декодере (GPT) — с causal-маской. В конце — нормализация и проекция в словарь (LM head)
     или голова под задачу. Ядро архитектуры — блок «attention + FFN + residual + norm».
   source: user-db
-  source_ref: [300c7430a3, e1ca86a486, 296e3f3335]
+  source_ref: ["300c7430a3", "e1ca86a486", "296e3f3335"]
 - id: iv-positional-01
   topic: positional-encoding
   tasks: [C03-rope, C10-nope, C-Q1-llama-quiz]
@@ -88,7 +88,7 @@
     q и k на угол, пропорциональный позиции, и score q_m·k_n зависит только от m − n; ALiBi добавляет к score
     штраф, растущий с расстоянием. Causal-маска тоже даёт неявный сигнал о позиции (на этом работают NoPE-слои).
   source: user-db
-  source_ref: [8d2716d55e, 8eb0558e31, c5a3a8595f]
+  source_ref: ["8d2716d55e", "8eb0558e31", "c5a3a8595f"]
 - id: iv-positional-02
   topic: positional-encoding
   tasks: [C03-rope]
@@ -103,7 +103,7 @@
     и плохая экстраполяция за обученную длину; RoPE обходит это, внося позицию поворотом q и k внутри
     attention, а не прибавкой к входу.
   source: user-db
-  source_ref: [6f81d617f1]
+  source_ref: ["6f81d617f1"]
 - id: iv-positional-03
   topic: positional-encoding
   tasks: [C03-rope, C-Q1-llama-quiz]
@@ -119,7 +119,7 @@
     k. Значения v не трогают. При генерации с KV-cache берутся cos/sin для абсолютных позиций новых токенов, а в
     кеш кладутся уже повёрнутые ключи.
   source: user-db
-  source_ref: [a2912025e2]
+  source_ref: ["a2912025e2"]
 - id: iv-attention-05
   topic: attention
   tasks: [C00-causal-mha]
@@ -133,7 +133,7 @@
     длину при обучении ограничивают. Современные модели снимают первое ограничение относительными позициями
     (RoPE + масштабирование), второе — FlashAttention, SWA, sparse/linear attention.
   source: user-db
-  source_ref: [2f0acc3c2e]
+  source_ref: ["2f0acc3c2e"]
 - id: iv-attention-06
   topic: attention
   tasks: [C00-causal-mha, C18-sparse-attention, C20-linear-attention, C-Q4-efficient-quiz]
@@ -146,7 +146,7 @@
     увеличивает и то, и другое. FlashAttention убирает квадрат по памяти (не материализует матрицу), но не по
     времени; SWA, sparse и линейное внимание снижают и время.
   source: user-db
-  source_ref: [57ce1af605, 04745e9b5a, 3f00eed1b0]
+  source_ref: ["57ce1af605", "04745e9b5a", "3f00eed1b0"]
 - id: iv-inference-01
   topic: inference
   tasks: [C00-causal-mha]
@@ -160,7 +160,7 @@
     считает softmax «онлайн» (с накоплением максимума и суммы), не сохраняя полную матрицу; в обратном проходе
     пересчитывает её по блокам. Меньше обращений к HBM → быстрее, и память O(T) вместо O(T²).
   source: user-db
-  source_ref: [33397b6d15, 2afe0662f5]
+  source_ref: ["33397b6d15", "2afe0662f5"]
 - id: iv-inference-02
   topic: inference
   tasks: [C00-causal-mha]
@@ -178,7 +178,7 @@
     Но память под веса падает до линейной, а реальное время сокращается в разы, потому что узкое место — не
     арифметика, а чтение и запись в HBM.
   source: user-db
-  source_ref: [19223f66c2]
+  source_ref: ["19223f66c2"]
 - id: iv-kvcache-01
   topic: kv-cache
   tasks: [C05-kv-cache, C-Q1-llama-quiz]
@@ -192,7 +192,7 @@
     токена, k и v дописываются в кеш, attention идёт по всему кешу. Цена — память 2·L·H_kv·d·S чисел на
     последовательность; её урезают GQA/MQA, MLA, SWA, квантизация кеша.
   source: user-db
-  source_ref: [9e26c22700, 7a47e839d4]
+  source_ref: ["9e26c22700", "7a47e839d4"]
 - id: iv-kvcache-02
   topic: kv-cache
   tasks: [C05-kv-cache]
@@ -207,7 +207,7 @@
     Память выделяется по мере роста, потери — максимум один неполный блок; общие префиксы (системный промпт,
     beam search) могут делить блоки. В итоге в той же памяти помещается больше одновременных запросов.
   source: user-db
-  source_ref: [62792bb05c, 2a645f8918]
+  source_ref: ["62792bb05c", "2a645f8918"]
 - id: iv-architecture-02
   topic: architecture
   tasks: [C00-causal-mha, C-Q1-llama-quiz]
@@ -220,7 +220,7 @@
     исходном encoder-decoder трансформере (перевод) у декодера ещё есть cross-attention: запросы из декодера, ключи
     и значения — из выхода энкодера. Современные LLM — decoder-only: только маскированный self-attention + FFN.
   source: user-db
-  source_ref: [d1eba489c7, b3113f921d]
+  source_ref: ["d1eba489c7", "b3113f921d"]
 - id: iv-architecture-03
   topic: attention
   tasks: [C00-causal-mha]
@@ -234,4 +234,4 @@
     Маска делает каждую позицию эквивалентной шагу генерации и позволяет считать все T предсказаний за один
     проход.
   source: user-db
-  source_ref: [7a819ee009]
+  source_ref: ["7a819ee009"]
