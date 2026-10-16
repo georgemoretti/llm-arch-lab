@@ -21,6 +21,7 @@ import json
 import os
 import re
 import threading
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 from fastapi import FastAPI, HTTPException, Request
@@ -29,7 +30,7 @@ from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
 from llmlab import __version__
-from llmlab import notes
+from llmlab import notes, srs
 from llmlab.content_loader import Course, Task, load_course
 from llmlab.paths import PACKAGE_DIR, db_path, notes_dir, project_root, workspace_dir
 from llmlab.runner import db, run_task_tests
@@ -50,6 +51,12 @@ class CodeIn(BaseModel):
     # во внешнем IDE), сервер вернёт 409, чтобы не затереть чужие правки молча.
     base_sha256: str | None = None
     force: bool = False
+
+
+class ReviewIn(BaseModel):
+    qid: str
+    grade: str                     # again | hard | good | easy
+    mode: str = "review"           # review | quiz | task — откуда пришёл ответ (для истории)
 
 
 class NoteIn(BaseModel):
@@ -322,6 +329,74 @@ def create_app(root: Path | None = None) -> FastAPI:
             "attempted": sum(p["status"] == "attempted" for p in tasks.values()),
             "tasks": tasks,
         }
+
+    @app.post("/api/tasks/{task_id}/complete")
+    def complete_task(task_id: str) -> dict:
+        """Отметить paper/quiz-задачу пройденной: у них нет тестов, статус ставит сам пользователь."""
+        task = get_task(course(), task_id)
+        if task.has_code:
+            raise HTTPException(400, "Задачи с кодом решаются прогоном тестов")
+        db.mark_completed(task.id, srs._iso(datetime.now(timezone.utc)), dbfile())
+        return task_progress(task.id, db.task_statuses(dbfile()))
+
+    # ---------- Interview: вопросы и интервальное повторение ----------
+
+    def card_of(qid: str, cards: dict[str, dict]) -> srs.Card:
+        row = cards.get(qid)
+        return srs.Card(**row) if row else srs.Card(qid)
+
+    def card_view(card: srs.Card, now: datetime) -> dict:
+        return {**card.to_dict(), "is_new": card.due_at is None, "due": srs.is_due(card, now),
+                "preview": srs.preview(card, now)}
+
+    @app.get("/api/interview")
+    def interview() -> dict:
+        """Все вопросы курса с модулями, состоянием карточек SM-2 и сводкой."""
+        c = course()
+        now = datetime.now(timezone.utc)
+        cards = db.srs_cards(dbfile())
+        module_titles = {m.id: m.title for b in c.blocks.values() for m in b.modules}
+        by_question: dict[str, set[str]] = {}
+        for t in c.tasks.values():
+            for q in c.questions_for(t):
+                by_question.setdefault(q.id, set()).add(t.id)
+        items = []
+        for q in c.questions.values():
+            linked = by_question.get(q.id, set())
+            modules = sorted({c.tasks[t].module for t in linked}, key=list(module_titles).index)
+            items.append({**q.model_dump(exclude={"source_ref"}), "tasks": sorted(linked), "modules": modules,
+                          "card": card_view(card_of(q.id, cards), now)})
+        day_ago = srs._iso(now - timedelta(days=1))
+        return {
+            "questions": items,
+            "modules": [{"id": m, "title": t} for m, t in module_titles.items()],
+            "stats": {
+                "total": len(items),
+                "new": sum(i["card"]["is_new"] for i in items),
+                "due": sum(i["card"]["due"] and not i["card"]["is_new"] for i in items),
+                "learned": sum(i["card"]["reps"] > 0 for i in items),
+                "reviews_24h": len(db.srs_reviews(since=day_ago, path=dbfile())),
+            },
+        }
+
+    @app.post("/api/interview/review")
+    def review(body: ReviewIn) -> dict:
+        """Самооценка ответа → новое состояние карточки (SM-2) + строка истории."""
+        c = course()
+        if body.qid not in c.questions:
+            raise HTTPException(404, f"Вопрос '{body.qid}' не найден")
+        if body.grade not in srs.GRADES:
+            raise HTTPException(422, f"grade: одно из {', '.join(srs.GRADES)}")
+        if body.mode not in ("review", "quiz", "task"):
+            raise HTTPException(422, "mode: review | quiz | task")
+        now = datetime.now(timezone.utc)
+        card = srs.schedule(card_of(body.qid, db.srs_cards(dbfile())), body.grade, now)
+        db.save_review(card.to_dict(), body.grade, body.mode, srs._iso(now), dbfile())
+        return card_view(card, now)
+
+    @app.get("/api/interview/{qid}/history")
+    def review_history(qid: str) -> list[dict]:
+        return db.srs_reviews(qid=qid, path=dbfile())
 
     @app.get("/api/notes")
     def list_notes() -> dict:

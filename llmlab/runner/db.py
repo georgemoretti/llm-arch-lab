@@ -32,7 +32,21 @@
 Полнотекстовый индекс ``notes_fts`` (FTS5) создаётся отдельно в ``llmlab/notes/index.py``:
 если SQLite собран без FTS5, поиск деградирует до LIKE, а не ломает всю базу.
 
-Таблицы SRS-карточек добавятся в Фазе 7 следующей миграцией (``PRAGMA user_version``).
+Версия 3 (Фаза 7, интервальное повторение — ``llmlab/srs.py``):
+
+    srs_cards(
+        qid            TEXT PRIMARY KEY,  -- id вопроса из content/questions
+        ease           REAL NOT NULL,     -- лёгкость SM-2 (≥ 1.3)
+        interval_days  REAL NOT NULL,
+        reps           INTEGER NOT NULL,  -- успешных повторений подряд
+        lapses         INTEGER NOT NULL,
+        due_at         TEXT,              -- когда показать снова (ISO-8601 UTC)
+        last_grade     TEXT,              -- again | hard | good | easy
+        last_review_at TEXT
+    )
+    srs_reviews(id, qid, grade, mode, created_at)   -- история ответов (mode: review | quiz | task)
+
+Пройденные вручную paper/quiz-задачи пишутся в ``attempts`` с ``impl = 'manual'``.
 """
 
 from __future__ import annotations
@@ -44,7 +58,7 @@ from pathlib import Path
 
 from llmlab.paths import db_path
 
-SCHEMA_VERSION = 2
+SCHEMA_VERSION = 3
 
 _MIGRATIONS: dict[int, str] = {
     1: """
@@ -78,6 +92,26 @@ _MIGRATIONS: dict[int, str] = {
         task_id      TEXT,
         mtime_ns     INTEGER NOT NULL
     );
+    """,
+    3: """
+    CREATE TABLE IF NOT EXISTS srs_cards (
+        qid            TEXT PRIMARY KEY,
+        ease           REAL    NOT NULL,
+        interval_days  REAL    NOT NULL,
+        reps           INTEGER NOT NULL,
+        lapses         INTEGER NOT NULL,
+        due_at         TEXT,
+        last_grade     TEXT,
+        last_review_at TEXT
+    );
+    CREATE TABLE IF NOT EXISTS srs_reviews (
+        id         INTEGER PRIMARY KEY AUTOINCREMENT,
+        qid        TEXT NOT NULL,
+        grade      TEXT NOT NULL,
+        mode       TEXT NOT NULL,
+        created_at TEXT NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_srs_reviews_qid ON srs_reviews(qid, created_at);
     """,
 }
 
@@ -129,7 +163,7 @@ def task_statuses(path: Path | None = None) -> dict[str, dict]:
                       COUNT(*) AS attempts,
                       MIN(CASE WHEN status = 'passed' THEN created_at END) AS solved_at,
                       MAX(created_at) AS last_at
-               FROM attempts WHERE impl = 'workspace' GROUP BY task_id"""
+               FROM attempts WHERE impl IN ('workspace', 'manual') GROUP BY task_id"""
         ).fetchall()
     return {
         r["task_id"]: {
@@ -170,3 +204,47 @@ def upsert_note(task_id: str, *, insight: str, code: str | None, code_sha256: st
             (task_id, insight, code, code_sha256, note_path, now, now),
         )
         conn.commit()
+
+
+# ---------- интервальное повторение ----------
+
+
+def srs_cards(path: Path | None = None) -> dict[str, dict]:
+    with closing(connect(path)) as conn:
+        rows = conn.execute("SELECT * FROM srs_cards").fetchall()
+    return {r["qid"]: dict(r) for r in rows}
+
+
+def save_review(card: dict, grade: str, mode: str, now: str, path: Path | None = None) -> None:
+    """Сохранить новое состояние карточки и строку истории — одной транзакцией."""
+    with closing(connect(path)) as conn:
+        conn.execute(
+            """INSERT INTO srs_cards (qid, ease, interval_days, reps, lapses, due_at, last_grade, last_review_at)
+               VALUES (:qid, :ease, :interval_days, :reps, :lapses, :due_at, :last_grade, :last_review_at)
+               ON CONFLICT(qid) DO UPDATE SET
+                   ease = excluded.ease, interval_days = excluded.interval_days, reps = excluded.reps,
+                   lapses = excluded.lapses, due_at = excluded.due_at, last_grade = excluded.last_grade,
+                   last_review_at = excluded.last_review_at""",
+            card,
+        )
+        conn.execute("INSERT INTO srs_reviews (qid, grade, mode, created_at) VALUES (?, ?, ?, ?)",
+                     (card["qid"], grade, mode, now))
+        conn.commit()
+
+
+def srs_reviews(qid: str | None = None, since: str | None = None, path: Path | None = None) -> list[dict]:
+    sql, args = "SELECT * FROM srs_reviews WHERE 1 = 1", []
+    if qid:
+        sql, args = sql + " AND qid = ?", args + [qid]
+    if since:
+        sql, args = sql + " AND created_at >= ?", args + [since]
+    with closing(connect(path)) as conn:
+        return [dict(r) for r in conn.execute(sql + " ORDER BY id", args).fetchall()]
+
+
+def mark_completed(task_id: str, now: str, path: Path | None = None) -> int:
+    """Отметить paper/quiz-задачу пройденной (у них нет тестов): попытка с impl = 'manual'."""
+    return record_attempt({
+        "task_id": task_id, "created_at": now, "impl": "manual", "status": "passed",
+        "passed": 0, "failed": 0, "total": 0, "duration_s": 0.0, "code_sha256": None,
+    }, path)
