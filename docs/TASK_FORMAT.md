@@ -75,7 +75,7 @@ papers: [roformer]               # id из content/papers/
 reading:                         # внешние ссылки — только ссылки, без копий текста
   - title: "…"
     url: https://…
-viz: [rope-rotation]             # id визуализаций (реестр появится в Фазе 1)
+viz: [rope-rotation]             # id визуализаций из content/viz/ (вкладка «Визуализация»)
 questions: [rope-*, positional-*]  # fnmatch-глобы по id вопросов
 ```
 
@@ -95,6 +95,8 @@ questions: [rope-*, positional-*]  # fnmatch-глобы по id вопросов
 
 Гиперпараметры реальных моделей — только с источником (`config.json` на HF или статья).
 Если не удалось проверить — пометка `TODO-verify`.
+
+Визуализацию можно вставить прямо в текст отдельной строкой `:::viz <id>:::` (см. §3.3).
 
 ### 2.3 `starter.py`
 
@@ -198,6 +200,21 @@ venue: arXiv            # опционально
 url: https://arxiv.org/abs/2104.09864
 tags: [positional-encoding]
 ```
+
+### 3.3 Визуализации: `content/viz/<id>.yaml` + компонент
+
+```yaml
+id: causal-mask
+title: "Causal-маска и веса внимания"
+description: "Что показывает и что покрутить."
+```
+
+Интерактивная часть — React-компонент в `web/src/viz/<Name>.tsx`, зарегистрированный в
+`web/src/viz/registry.ts` (`"causal-mask": CausalMask`). Компонент без пропсов, сам держит
+состояние, использует CSS-переменные темы (`--accent`, `--border`, …) и работает офлайн.
+Загрузчик проверяет, что каждый id из `task.yaml → viz` и из директив `:::viz id:::` в README
+описан в `content/viz/`; `tests/test_viz_registry.py` — что у каждого описания есть компонент.
+После правок фронтенда: `cd web && npm run build` и коммит `llmlab/static/`.
 
 ---
 
@@ -312,6 +329,23 @@ llmlab test <id> [--impl reference|starter|buggy] [--impl-path file.py] [--timeo
 llmlab validate <id> | --all [-j 4]
 llmlab serve [--port 8765] [--no-open]   # веб-интерфейс на 127.0.0.1
 ```
+
+### 4.5.1 HTTP API (`llmlab/server.py`, только 127.0.0.1)
+
+| метод | путь | что делает |
+|-------|------|------------|
+| GET | `/api/course` | блоки → модули → задачи со статусами, `issues` загрузчика |
+| GET | `/api/tasks`, `/api/tasks/{id}` | список / детали (README, hints по `##`, reading, papers, viz, `diff_unlocked`) |
+| GET/PUT | `/api/tasks/{id}/code` | рабочая копия; GET создаёт её из заготовки; PUT с `base_sha256` → 409, если файл изменён снаружи (`force: true` — перезаписать) |
+| GET | `/api/tasks/{id}/code/meta` | sha256/mtime файла — фронтенд опрашивает раз в 1.5 с, чтобы подхватить правки из IDE |
+| POST | `/api/tasks/{id}/reset` | сброс к заготовке (`buggy.py` для debug) |
+| POST | `/api/tasks/{id}/run` | прогон тестов → RunResult (§4.3), попытка пишется в БД |
+| GET | `/api/tasks/{id}/attempts` | история попыток, новые сверху; полный RunResult — у последней |
+| GET | `/api/tasks/{id}/reference` | эталон; 403, пока задача не решена и неудачных попыток < 3 |
+| GET | `/api/progress`, `/api/notes`, `/api/viz` | сводка прогресса, список конспектов (Фаза 2), визуализации |
+
+Изменяющие запросы требуют заголовок `X-LLMLab: 1` (защита от CSRF), `Host` — только
+localhost/127.0.0.1 (защита от DNS rebinding). Документация OpenAPI — `/api/docs`.
 
 ### 4.6 Инварианты `llmlab validate`
 
