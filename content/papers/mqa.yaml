@@ -1,0 +1,7 @@
+id: mqa
+title: "Fast Transformer Decoding: One Write-Head is All You Need"
+authors: "Shazeer"
+year: 2019
+venue: arXiv
+url: https://arxiv.org/abs/1911.02150
+tags: [attention, mqa, kv-cache]

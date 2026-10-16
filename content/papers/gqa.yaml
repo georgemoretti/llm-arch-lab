@@ -1,0 +1,7 @@
+id: gqa
+title: "GQA: Training Generalized Multi-Query Transformer Models from Multi-Head Checkpoints"
+authors: "Ainslie, Lee-Thorp, de Jong, Zemlyanskiy, Lebrón, Sanghai"
+year: 2023
+venue: EMNLP 2023
+url: https://arxiv.org/abs/2305.13245
+tags: [attention, gqa, kv-cache]

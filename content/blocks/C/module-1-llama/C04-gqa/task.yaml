@@ -1,0 +1,25 @@
+id: C04-gqa
+title: Grouped-Query Attention (GQA и MQA)
+block: C
+module: module-1-llama
+type: implement
+difficulty: medium
+depends_on: [C00-causal-mha]
+diff_from: gpt2-baseline
+tags: [attention, gqa, mqa, kv-cache, llama]
+entrypoint: [repeat_kv, kv_cache_bytes, GroupedQueryAttention]
+time_estimate_min: 35
+papers: [gqa, mqa]
+reading:
+  - title: "The Big LLM Architecture Comparison (Sebastian Raschka)"
+    url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
+  - title: "Hugging Face transformers: modeling_llama.py (repeat_kv, LlamaAttention)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/llama/modeling_llama.py
+viz: [kv-cache]
+questions: [gqa-*]
+# Источник: config.json Llama 3 8B (meta-llama/Meta-Llama-3-8B; сверено по открытому зеркалу
+# NousResearch/Meta-Llama-3-8B): num_attention_heads = 32, num_key_value_heads = 8, hidden_size = 4096
+# → head_dim = 128, группа из 4 голов запросов на одну KV-голову.
+arch:
+  llama-3:
+    attention: "GQA: 32 головы запросов, 8 KV-голов (группы по 4), head_dim 128, causal, без bias"

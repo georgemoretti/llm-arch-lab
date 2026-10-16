@@ -1,0 +1,7 @@
+id: llama2
+title: "Llama 2: Open Foundation and Fine-Tuned Chat Models"
+authors: "Touvron, Martin, Stone, et al."
+year: 2023
+venue: arXiv
+url: https://arxiv.org/abs/2307.09288
+tags: [llama, gqa]

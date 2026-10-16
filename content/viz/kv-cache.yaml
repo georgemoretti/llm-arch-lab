@@ -1,0 +1,5 @@
+id: kv-cache
+title: "Калькулятор KV-cache: MHA / GQA / MQA"
+description: >
+  Сколько памяти занимает KV-cache реальных моделей в зависимости от длины контекста, batch и
+  типа данных; как его уменьшают GQA и MQA. Пресеты — из config.json на Hugging Face.
