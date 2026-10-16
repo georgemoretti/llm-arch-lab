@@ -74,3 +74,63 @@
     Слой i — full, когда (i + 1) делится на 6: это последний слой каждой группы из шести, то есть
     5, 11, 17, … Слой 0 всегда sliding. Перепутать с i % 6 == 0 — частая ошибка при загрузке весов.
   source: course
+- id: norm-placement-pre-post-01
+  topic: normalization
+  tasks: [C08-norm-placement]
+  difficulty: medium
+  kind: open
+  question: "Чем Pre-Norm отличается от Post-Norm и почему почти все LLM после GPT-2 перешли на Pre-Norm?"
+  answer: >
+    В Post-Norm нормируется сумма x + f(x), то есть норма стоит на пути остаточного потока; в
+    Pre-Norm нормируется только вход подслоя, а остаток проходит мимо: x + f(n(x)). У Pre-Norm есть
+    «чистый» путь от выхода к входу, и анализ при инициализации (Xiong et al., 2020) показывает, что
+    градиенты весов верхних слоёв убывают с глубиной примерно как 1/√L, тогда как у Post-Norm они
+    остаются большими. Поэтому Post-Norm требует аккуратного warmup learning rate, а Pre-Norm
+    обучается стабильнее и проще масштабируется по глубине. Минус Pre-Norm — остаток растёт по слоям
+    и не нормирован.
+  source: course
+- id: norm-placement-olmo-01
+  topic: normalization
+  tasks: [C08-norm-placement]
+  difficulty: medium
+  kind: open
+  question: "Где стоит нормализация в блоке OLMo 2 и чем это отличается от классического Post-Norm?"
+  answer: >
+    В OLMo 2 норма применяется к выходу подслоя перед сложением с остатком: x + n(f(x)); входной
+    нормы нет. В классическом Post-Norm нормируется сумма n(x + f(x)), то есть сам остаточный поток.
+    У OLMo 2 остаток идёт мимо нормы (как у Pre-Norm), блок с нулевыми подслоями — тождество, а вклад
+    каждого подслоя ограничен по масштабу. Это одна из правок OLMo 2 ради стабильности обучения
+    (вместе с QK-Norm).
+  source: course
+- id: norm-placement-sandwich-01
+  topic: normalization
+  tasks: [C08-norm-placement]
+  difficulty: easy
+  kind: mcq
+  question: "Какая формула описывает подслой Gemma 3 (sandwich norm)?"
+  options:
+    - "x ← n(x + f(x))"
+    - "x ← x + f(n(x))"
+    - "x ← x + n₂(f(n₁(x)))"
+    - "x ← n₂(x + f(n₁(x)))"
+  correct: 2
+  answer: >
+    Gemma 2/3 ставят RMSNorm и на вход, и на выход подслоя, а остаток прибавляют мимо обеих норм:
+    x + n₂(f(n₁(x))). В HF это input_layernorm → attention → post_attention_layernorm и
+    pre_feedforward_layernorm → MLP → post_feedforward_layernorm.
+  source: course
+- id: norm-placement-growth-01
+  topic: normalization
+  tasks: [C08-norm-placement]
+  difficulty: hard
+  kind: open
+  question: >
+    В модели с нормой на выходе подслоя (OLMo 2, sandwich) как растёт RMS остаточного потока с
+    глубиной при инициализации и почему?
+  answer: >
+    Каждый подслой прибавляет к остатку выход RMSNorm — вектор с RMS ≈ 1 (при единичных весах нормы),
+    который в начале обучения почти ортогонален текущему остатку. Квадраты норм ортогональных
+    векторов складываются, поэтому RMS² растёт на ≈ 1 за подслой: после L блоков (2L подслоёв)
+    RMS ≈ √(1 + 2L). Рост предсказуемый и не зависит от масштаба весов подслоя — в отличие от
+    Pre-Norm, где вклад подслоя ничем не ограничен.
+  source: course

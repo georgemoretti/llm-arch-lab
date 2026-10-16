@@ -1,0 +1,30 @@
+id: C08-norm-placement
+title: "Куда ставить нормализацию: Post-Norm, Pre-Norm, OLMo 2, sandwich"
+block: C
+module: module-2-gemma-olmo
+type: implement
+difficulty: medium
+depends_on: [C06-llama-block]
+diff_from: C06-llama-block
+tags: [normalization, pre-norm, post-norm, sandwich-norm, olmo, gemma, training-stability]
+entrypoint: [PostNormBlock, PreNormBlock, OlmoPostNormBlock, SandwichNormBlock]
+time_estimate_min: 40
+papers: [layernorm-placement, olmo-2, gemma-2, gemma-3]
+reading:
+  - title: "The Big LLM Architecture Comparison (Sebastian Raschka) — разделы про OLMo 2 и Gemma 3"
+    url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
+  - title: "Hugging Face transformers: modeling_olmo2.py (Olmo2DecoderLayer)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/olmo2/modeling_olmo2.py
+  - title: "Hugging Face transformers: modeling_gemma3.py (Gemma3DecoderLayer)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/gemma3/modeling_gemma3.py
+questions: [norm-placement-*]
+# Источники: Olmo2DecoderLayer (modeling_olmo2.py): post_attention_layernorm / post_feedforward_layernorm
+# применяются к выходу подслоя до сложения с остатком, input_layernorm нет. Gemma3DecoderLayer
+# (modeling_gemma3.py): input_layernorm, post_attention_layernorm, pre_feedforward_layernorm,
+# post_feedforward_layernorm; Gemma3RMSNorm умножает на (1 + weight). config.json OLMo-2-1124-7B:
+# rms_norm_eps = 1e-6; Gemma 3: rms_norm_eps = 1e-6.
+arch:
+  gemma-3:
+    norm: "RMSNorm (масштаб 1 + w), sandwich: норма до и после каждого подслоя, остаток не нормируется"
+  olmo-2:
+    norm: "RMSNorm на выходе подслоя внутри остатка: x + n(подслой(x)), без нормы на входе"
