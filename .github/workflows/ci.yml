@@ -22,6 +22,9 @@ jobs:
           python -m pip install --upgrade pip
           pip install torch --index-url https://download.pytorch.org/whl/cpu
           pip install -e . "httpx>=0.27"
+      - name: Install weights extras (transformers — для сверки на игрушечных моделях, без скачивания весов)
+        if: matrix.python-version == '3.12'
+        run: pip install -e ".[weights]"
       - name: Platform tests
         run: pytest tests/
       - name: Course invariants

@@ -3,16 +3,14 @@
 > Обновляется в конце КАЖДОЙ сессии Claude Code. Пиши кратко и конкретно.
 
 ## Текущая фаза
-Фаза 7 — **завершена** (2026-10-17). База вопросов с собеседований импортирована (244 сырых → 105 вопросов
-своими словами), вкладка Interview с SM-2, самооценка во вкладке «Вопросы», ссылки из конспектов. Следующая:
-Фаза 8 — финальный проект (конфигурируемая модель + реальные веса).
+Фаза 8 — **в процессе** (2026-10-17). Ядро, конфиги, задачи C24/C25, CLI и тесты готовы и закоммичены.
 
 ## Следующий шаг (точный)
-Запустить Фазу 8 по промпту «Фаза 8» из `docs/PROMPTS.md` (PLAN.md → «Фаза 8»): `llmlab/core/model.py` — модель
-из YAML через реестр компонентов (norm, позиции, attention, ffn/moe, расписание слоёв local/global/linear),
-конфиги gpt2 / llama-like / gemma3-like / qwen3-0.6b / …, загрузка реальных весов (`@pytest.mark.weights`).
-Учесть долги прошлых фаз: RMSNorm (1 + w) у Gemma и Qwen3-Next, разные θ RoPE для local/global Gemma 3, MoE-экспертов
-Mixtral в формате 3D-тензоров HF, conv1d / выходной гейт / 32:16 головы у Gated DeltaNet, KV-cache у GatedAttention.
+Закончить Фазу 8: (1) README.md — раздел «Финальный проект» (`uv sync --extra weights`, `llmlab model`,
+`llmlab generate qwen3-0.6b "…" --chat`, `llmlab test C25-qwen3-project --weights`); (2) `docs/MODEL.md` — схема
+YAML-конфига и как добавить компонент в реестр; `docs/TASK_FORMAT.md` — флаг `--weights`; (3) сквозная проверка
+конспекта C25 в копии репо (`llmlab notes build C25-qwen3-project --insight …`, ячейки строки qwen3);
+(4) `llmlab validate --all`, `pytest tests/`; (5) PROGRESS: блок «Фаза 8» в «Сделано», решения, журнал; коммит, отчёт.
 
 ## Сделано
 **Фаза 0:**
@@ -346,6 +344,15 @@ Mixtral в формате 3D-тензоров HF, conv1d / выходной ге
 - Визуальную проверку UI в 5a не делал (новых viz нет); README отдаются API, KaTeX проверен скриптом.
 
 ## Решения (почему сделано так, а не иначе)
+- **Фаза 8 (черновые записи):** одна общая `Attention` в `core/model.py` из функций эталонов (rope, partial rope,
+  repeat_kv, KVCache, RingKVCache) вместо обёрток над 6 классами — у Qwen3 head_dim ≠ d/H, нужны сочетания идей; её
+  частные случаи сверяются с LlamaAttention/QKNorm/SWA/NoPE/GatedAttention/блоками C08 в `tests/test_core_model.py`.
+  MLA, Gated DeltaNet, MoE, FFN — классы эталонов. Имена параметров = HF без `model.`. Задача-проект разбита на
+  C24 (config.json + имена весов, вкл. GPT-2 Conv1D) и C25 (safetensors-шарды, meta-загрузка, сэмплирование,
+  генерация, сверка с transformers). Бонус — GPT-2 и SmolLM2-135M одной `load_pretrained`. Поддержан формат
+  config.json transformers 5.x (`rope_parameters`). Допуск логитов 1e-3 в fp32 (факт 6e-5 на Qwen3-0.6B).
+  Новая строка таблицы архитектур `qwen3` (открывает C25). Weights-тесты: флаг `--weights`/`LLMLAB_WEIGHTS=1`.
+
 - **pytest-плагин в пакете** (`llmlab/pytest_plugin.py`), а корневой `conftest.py` только
   подключает его: раннер передаёт `-p llmlab.pytest_plugin` явно и работает в любом корне
   (в т.ч. во временном курсе в тестах платформы), ручной `pytest content/...` тоже работает.
