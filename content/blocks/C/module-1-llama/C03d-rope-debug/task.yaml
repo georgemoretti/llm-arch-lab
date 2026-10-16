@@ -1,0 +1,16 @@
+id: C03d-rope-debug
+title: "Отладка: после RoPE «плывёт» норма и score зависит от абсолютной позиции"
+block: C
+module: module-1-llama
+type: debug
+difficulty: medium
+depends_on: [C03-rope]
+diff_from: C03-rope
+tags: [positional-encoding, rope, debug]
+entrypoint: [rope_inv_freq, rope_cos_sin, rotate_half, apply_rope]
+time_estimate_min: 20
+papers: [roformer]
+reading:
+  - title: "Hugging Face transformers: modeling_llama.py (rotate_half, apply_rotary_pos_emb)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/llama/modeling_llama.py
+questions: [rope-relative-*]
