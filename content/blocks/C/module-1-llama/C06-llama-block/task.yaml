@@ -1,0 +1,25 @@
+id: C06-llama-block
+title: Собрать блок и модель Llama
+block: C
+module: module-1-llama
+type: implement
+difficulty: medium
+depends_on: [C01-rmsnorm, C02-swiglu, C05-kv-cache]
+diff_from: gpt2-baseline
+tags: [architecture, llama, pre-norm, kv-cache]
+entrypoint: [LlamaConfig, LlamaBlock, LlamaModel, generate]
+time_estimate_min: 40
+papers: [llama, llama2, llama3]
+reading:
+  - title: "The Big LLM Architecture Comparison (Sebastian Raschka)"
+    url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
+  - title: "Hugging Face transformers: modeling_llama.py (LlamaDecoderLayer, LlamaModel)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/llama/modeling_llama.py
+  - title: "rasbt/LLMs-from-scratch: конвертация GPT в Llama (ноутбуки ch05/07_gpt_to_llama)"
+    url: https://github.com/rasbt/LLMs-from-scratch/tree/main/ch05/07_gpt_to_llama
+questions: [llama-block-*]
+# Источник: config.json Llama 3 8B (meta-llama/Meta-Llama-3-8B; сверено по открытому зеркалу
+# NousResearch/Meta-Llama-3-8B): num_local_experts отсутствует — dense-модель; tie_word_embeddings = false.
+arch:
+  llama-3:
+    moe: "нет — dense: каждый токен проходит через один и тот же SwiGLU-FFN"
