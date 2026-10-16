@@ -1,0 +1,22 @@
+id: C16-mla
+title: "MLA: латентный KV-cache и поглощение весов"
+block: C
+module: module-3-moe
+type: implement
+difficulty: hard
+depends_on: [C05-kv-cache]
+diff_from: C05-kv-cache
+tags: [attention, mla, kv-cache, low-rank, deepseek, inference]
+entrypoint: [LatentCache, MLAttention]
+time_estimate_min: 50
+papers: [deepseek-v2, deepseek-v3]
+reading:
+  - title: "The Big LLM Architecture Comparison (Sebastian Raschka) — MLA в DeepSeek-V3"
+    url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
+  - title: "Hugging Face transformers: modeling_deepseek_v3.py (DeepseekV3Attention)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/deepseek_v3/modeling_deepseek_v3.py
+viz: [kv-cache]
+questions: [mla-*]
+# Источник: deepseek-ai/DeepSeek-V3 config.json: num_attention_heads 128, kv_lora_rank 512,
+# qk_nope_head_dim 128, qk_rope_head_dim 64, v_head_dim 128, q_lora_rank 1536;
+# deepseek-ai/DeepSeek-V2-Lite: 16 голов, kv_lora_rank 512, q_lora_rank null (запрос без сжатия).

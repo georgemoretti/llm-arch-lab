@@ -1,0 +1,17 @@
+id: C16d-mla-debug
+title: "Отладка: MLA генерирует правильно, но памяти ест как MHA"
+block: C
+module: module-3-moe
+type: debug
+difficulty: medium
+depends_on: [C16-mla]
+diff_from: C16-mla
+tags: [attention, mla, kv-cache, memory, debug]
+entrypoint: [LatentCache, MLAttention]
+time_estimate_min: 15
+papers: [deepseek-v2]
+reading:
+  - title: "Hugging Face transformers: modeling_deepseek_v3.py (кеш пишется, пока латент ещё сжат)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/deepseek_v3/modeling_deepseek_v3.py
+viz: [kv-cache]
+questions: [mla-cache-*]
