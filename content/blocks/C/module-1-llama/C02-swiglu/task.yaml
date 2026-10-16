@@ -1,0 +1,23 @@
+id: C02-swiglu
+title: SwiGLU FFN (вместо GELU-MLP)
+block: C
+module: module-1-llama
+type: implement
+difficulty: easy
+depends_on: [C01-rmsnorm]
+diff_from: gpt2-baseline
+tags: [ffn, swiglu, activation, llama]
+entrypoint: [silu, llama_ffn_hidden_dim, SwiGLUFFN]
+time_estimate_min: 25
+papers: [glu-variants, llama]
+reading:
+  - title: "The Big LLM Architecture Comparison (Sebastian Raschka)"
+    url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
+  - title: "Hugging Face transformers: modeling_llama.py (LlamaMLP)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/llama/modeling_llama.py
+questions: [swiglu-*]
+# Источник: config.json Llama 3 8B (meta-llama/Meta-Llama-3-8B; сверено по открытому зеркалу
+# NousResearch/Meta-Llama-3-8B): hidden_size = 4096, intermediate_size = 14336, hidden_act = silu.
+arch:
+  llama-3:
+    ffn: "SwiGLU без bias, скрытый слой 14 336 = 3.5·d"

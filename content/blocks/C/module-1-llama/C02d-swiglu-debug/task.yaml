@@ -1,0 +1,16 @@
+id: C02d-swiglu-debug
+title: "Отладка: FFN с весами Llama даёт не те числа"
+block: C
+module: module-1-llama
+type: debug
+difficulty: easy
+depends_on: [C02-swiglu]
+diff_from: C02-swiglu
+tags: [ffn, swiglu, debug]
+entrypoint: [silu, llama_ffn_hidden_dim, SwiGLUFFN]
+time_estimate_min: 15
+papers: [glu-variants]
+reading:
+  - title: "Hugging Face transformers: modeling_llama.py (LlamaMLP)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/llama/modeling_llama.py
+questions: [swiglu-formula-*]
