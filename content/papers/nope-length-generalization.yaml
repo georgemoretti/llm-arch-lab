@@ -1,0 +1,7 @@
+id: nope-length-generalization
+title: "The Impact of Positional Encoding on Length Generalization in Transformers"
+authors: "Kazemnejad, Padhi, Natesan Ramamurthy, Das, Reddy"
+year: 2023
+venue: NeurIPS 2023
+url: https://arxiv.org/abs/2305.19466
+tags: [positional-encoding, nope, length-generalization]

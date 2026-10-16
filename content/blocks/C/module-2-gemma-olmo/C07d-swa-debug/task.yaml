@@ -1,0 +1,17 @@
+id: C07d-swa-debug
+title: "Отладка: sliding window пропускает лишний токен"
+block: C
+module: module-2-gemma-olmo
+type: debug
+difficulty: easy
+depends_on: [C07-swa]
+diff_from: C07-swa
+tags: [attention, sliding-window, mask, debug]
+entrypoint: [sliding_window_mask, layer_types, SlidingWindowAttention]
+time_estimate_min: 15
+papers: [mistral-7b]
+reading:
+  - title: "Hugging Face transformers: masking_utils.py (sliding_window_overlay)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/masking_utils.py
+viz: [masks]
+questions: [swa-window-*]

@@ -1,0 +1,7 @@
+id: layernorm-placement
+title: "On Layer Normalization in the Transformer Architecture"
+authors: "Xiong, Yang, He, Zheng, Zheng, Xing, Zhang, Lan, Wang, Liu"
+year: 2020
+venue: ICML 2020
+url: https://arxiv.org/abs/2002.04745
+tags: [normalization, pre-norm, post-norm, training-stability]

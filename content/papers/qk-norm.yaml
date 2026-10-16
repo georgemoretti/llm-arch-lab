@@ -1,0 +1,7 @@
+id: qk-norm
+title: "Query-Key Normalization for Transformers"
+authors: "Henry, Dachapally, Pawar, Chen"
+year: 2020
+venue: Findings of EMNLP 2020
+url: https://arxiv.org/abs/2010.04245
+tags: [normalization, qk-norm, attention]

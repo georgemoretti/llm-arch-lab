@@ -1,0 +1,7 @@
+id: mistral-7b
+title: "Mistral 7B"
+authors: "Jiang, Sablayrolles, Mensch, Bamford, Chaplot, de las Casas, et al."
+year: 2023
+venue: arXiv
+url: https://arxiv.org/abs/2310.06825
+tags: [attention, sliding-window, gqa, kv-cache]

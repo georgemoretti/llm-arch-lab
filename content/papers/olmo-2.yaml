@@ -1,0 +1,7 @@
+id: olmo-2
+title: "2 OLMo 2 Furious"
+authors: "Team OLMo (Allen Institute for AI)"
+year: 2024
+venue: arXiv
+url: https://arxiv.org/abs/2501.00656
+tags: [architecture, normalization, qk-norm, training-stability]

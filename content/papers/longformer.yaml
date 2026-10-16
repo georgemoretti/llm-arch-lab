@@ -1,0 +1,7 @@
+id: longformer
+title: "Longformer: The Long-Document Transformer"
+authors: "Beltagy, Peters, Cohan"
+year: 2020
+venue: arXiv
+url: https://arxiv.org/abs/2004.05150
+tags: [attention, sliding-window, long-context]

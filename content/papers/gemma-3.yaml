@@ -1,0 +1,7 @@
+id: gemma-3
+title: "Gemma 3 Technical Report"
+authors: "Gemma Team, Google DeepMind"
+year: 2025
+venue: arXiv
+url: https://arxiv.org/abs/2503.19786
+tags: [architecture, sliding-window, local-global, qk-norm, normalization]

@@ -1,0 +1,7 @@
+id: gemma-2
+title: "Gemma 2: Improving Open Language Models at a Practical Size"
+authors: "Gemma Team, Google DeepMind"
+year: 2024
+venue: arXiv
+url: https://arxiv.org/abs/2408.00118
+tags: [architecture, sliding-window, local-global, normalization]

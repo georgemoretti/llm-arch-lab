@@ -1,0 +1,5 @@
+id: masks
+title: "Маски внимания: causal, sliding window, local:global по слоям"
+description: >
+  Интерактивные матрицы масок: обычная causal-маска, скользящее окно (слайдер W), расписание
+  sliding/full по слоям (Gemma 2 / Gemma 3) и рост поля зрения при наложении нескольких SWA-слоёв.

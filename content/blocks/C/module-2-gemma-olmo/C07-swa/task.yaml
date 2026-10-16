@@ -1,0 +1,29 @@
+id: C07-swa
+title: Sliding window attention и паттерн local:global
+block: C
+module: module-2-gemma-olmo
+type: implement
+difficulty: medium
+depends_on: [C05-kv-cache]
+diff_from: C05-kv-cache
+tags: [attention, sliding-window, local-global, gemma, mask]
+entrypoint: [sliding_window_mask, layer_types, SlidingWindowAttention]
+time_estimate_min: 40
+papers: [longformer, mistral-7b, gemma-2, gemma-3]
+reading:
+  - title: "The Big LLM Architecture Comparison (Sebastian Raschka) — раздел о Gemma 3 и sliding window"
+    url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
+  - title: "Hugging Face transformers: configuration_gemma3.py (layer_types из sliding_window_pattern)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/gemma3/configuration_gemma3.py
+  - title: "Hugging Face transformers: masking_utils.py (sliding_window_overlay)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/masking_utils.py
+viz: [masks, kv-cache]
+questions: [swa-*, local-global-*]
+# Источник: google/gemma-3-27b-pt config.json, text_config (сверено по открытому зеркалу
+# unsloth/gemma-3-27b-pt): num_hidden_layers = 62, num_attention_heads = 32, num_key_value_heads = 16,
+# head_dim = 128, sliding_window = 1024, sliding_window_pattern = 6, rope_theta = 1 000 000,
+# rope_local_base_freq = 10 000. Правило «слой i full ⇔ (i+1) % 6 == 0» — configuration_gemma3.py.
+arch:
+  gemma-3:
+    attention: "GQA (27B: 32 / 16 голов) + SWA: окно 1024 токена, 5 sliding : 1 full (каждый 6-й слой)"
+    position: "RoPE: θ = 10 000 на sliding-слоях, θ = 1 000 000 на full-слоях"
