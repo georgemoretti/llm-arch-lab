@@ -232,7 +232,7 @@ def next_batch(course: Course, size: int = 50, root: Path | None = None) -> list
     return import_status(course, root).remaining[:size]
 
 
-def verbatim_matches(course: Course, root: Path | None = None, threshold: float = 0.9) -> list[dict]:
+def verbatim_matches(course: Course, root: Path | None = None, threshold: float = 0.8) -> list[dict]:
     """Вопросы user-db, текст которых почти совпадает с сырым (нарушение правила «своими словами»)."""
     raw = {q.ref: q for q in load_raw(root)}
     hits = []
