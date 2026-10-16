@@ -1,0 +1,12 @@
+id: C-Q4-efficient-quiz
+title: "Квиз модуля: эффективное внимание и гибриды"
+block: C
+module: module-4-efficient
+type: quiz
+difficulty: medium
+depends_on: [C22-hybrid-stack]
+diff_from: C06-llama-block
+tags: [quiz, sparse-attention, linear-attention, hybrid, ssm, interview]
+time_estimate_min: 35
+papers: []
+questions: [sparse-*, gated-attn-*, partial-rope-*, linear-attn-*, deltanet-*, hybrid-*, ssm-*]

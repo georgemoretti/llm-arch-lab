@@ -1,0 +1,17 @@
+id: C-P4-efficient-attention
+title: "Статьи: Transformers are RNNs, Gated DeltaNet, Gated Attention, Mamba-2, DeepSeek-V3.2 (DSA)"
+block: C
+module: module-4-efficient
+type: paper
+difficulty: hard
+depends_on: [C18-sparse-attention, C19-gated-attention, C21-gated-deltanet, C22-hybrid-stack]
+diff_from: null
+tags: [paper, linear-attention, delta-rule, gating, ssm, sparse-attention, hybrid]
+time_estimate_min: 90
+papers: [transformers-are-rnns, deltanet, gated-deltanet, gated-attention, mamba-2, deepseek-v32]
+reading:
+  - title: "The Big LLM Architecture Comparison (Sebastian Raschka) — Qwen3-Next, гибриды"
+    url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
+  - title: "Songlin Yang — DeltaNet Explained (серия заметок)"
+    url: https://sustcsonglin.github.io/blog/2024/deltanet-1/
+questions: [paper-linrnn-*, paper-gdn-*, paper-gattn-*, paper-mamba2-*, paper-dsa-*]
