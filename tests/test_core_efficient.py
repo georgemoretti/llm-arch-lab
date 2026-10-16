@@ -1,4 +1,4 @@
-"""llmlab/core/efficient.py совпадает с эталонами задач C18, C19, C20 (страховка от расхождения копий)."""
+"""llmlab/core/efficient.py совпадает с эталонами задач C18–C21 (страховка от расхождения копий)."""
 
 from __future__ import annotations
 
@@ -53,3 +53,15 @@ def test_linear_attention_matches_c20():
     assert_close(oa, ob)
     assert_close(sa, sb)
     assert_close(za, zb)
+
+
+def test_gated_deltanet_matches_c21():
+    sol = _solution("C21-gated-deltanet")
+    torch.manual_seed(0)
+    a, b = core.GatedDeltaNet(32, 2, 8, 6), sol.GatedDeltaNet(32, 2, 8, 6)
+    b.load_state_dict(a.state_dict())
+    x = torch.randn(2, 9, 32)
+    with torch.no_grad():
+        (ya, sa), (yb, sb) = a(x), b(x)
+    assert_close(ya, yb)
+    assert_close(sa, sb)

@@ -1,0 +1,28 @@
+id: C22-hybrid-stack
+title: "Гибридный стек 3 : 1: Gated DeltaNet + gated attention, память кеша"
+block: C
+module: module-4-efficient
+type: implement
+difficulty: medium
+depends_on: [C19-gated-attention, C21-gated-deltanet]
+diff_from: C11-swa-kv-cache
+tags: [hybrid, linear-attention, kv-cache, memory, qwen, inference]
+entrypoint: [hybrid_layer_types, HybridBlock, HybridStack, hybrid_cache_bytes]
+time_estimate_min: 30
+papers: [gated-deltanet]
+reading:
+  - title: "Hugging Face transformers: configuration_qwen3_next.py (layer_types из full_attention_interval)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/qwen3_next/configuration_qwen3_next.py
+  - title: "The Big LLM Architecture Comparison (Sebastian Raschka) — Qwen3-Next"
+    url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
+viz: [hybrid]
+questions: [hybrid-*]
+# Источник: Qwen/Qwen3-Next-80B-A3B-Instruct config.json: num_hidden_layers 48, full_attention_interval 4,
+# num_key_value_heads 2, head_dim 256, linear_num_value_heads 32, linear_key_head_dim 128, linear_value_head_dim 128.
+# Правило layer_types: (i + 1) % interval → linear, иначе full — configuration_qwen3_next.py.
+# Gemma 3 27B (google/gemma-3-27b-pt config.json): 62 слоя, sliding_window 1024, sliding_window_pattern 6.
+# Llama 3 8B (meta-llama/Meta-Llama-3-8B config.json): 32 слоя, все full.
+arch:
+  qwen3-next: {layers: "48 слоёв: 36 Gated DeltaNet + 12 gated attention (каждый 4-й), 3 : 1"}
+  gemma-3: {layers: "62 слоя: 5 sliding (окно 1024) : 1 full"}
+  llama-3: {layers: "32 одинаковых слоя, все full attention"}

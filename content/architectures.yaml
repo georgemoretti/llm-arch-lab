@@ -8,6 +8,7 @@ columns:
   - {id: attention, title: "Attention"}
   - {id: ffn, title: "FFN"}
   - {id: moe, title: "MoE"}
+  - {id: layers, title: "Чередование слоёв"}
 models:
   - id: gpt2
     title: GPT-2

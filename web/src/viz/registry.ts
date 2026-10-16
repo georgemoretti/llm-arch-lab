@@ -4,6 +4,7 @@
 // затем `:::viz <id>:::` в README задачи и/или `viz: [<id>]` в task.yaml.
 import type { ComponentType } from "react";
 import CausalMask from "./CausalMask";
+import Hybrid from "./Hybrid";
 import KvCache from "./KvCache";
 import Masks from "./Masks";
 import MoeRouting from "./MoeRouting";
@@ -11,6 +12,7 @@ import RopeRotation from "./RopeRotation";
 
 export const VIZ_REGISTRY: Record<string, ComponentType> = {
   "causal-mask": CausalMask,
+  "hybrid": Hybrid,
   "kv-cache": KvCache,
   "masks": Masks,
   "moe-routing": MoeRouting,
