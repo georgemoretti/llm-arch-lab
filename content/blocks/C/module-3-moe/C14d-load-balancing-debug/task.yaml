@@ -1,0 +1,16 @@
+id: C14d-load-balancing-debug
+title: "Отладка: bias-балансировка делает перекос только хуже"
+block: C
+module: module-3-moe
+type: debug
+difficulty: easy
+depends_on: [C14-load-balancing]
+diff_from: C14-load-balancing
+tags: [moe, load-balancing, router-bias, debug]
+entrypoint: [expert_load, load_balancing_loss, route_with_bias, update_bias]
+time_estimate_min: 15
+papers: [aux-loss-free]
+reading:
+  - title: "Auxiliary-Loss-Free Load Balancing Strategy for Mixture-of-Experts (arXiv:2408.15664)"
+    url: https://arxiv.org/abs/2408.15664
+questions: [load-balance-bias-*]
