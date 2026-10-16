@@ -56,6 +56,17 @@ export interface VizInfo {
   description: string;
 }
 
+export interface Question {
+  id: string;
+  topic: string;
+  difficulty: "easy" | "medium" | "hard";
+  kind: "open" | "mcq" | "code-reading";
+  question: string;
+  answer: string;
+  options: string[];
+  correct: number | null;
+}
+
 export interface TaskDetail extends TaskSummary {
   entrypoints: string[];
   readme: string;
@@ -63,6 +74,7 @@ export interface TaskDetail extends TaskSummary {
   reading: { title: string; url: string }[];
   papers: { id: string; title: string; authors: string; year: number; url: string; venue: string | null }[];
   viz: VizInfo[];
+  questions: Question[];
   diff_from_info: { id: string; title: string; kind: "task" | "baseline"; description?: string } | null;
   dependents: string[];
   diff_unlocked: boolean;

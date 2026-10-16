@@ -7,8 +7,9 @@ import { CodeEditor, DiffView, type CodeEditorHandle, type ErrorMark } from "./C
 import { Markdown, VizBlock } from "./Markdown";
 import { DIFFICULTY_LABEL, StatusIcon, TYPE_LABEL } from "./StatusIcon";
 import { TestResults } from "./TestResults";
+import { Questions } from "./Questions";
 
-type Tab = "readme" | "hints" | "reading" | "viz" | "attempts";
+type Tab = "readme" | "hints" | "reading" | "viz" | "questions" | "attempts";
 type SaveState = "saved" | "dirty" | "saving" | "conflict" | "error";
 
 const AUTOSAVE_MS = 700;
@@ -130,6 +131,7 @@ function LeftPane(props: { task: TaskDetail; tab: Tab; setTab(t: Tab): void; att
     ["hints", "Подсказки", task.hints.length],
     ["reading", "Чтение", task.reading.length + task.papers.length],
     ["viz", "Визуализация", task.viz.length],
+    ["questions", "Вопросы", task.questions.length],
   ];
   if (task.has_code) tabs.push(["attempts", "Попытки", attempts.length]);
 
@@ -158,6 +160,7 @@ function LeftPane(props: { task: TaskDetail; tab: Tab; setTab(t: Tab): void; att
           ) : (
             <p className="muted">У этой задачи пока нет визуализаций.</p>
           ))}
+        {tab === "questions" && <Questions questions={task.questions} />}
         {tab === "attempts" && <Attempts attempts={attempts} />}
       </div>
     </div>

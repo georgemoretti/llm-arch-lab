@@ -35,6 +35,15 @@ def test_task_detail(client):
     assert client.get("/api/tasks/nope").status_code == 404
 
 
+def test_task_detail_includes_questions(client, toy_root):
+    (toy_root / "content" / "questions" / "q.yaml").write_text(
+        "- {id: q-01, topic: t, tasks: [Z01-add], kind: mcq, question: '?', answer: a, options: [a, b], correct: 0}\n",
+        encoding="utf-8")
+    qs = client.get("/api/tasks/Z01-add").json()["questions"]
+    assert [(q["id"], q["kind"], q["correct"]) for q in qs] == [("q-01", "mcq", 0)]
+    assert client.get("/api/tasks/Z02-more").json()["questions"] == []
+
+
 def test_code_roundtrip_conflict_and_reset(client, toy_root):
     first = client.get("/api/tasks/Z01-add/code").json()
     assert "NotImplementedError" in first["code"]

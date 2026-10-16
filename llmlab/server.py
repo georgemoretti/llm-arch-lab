@@ -216,6 +216,7 @@ def create_app(root: Path | None = None) -> FastAPI:
             "reading": [r.model_dump() for r in task.reading],
             "papers": [c.papers[p].model_dump() for p in task.papers if p in c.papers],
             "viz": [c.viz[v].model_dump() for v in task.viz if v in c.viz],
+            "questions": [q.model_dump() for q in c.questions_for(task)],
             "diff_from_info": diff_from,
             "dependents": [t.id for t in c.tasks.values() if task.id in t.depends_on],
             "diff_unlocked": unlocked,

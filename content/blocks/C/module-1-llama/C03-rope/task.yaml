@@ -17,6 +17,7 @@ reading:
     url: https://blog.eleuther.ai/rotary-embeddings/
   - title: "Hugging Face transformers: modeling_llama.py (rotate_half, apply_rotary_pos_emb)"
     url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/llama/modeling_llama.py
+viz: [rope-rotation]
 questions: [rope-*]
 # Источник: config.json Llama 3 8B (meta-llama/Meta-Llama-3-8B; сверено по открытому зеркалу
 # NousResearch/Meta-Llama-3-8B): rope_theta = 500000.0, rope_scaling = null, max_position_embeddings = 8192.

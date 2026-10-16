@@ -245,7 +245,11 @@ def _render_questions(course: Course, task: Task) -> str:
     out = []
     for q in qs:
         title = " ".join(q.question.split())
-        out.append(f"> [!question]- {title}\n" + _quote(q.answer.strip()) + f"\n>\n> `{q.id}` · {q.difficulty}")
+        body = q.answer.strip()
+        if q.kind == "mcq":
+            opts = "\n".join(f"- {'✅ ' if i == q.correct else ''}{o}" for i, o in enumerate(q.options))
+            body = f"{opts}\n\n{body}"
+        out.append(f"> [!question]- {title}\n" + _quote(body) + f"\n>\n> `{q.id}` · {q.difficulty}")
     return "\n\n".join(out)
 
 
