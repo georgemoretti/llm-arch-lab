@@ -71,7 +71,7 @@ export default function Hybrid() {
 
   const series: Series[] = [
     { id: "full", label: "все full", color: "var(--series-2)", ys: CTX.map((s) => memAllFull(s) / 2 ** 30) },
-    { id: "swa", label: `SWA 5:1 (W=${W})`, color: "var(--series-1)", ys: CTX.map((s) => memSwa(s, W) / 2 ** 30) },
+    { id: "swa", label: "SWA 5:1", color: "var(--series-1)", ys: CTX.map((s) => memSwa(s, W) / 2 ** 30) },
     { id: "hybrid", label: "гибрид 3:1", color: "var(--series-3)", ys: CTX.map((s) => memHybrid(s) / 2 ** 30) },
   ];
 
