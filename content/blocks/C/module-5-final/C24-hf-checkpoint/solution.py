@@ -30,6 +30,10 @@ def config_from_hf(hf: dict) -> ModelConfig:
         raise ValueError(f"model_type = {model_type!r} не поддерживается: есть qwen3, llama, gpt2")
     _reject(hf, "hidden_act", lambda v: v == "silu", "FFN курса для Llama/Qwen3 — SwiGLU (silu)")
     _reject(hf, "rope_scaling", lambda v: v is None, "масштабирование RoPE (YaRN, llama3) в курсе не реализовано")
+    # transformers ≥ 5 пишет RoPE иначе: "rope_parameters": {"rope_theta": …, "rope_type": "default" | "yarn" | …}
+    rope = hf.get("rope_parameters") or {}
+    _reject(rope, "rope_type", lambda v: v in (None, "default"), "масштабирование RoPE в курсе не реализовано")
+    theta = rope.get("rope_theta", hf.get("rope_theta", 10000.0))
     _reject(hf, "attention_bias", lambda v: not v, "bias у q/k/v/o в Llama/Qwen3 не используется")
     _reject(hf, "mlp_bias", lambda v: not v, "bias в SwiGLU не используется")
     _reject(hf, "use_sliding_window", lambda v: not v, "у Qwen3 dense окно выключено; SWA — см. gemma3-like")
@@ -39,7 +43,7 @@ def config_from_hf(hf: dict) -> ModelConfig:
         "vocab_size": hf["vocab_size"], "d_model": hf["hidden_size"], "n_layers": hf["num_hidden_layers"],
         "tie_embeddings": hf.get("tie_word_embeddings", False),
         "norm": {"type": "rmsnorm", "eps": hf["rms_norm_eps"], "placement": "pre"},
-        "position": {"type": "rope", "theta": hf.get("rope_theta", 10000.0)},
+        "position": {"type": "rope", "theta": theta},
         "attention": {
             "type": "gqa", "n_heads": H, "n_kv_heads": hf.get("num_key_value_heads") or H,
             "head_dim": hf.get("head_dim") or hf["hidden_size"] // H,

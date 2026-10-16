@@ -22,7 +22,8 @@ def config_from_hf(hf: dict) -> ModelConfig:
     # TODO 2 (qwen3, llama): hidden_size, num_hidden_layers, num_attention_heads, num_key_value_heads,
     #   head_dim (если есть — у Qwen3 он НЕ равен hidden_size / heads!), intermediate_size, rms_norm_eps,
     #   rope_theta, tie_word_embeddings. У Qwen3 — QK-Norm по голове.
-    # TODO 3: ValueError для rope_scaling ≠ None, use_sliding_window, attention_bias / mlp_bias,
+    #   Внимание: transformers ≥ 5 пишет θ в "rope_parameters": {"rope_theta": …, "rope_type": …} — поддержи оба.
+    # TODO 3: ValueError для rope_scaling ≠ None (или rope_parameters.rope_type ≠ "default"), use_sliding_window, attention_bias / mlp_bias,
     #   hidden_act ≠ silu, других model_type. Тихо проигнорировать такую опцию — значит получить модель,
     #   которая грузится без ошибок и выдаёт мусор.
     # Подсказка: ModelConfig.model_validate({...вложенные dict как в YAML...}).

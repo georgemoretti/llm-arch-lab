@@ -38,12 +38,17 @@ Qwen3 и Llama (`model_type: qwen3 | llama`):
 | `head_dim` (если есть, иначе `hidden_size / heads`) | `attention.head_dim` | |
 | `intermediate_size` | `ffn.d_hidden` (`type: swiglu`) | C02 |
 | `rms_norm_eps` | `norm.eps` (`rmsnorm`, `pre`) | C01, C08 |
-| `rope_theta` | `position.theta` (`rope`) | C03 |
+| `rope_theta` или `rope_parameters.rope_theta` | `position.theta` (`rope`) | C03 |
 | `tie_word_embeddings` | `tie_embeddings` | |
 | `model_type == "qwen3"` | `attention.qk_norm: head` | C09, `modeling_qwen3.py` |
 
 GPT-2 (`model_type: gpt2`): `n_embd`, `n_layer`, `n_head`, `n_positions` (→ обучаемые позиции),
 `layer_norm_epsilon` (→ `layernorm`), bias у attention и FFN, `gelu` с расширением ×4, выход связан с `wte`.
+
+Формат `config.json` меняется между версиями `transformers`: файлы, сохранённые версией 5.x, хранят RoPE как
+`"rope_parameters": {"rope_theta": 1000000.0, "rope_type": "default"}`, а поля `rope_theta` в них нет.
+Если взять «θ по умолчанию» (10 000), модель загрузится без единой ошибки и будет считать позиции не так, как
+при обучении, — поддержи оба формата.
 
 Если в конфиге есть то, чего наша модель не умеет (`rope_scaling` — YaRN/«llama3», включённое окно,
 bias в Llama/Qwen, другая активация), — **ValueError**. Молча проигнорированная опция = модель с правильными
@@ -102,7 +107,8 @@ wte / wpe / ln_f / h.{i}.ln_1 / ln_2                    → embed_tokens / embed
 ## Критерии готовности
 
 - config.json Qwen3-0.6B, SmolLM2-135M и GPT-2 дают те же конфиги, что в `llmlab/configs/`;
-- `rope_scaling`, окно, bias, чужая активация, чужой `model_type` → `ValueError`;
+- формат transformers 5.x (`rope_parameters`) понимается так же, как старый;
+- `rope_scaling` / `rope_type ≠ default`, окно, bias, чужая активация, чужой `model_type` → `ValueError`;
 - после конвертации «чекпойнта» Qwen3, Llama (без связи, с мусорными `inv_freq`) и GPT-2 модель даёт
   **те же логиты**, что исходная; все тензоры — `float32`;
 - если установлен `transformers` (`uv sync --extra weights`): веса настоящих `Qwen3ForCausalLM` и

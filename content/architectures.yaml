@@ -50,3 +50,8 @@ models:
     year: 2025
     module: module-4-efficient
     source: https://huggingface.co/Qwen/Qwen3-Next-80B-A3B-Instruct/blob/main/config.json
+  - id: qwen3
+    title: Qwen3 (0.6B) — моя модель
+    year: 2025
+    module: module-5-final
+    source: https://huggingface.co/Qwen/Qwen3-0.6B/blob/main/config.json

@@ -1,0 +1,33 @@
+id: C25-qwen3-project
+title: "Проект: Qwen3-0.6B на своих деталях — загрузка весов и генерация"
+block: C
+module: module-5-final
+type: project
+difficulty: hard
+depends_on: [C24-hf-checkpoint, C05-kv-cache]
+diff_from: C24-hf-checkpoint
+tags: [project, weights, safetensors, sampling, generation, kv-cache, qwen]
+entrypoint: [load_safetensors, load_pretrained, sample_next, generate]
+time_estimate_min: 55
+papers: [qwen3]
+reading:
+  - title: "Qwen/Qwen3-0.6B: карточка модели и файлы"
+    url: https://huggingface.co/Qwen/Qwen3-0.6B
+  - title: "safetensors: формат и API (load_file, safe_open)"
+    url: https://huggingface.co/docs/safetensors/index
+  - title: "The Curious Case of Neural Text Degeneration (Holtzman et al., 2019) — nucleus sampling"
+    url: https://arxiv.org/abs/1904.09751
+  - title: "rasbt/LLMs-from-scratch: Qwen3 с нуля (ch05/11_qwen3)"
+    url: https://github.com/rasbt/LLMs-from-scratch/tree/main/ch05/11_qwen3
+questions: [final-load-*, final-sampling-*, iv-generation-01, iv-generation-02, iv-generation-03, iv-generation-04]
+# Источник: Qwen/Qwen3-0.6B (config.json, model.safetensors, сверено 2026-10-17): 596 049 920 параметров
+# (посчитано по весам и совпадает с transformers), bf16, один файл ~1.5 ГБ, lm_head.weight == embed_tokens.weight.
+# Расхождение логитов с transformers 5.x (fp32, eager attention) на промпте из теста: max |Δ| ≈ 6e-5 при |logit| ≤ 21.
+arch:
+  qwen3:
+    norm: "RMSNorm (ε = 1e-6), Pre-Norm + QK-Norm по голове (q_norm, k_norm размера head_dim)"
+    position: "RoPE, θ = 1 000 000, без масштабирования"
+    attention: "GQA 16 / 8 голов, head_dim = 128 ≠ d_model / H = 64"
+    ffn: "SwiGLU, 1024 → 3072 → 1024"
+    moe: "нет — dense (MoE — у Qwen3-30B-A3B и 235B-A22B)"
+    layers: "28 одинаковых слоёв, все full attention"

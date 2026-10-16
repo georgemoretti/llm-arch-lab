@@ -114,6 +114,21 @@ def test_config_qwen3(impl):
     _check_config(impl, QWEN3_06B, "qwen3-0.6b")
 
 
+def test_config_transformers_v5_rope(impl):
+    """config_from_hf: формат transformers ≥ 5 — θ лежит в rope_parameters, а не в rope_theta"""
+    v5 = {k: v for k, v in QWEN3_06B.items() if k not in ("rope_theta", "rope_scaling")}
+    v5["rope_parameters"] = {"rope_theta": 1000000.0, "rope_type": "default"}   # так пишет save_pretrained в 5.x
+    got = impl.config_from_hf(v5)
+    if got.position.theta != 1e6:
+        pytest.fail(f"position.theta = {got.position.theta}, нужно 1e6. Новые версии transformers сохраняют RoPE как "
+                    "\"rope_parameters\": {\"rope_theta\": …, \"rope_type\": …}; поля rope_theta нет. С θ = 10 000 по "
+                    "умолчанию модель загрузится без ошибок, но позиции будут закодированы не так, как при обучении.",
+                    pytrace=False)
+    yarn = {**v5, "rope_parameters": {"rope_theta": 1000000.0, "rope_type": "yarn", "factor": 4.0}}
+    with pytest.raises(ValueError):
+        impl.config_from_hf(yarn)
+
+
 def test_config_llama_and_gpt2(impl):
     """config_from_hf: SmolLM2-135M (llama, без head_dim в config.json) и GPT-2 (свои имена полей)"""
     _check_config(impl, SMOLLM2_135M, "smollm2-135m")
