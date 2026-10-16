@@ -36,7 +36,7 @@ class LatentCache:
         raise NotImplementedError("LatentCache.update")
 
 
-def _causal_mask(T: int, S: int, device) -> torch.Tensor:
+def causal_mask(T: int, S: int, device) -> torch.Tensor:
     return torch.ones(T, S, dtype=torch.bool, device=device).tril(diagonal=S - T)
 
 

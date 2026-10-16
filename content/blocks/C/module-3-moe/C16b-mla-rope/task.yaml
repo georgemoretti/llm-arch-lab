@@ -1,0 +1,26 @@
+id: C16b-mla-rope
+title: "MLA с decoupled RoPE и размер его кеша"
+block: C
+module: module-3-moe
+type: implement
+difficulty: hard
+depends_on: [C16-mla, C03-rope]
+diff_from: C16-mla
+tags: [attention, mla, rope, kv-cache, deepseek]
+entrypoint: [MLARopeAttention, mla_kv_cache_bytes]
+time_estimate_min: 45
+papers: [deepseek-v2, deepseek-v3]
+reading:
+  - title: "Hugging Face transformers: modeling_deepseek_v3.py (DeepseekV3Attention: q_rot, k_rot, expand_kv)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/deepseek_v3/modeling_deepseek_v3.py
+  - title: "The Big LLM Architecture Comparison (Sebastian Raschka) — MLA в DeepSeek-V3"
+    url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
+viz: [kv-cache]
+questions: [mla-rope-*]
+# Источник: deepseek-ai/DeepSeek-V3 config.json: num_attention_heads 128, kv_lora_rank 512,
+# qk_nope_head_dim 128, qk_rope_head_dim 64, v_head_dim 128, q_lora_rank 1536, rope_theta 10000,
+# rope_scaling {type: yarn, factor: 40, original_max_position_embeddings: 4096}, max_position_embeddings 163840.
+arch:
+  deepseek-v3:
+    attention: "MLA: 128 голов, KV-латент 512 + общий RoPE-ключ 64 (576 чисел на токен в кеше), запрос через латент 1536"
+    position: "decoupled RoPE: 64 из 192 измерений ключа головы, ключ общий на все головы; YaRN ×40 (4K → 160K)"

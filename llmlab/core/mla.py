@@ -44,7 +44,7 @@ class LatentCache:
         return self.c, self.k_rope
 
 
-def _causal_mask(T: int, S: int, device) -> torch.Tensor:
+def causal_mask(T: int, S: int, device) -> torch.Tensor:
     return torch.ones(T, S, dtype=torch.bool, device=device).tril(diagonal=S - T)
 
 
@@ -79,7 +79,7 @@ class MLAttention(nn.Module):
         kv = self.kv_b_proj(c).view(B, S, H, d + dv).transpose(1, 2)                  # [B, H, S, d + dv]
         k, v = kv.split([d, dv], dim=-1)
         scores = q @ k.transpose(-2, -1) / math.sqrt(d)
-        scores = scores.masked_fill(~_causal_mask(T, S, x.device), float("-inf"))
+        scores = scores.masked_fill(~causal_mask(T, S, x.device), float("-inf"))
         out = F.softmax(scores, dim=-1) @ v                                           # [B, H, T, dv]
         return self.o_proj(out.transpose(1, 2).reshape(B, T, H * dv))
 
@@ -93,7 +93,7 @@ class MLAttention(nn.Module):
         W_uk, W_uv = W[:, :d], W[:, d:]                                               # [H, d, r], [H, dv, r]
         q_lat = torch.einsum("bhtd,hdr->bhtr", q, W_uk)                               # [B, H, T, r]
         scores = q_lat @ c.unsqueeze(1).transpose(-2, -1) / math.sqrt(d)              # [B, H, T, S]
-        scores = scores.masked_fill(~_causal_mask(T, S, x.device), float("-inf"))
+        scores = scores.masked_fill(~causal_mask(T, S, x.device), float("-inf"))
         o_lat = F.softmax(scores, dim=-1) @ c.unsqueeze(1)                            # [B, H, T, r]
         out = torch.einsum("bhtr,hvr->bhtv", o_lat, W_uv)                             # [B, H, T, dv]
         return self.o_proj(out.transpose(1, 2).reshape(B, T, H * dv))
@@ -141,7 +141,7 @@ class MLARopeAttention(nn.Module):
         k = torch.cat((k_nope, k_rope.unsqueeze(1).expand(B, H, S, dr)), dim=-1)      # [B, H, S, dn + dr]
         q = torch.cat((q_nope, q_rope), dim=-1)
         scores = q @ k.transpose(-2, -1) / math.sqrt(dn + dr)
-        scores = scores.masked_fill(~_causal_mask(T, S, x.device), float("-inf"))
+        scores = scores.masked_fill(~causal_mask(T, S, x.device), float("-inf"))
         out = F.softmax(scores, dim=-1) @ v
         return self.o_proj(out.transpose(1, 2).reshape(B, T, H * dv))
 
