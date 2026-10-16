@@ -1,0 +1,16 @@
+id: C04d-gqa-debug
+title: "Отладка: GQA работает как MHA и как MQA, но не с группами"
+block: C
+module: module-1-llama
+type: debug
+difficulty: easy
+depends_on: [C04-gqa]
+diff_from: C04-gqa
+tags: [attention, gqa, debug]
+entrypoint: [repeat_kv, kv_cache_bytes, GroupedQueryAttention]
+time_estimate_min: 15
+papers: [gqa]
+reading:
+  - title: "Hugging Face transformers: modeling_llama.py (repeat_kv)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/llama/modeling_llama.py
+questions: [gqa-groups-*]
