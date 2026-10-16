@@ -1,0 +1,16 @@
+id: C09d-qk-norm-debug
+title: "Отладка: после загрузки обученных весов QK-Norm даёт не тот выход"
+block: C
+module: module-2-gemma-olmo
+type: debug
+difficulty: medium
+depends_on: [C09-qk-norm]
+diff_from: C09-qk-norm
+tags: [attention, qk-norm, rope, debug]
+entrypoint: [QKNormAttention]
+time_estimate_min: 20
+papers: [gemma-3]
+reading:
+  - title: "Hugging Face transformers: modeling_gemma3.py (Gemma3Attention.forward)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/gemma3/modeling_gemma3.py
+questions: [qk-norm-order-*]

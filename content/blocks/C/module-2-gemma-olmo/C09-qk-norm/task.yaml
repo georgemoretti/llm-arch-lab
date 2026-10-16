@@ -1,0 +1,28 @@
+id: C09-qk-norm
+title: "QK-Norm: нормировать запросы и ключи до RoPE"
+block: C
+module: module-2-gemma-olmo
+type: implement
+difficulty: medium
+depends_on: [C01-rmsnorm, C04-gqa]
+diff_from: C04-gqa
+tags: [attention, normalization, qk-norm, training-stability, gemma, olmo]
+entrypoint: [QKNormAttention]
+time_estimate_min: 35
+papers: [qk-norm, vit-22b, olmo-2, gemma-3]
+reading:
+  - title: "The Big LLM Architecture Comparison (Sebastian Raschka) — QK-Norm в OLMo 2 и Gemma 3"
+    url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
+  - title: "Hugging Face transformers: modeling_olmo2.py (Olmo2Attention: q_norm/k_norm по всей проекции)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/olmo2/modeling_olmo2.py
+  - title: "Hugging Face transformers: modeling_gemma3.py (Gemma3Attention: q_norm/k_norm по голове)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/gemma3/modeling_gemma3.py
+questions: [qk-norm-*]
+# Источники: Olmo2Attention (modeling_olmo2.py): q_norm = RMSNorm(num_attention_heads * head_dim),
+# k_norm = RMSNorm(num_key_value_heads * head_dim), применяются к выходу q_proj/k_proj до view и RoPE.
+# config.json allenai/OLMo-2-1124-7B: num_attention_heads = 32, num_key_value_heads = 32 (MHA),
+# hidden_size = 4096, rope_theta = 500 000.
+arch:
+  olmo-2:
+    attention: "MHA (7B: 32 / 32 головы) + QK-Norm по всей проекции q и k до RoPE"
+    position: "RoPE, θ = 500 000, во всех слоях"
