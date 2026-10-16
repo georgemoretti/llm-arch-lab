@@ -1,0 +1,12 @@
+id: C-Q3-moe-quiz
+title: "Квиз модуля: MoE и DeepSeek"
+block: C
+module: module-3-moe
+type: quiz
+difficulty: medium
+depends_on: [C17-mtp]
+diff_from: C06-llama-block
+tags: [quiz, moe, deepseek, mla, interview]
+time_estimate_min: 35
+papers: []
+questions: [router-*, moe-layer-*, load-balance-*, shared-expert-*, moe-params-*, mla-*, mtp-*]

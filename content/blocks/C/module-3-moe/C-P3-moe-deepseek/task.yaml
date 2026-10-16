@@ -1,0 +1,15 @@
+id: C-P3-moe-deepseek
+title: "Статьи: Switch Transformer, DeepSeekMoE, DeepSeek-V2 (MLA), DeepSeek-V3 (MTP)"
+block: C
+module: module-3-moe
+type: paper
+difficulty: hard
+depends_on: [C14-load-balancing, C15-shared-expert, C16b-mla-rope, C17-mtp]
+diff_from: null
+tags: [paper, moe, load-balancing, mla, mtp, deepseek]
+time_estimate_min: 90
+papers: [switch-transformer, deepseekmoe, deepseek-v2, deepseek-v3, aux-loss-free]
+reading:
+  - title: "The Big LLM Architecture Comparison (Sebastian Raschka) — DeepSeek-V3, Qwen3, gpt-oss"
+    url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
+questions: [paper-switch-*, paper-deepseekmoe-*, paper-dsv2-*, paper-dsv3-*]
