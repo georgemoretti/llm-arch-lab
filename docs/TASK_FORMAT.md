@@ -77,6 +77,8 @@ reading:                         # внешние ссылки — только 
     url: https://…
 viz: [rope-rotation]             # id визуализаций из content/viz/ (вкладка «Визуализация»)
 questions: [rope-*, positional-*]  # fnmatch-глобы по id вопросов
+arch:                            # ячейки таблицы архитектур, которые открывает решение (§3.4)
+  llama-3: {position: "RoPE, θ = 500 000"}   # модель → столбец → значение (с источником!)
 ```
 
 Неизвестные поля — ошибка (схема строгая, опечатки ловятся сразу).
@@ -162,7 +164,8 @@ def test_something(impl, ref):
 
 ### 2.8 `summary.md`
 
-Авторская выжимка для автоконспекта (Фаза 2). Разделы строго:
+Авторская выжимка для автоконспекта (§4.7). Разделы строго (в конспект попадают именно они,
+в этом порядке; заголовок четвёртого раздела копируется как есть):
 
 ```markdown
 ## TL;DR
@@ -215,6 +218,25 @@ description: "Что показывает и что покрутить."
 Загрузчик проверяет, что каждый id из `task.yaml → viz` и из директив `:::viz id:::` в README
 описан в `content/viz/`; `tests/test_viz_registry.py` — что у каждого описания есть компонент.
 После правок фронтенда: `cd web && npm run build` и коммит `llmlab/static/`.
+
+### 3.4 Таблица архитектур: `content/architectures.yaml` + `task.yaml → arch`
+
+```yaml
+columns:                       # компоненты (столбцы)
+  - {id: norm, title: "Нормализация"}
+models:                        # модели (строки)
+  - id: llama-3
+    title: Llama 3 (8B)
+    year: 2024
+    module: module-1-llama     # модуль курса, где строка начнёт заполняться
+    source: https://huggingface.co/meta-llama/Meta-Llama-3-8B/blob/main/config.json
+```
+
+Значения ячеек пишет **задача**, которая объясняет компонент (`arch` в task.yaml), и ячейка
+открывается во вкладке «Конспекты», когда задача решена. Закрытая ячейка показывает только,
+какая задача её откроет. Загрузчик проверяет: модель и столбец описаны, одну ячейку задаёт одна
+задача. Факты — только из `source` (config.json на HF или статья); источник указывать
+комментарием рядом с `arch`.
 
 ---
 
@@ -317,6 +339,22 @@ CREATE TABLE attempts (
 );
 ```
 
+```sql
+-- v2 (конспекты)
+CREATE TABLE notes (
+    task_id      TEXT PRIMARY KEY,
+    insight      TEXT NOT NULL,      -- «Главное, что я понял»
+    code         TEXT,               -- снимок кода последнего зелёного прогона
+    code_sha256  TEXT,
+    path         TEXT NOT NULL,      -- относительно notes/
+    created_at   TEXT NOT NULL,
+    updated_at   TEXT NOT NULL
+);
+CREATE TABLE notes_index (path TEXT PRIMARY KEY, task_id TEXT, mtime_ns INTEGER NOT NULL);
+-- notes_fts — FTS5 (path UNINDEXED, title, tags, body), создаётся лениво в llmlab/notes/index.py;
+-- без FTS5 поиск идёт сканом файлов.
+```
+
 Статус задачи вычисляется из попыток (`db.task_statuses()`): `solved` — была попытка
 `passed`, `attempted` — были попытки, иначе `new`.
 
@@ -328,7 +366,12 @@ llmlab init-workspace <id> [--force]
 llmlab test <id> [--impl reference|starter|buggy] [--impl-path file.py] [--timeout 60]
 llmlab validate <id> | --all [-j 4]
 llmlab serve [--port 8765] [--no-open]   # веб-интерфейс на 127.0.0.1
+llmlab notes build [<id>] [--insight "строка\nстрока"]   # создать/пересобрать конспект(ы)
+llmlab notes export [--out llmlab-notes.zip]             # vault для Obsidian
 ```
+
+После зелёного `llmlab test` конспект обновляется; если его ещё нет, в терминале спрашивается
+«Главное, что я понял» (в неинтерактивном режиме печатается подсказка с `notes build`).
 
 ### 4.5.1 HTTP API (`llmlab/server.py`, только 127.0.0.1)
 
@@ -342,7 +385,17 @@ llmlab serve [--port 8765] [--no-open]   # веб-интерфейс на 127.0.
 | POST | `/api/tasks/{id}/run` | прогон тестов → RunResult (§4.3), попытка пишется в БД |
 | GET | `/api/tasks/{id}/attempts` | история попыток, новые сверху; полный RunResult — у последней |
 | GET | `/api/tasks/{id}/reference` | эталон; 403, пока задача не решена и неудачных попыток < 3 |
-| GET | `/api/progress`, `/api/notes`, `/api/viz` | сводка прогресса, список конспектов (Фаза 2), визуализации |
+| GET | `/api/progress`, `/api/viz` | сводка прогресса, визуализации |
+| GET | `/api/notes` | конспекты (по файлам `notes/`) + теги с частотой + путь к папке |
+| GET | `/api/notes/search?q=` | FTS5-поиск (каждое слово — префикс); совпадения в `snippet` обрамлены `\u0002…\u0003` |
+| GET | `/api/notes/{id}` | frontmatter (`meta`), тело без frontmatter, `insight`, абсолютный путь |
+| POST | `/api/notes/{id}` | `{insight?}` → создать/пересобрать; 409 `needs_insight` / `not_solved`, 422 — неверный вывод |
+| POST | `/api/notes` | пересобрать все конспекты |
+| GET | `/api/notes/export.zip` | zip всей папки `notes/` |
+| GET | `/api/architectures` | таблица архитектур; закрытые ячейки без значения |
+
+`POST /run` при `status: passed` добавляет к RunResult поле `note`: `{"status": "needs_insight"}`
+(конспекта ещё нет → UI показывает модалку) или `{"status": "updated", "path": …}`.
 
 Изменяющие запросы требуют заголовок `X-LLMLab: 1` (защита от CSRF), `Host` — только
 localhost/127.0.0.1 (защита от DNS rebinding). Документация OpenAPI — `/api/docs`.
@@ -354,6 +407,28 @@ localhost/127.0.0.1 (защита от DNS rebinding). Документация 
 - `reference ✓` — эталон проходит все тесты (и тестов > 0);
 - `starter ✗` (implement/project) — на заготовке не проходит **ни один** тест;
 - `buggy ✗` (debug) — багованный код падает хотя бы на одном тесте.
+
+### 4.7 Конспекты (`llmlab/notes/`)
+
+Файл `notes/<block>/<task_id>.md` создаётся после первого зелёного прогона, когда пользователь
+ввёл «Главное, что я понял» (1–3 строки, ≤ 600 символов — без этого конспекта нет). Разделы:
+
+| раздел | откуда |
+|--------|--------|
+| frontmatter: `id, title, aliases, block, module, type, difficulty, tags, solved_at, attempts, parent, depends_on, updated, source` | task.yaml + попытки; `parent`/`depends_on` — `"[[wiki-ссылки]]"` |
+| строка связей: Родитель / Опирается на / Дальше | `diff_from`, `depends_on`, обратные зависимости |
+| TL;DR, Формула, Формы тензоров, Что поменялось… | `summary.md` |
+| Мой код | рабочая копия, если её sha совпадает с зелёной попыткой, иначе снимок из БД |
+| Отличия от эталона | unified diff в свёрнутом callout `> [!example]-` |
+| Мои ошибки по пути | попытки до последней зелёной: ошибки группируются по тексту (числа не различаются), шум `NotImplementedError` отброшен |
+| Главное, что я понял | ввод пользователя, списком |
+| Вопросы для повторения | `questions_for(task)`, каждый — свёрнутый callout `> [!question]-` с ответом |
+| Читать | `papers` + `reading` |
+
+Пересборка (`notes build`, повторный зелёный прогон, кнопка в UI) перезаписывает всё, кроме
+«Главное, что я понял»: правка этого раздела прямо в файле (Obsidian) побеждает и сохраняется в
+БД. `notes/index.md` — оглавление vault'а и открытая часть таблицы архитектур, пересобирается
+автоматически. Конспекты создаются только для задач с тестами (implement/debug/project).
 
 ---
 
