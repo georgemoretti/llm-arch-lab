@@ -107,3 +107,60 @@ def repeat_kv(x: torch.Tensor, n_rep: int) -> torch.Tensor:
 def kv_cache_bytes(n_layers: int, n_kv_heads: int, head_dim: int, seq_len: int,
                    batch: int = 1, bytes_per_elem: int = 2) -> int:
     return 2 * n_layers * n_kv_heads * head_dim * seq_len * batch * bytes_per_elem
+
+
+# ---------------------------------------------------------------------------- C05 KV-cache
+
+
+class KVCache:
+    """KV-cache одного слоя: k (после RoPE) и v прошлых токенов, [B, H_kv, S, D]."""
+
+    def __init__(self):
+        self.k: torch.Tensor | None = None
+        self.v: torch.Tensor | None = None
+
+    @property
+    def seq_len(self) -> int:
+        return 0 if self.k is None else self.k.shape[2]
+
+    def update(self, k: torch.Tensor, v: torch.Tensor):
+        if self.k is None:
+            self.k, self.v = k, v
+        else:
+            self.k = torch.cat((self.k, k), dim=2)
+            self.v = torch.cat((self.v, v), dim=2)
+        return self.k, self.v
+
+
+class LlamaAttention(nn.Module):
+    """GQA + RoPE + KV-cache. x [B, T, C] — новые токены, cache — прошлые (или None)."""
+
+    def __init__(self, d_model: int, n_heads: int, n_kv_heads: int, rope_theta: float = 500000.0):
+        super().__init__()
+        assert d_model % n_heads == 0 and n_heads % n_kv_heads == 0
+        self.n_heads = n_heads
+        self.n_kv_heads = n_kv_heads
+        self.n_rep = n_heads // n_kv_heads
+        self.head_dim = d_model // n_heads
+        self.rope_theta = rope_theta
+        self.q_proj = nn.Linear(d_model, n_heads * self.head_dim, bias=False)
+        self.k_proj = nn.Linear(d_model, n_kv_heads * self.head_dim, bias=False)
+        self.v_proj = nn.Linear(d_model, n_kv_heads * self.head_dim, bias=False)
+        self.o_proj = nn.Linear(n_heads * self.head_dim, d_model, bias=False)
+
+    def forward(self, x: torch.Tensor, cache: KVCache | None = None) -> torch.Tensor:
+        B, T, _ = x.shape
+        H, H_kv, D = self.n_heads, self.n_kv_heads, self.head_dim
+        start = cache.seq_len if cache is not None else 0
+        cos, sin = rope_cos_sin(torch.arange(start, start + T, device=x.device), D, self.rope_theta)
+        q = apply_rope(self.q_proj(x).view(B, T, H, D).transpose(1, 2), cos, sin)
+        k = apply_rope(self.k_proj(x).view(B, T, H_kv, D).transpose(1, 2), cos, sin)
+        v = self.v_proj(x).view(B, T, H_kv, D).transpose(1, 2)
+        if cache is not None:
+            k, v = cache.update(k, v)
+        S = k.shape[2]
+        k, v = repeat_kv(k, self.n_rep), repeat_kv(v, self.n_rep)
+        scores = q @ k.transpose(-2, -1) / math.sqrt(D)
+        mask = torch.ones(T, S, dtype=torch.bool, device=x.device).tril(diagonal=S - T)
+        out = F.softmax(scores.masked_fill(~mask, float("-inf")), dim=-1) @ v
+        return self.o_proj(out.transpose(1, 2).reshape(B, T, H * D))
