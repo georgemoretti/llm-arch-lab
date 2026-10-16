@@ -1,0 +1,18 @@
+id: C20-linear-attention
+title: "Линейное внимание: kernel trick, параллельная и рекуррентная формы"
+block: C
+module: module-4-efficient
+type: implement
+difficulty: medium
+depends_on: [C05-kv-cache]
+diff_from: C00-causal-mha
+tags: [attention, linear-attention, recurrent, kernel, long-context]
+entrypoint: [feature_map, linear_attention_noncausal, linear_attention, linear_attention_recurrent]
+time_estimate_min: 40
+papers: [transformers-are-rnns]
+reading:
+  - title: "Katharopoulos et al. — Transformers are RNNs (страница проекта с кодом)"
+    url: https://linear-transformers.com/
+  - title: "Songlin Yang — DeltaNet Explained (часть 1: от линейного внимания к DeltaNet)"
+    url: https://sustcsonglin.github.io/blog/2024/deltanet-1/
+questions: [linear-attn-*]

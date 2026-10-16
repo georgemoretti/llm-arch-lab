@@ -1,0 +1,16 @@
+id: C20d-linear-attention-debug
+title: "Отладка: линейное внимание учится не тому, что генерирует"
+block: C
+module: module-4-efficient
+type: debug
+difficulty: medium
+depends_on: [C20-linear-attention]
+diff_from: C20-linear-attention
+tags: [attention, linear-attention, normalization, debug]
+entrypoint: [feature_map, linear_attention_noncausal, linear_attention, linear_attention_recurrent]
+time_estimate_min: 15
+papers: [transformers-are-rnns]
+reading:
+  - title: "Katharopoulos et al. — Transformers are RNNs, раздел про causal-маскирование"
+    url: https://arxiv.org/abs/2006.16236
+questions: [linear-attn-norm-*]
