@@ -8,9 +8,9 @@ build/
 .pytest_cache/
 
 # Состояние пользователя: прогресс, рабочие копии решений, конспекты
-.llmlab/
-workspace/
-notes/
+/.llmlab/
+/workspace/
+/notes/
 
 # Frontend
 web/node_modules/
