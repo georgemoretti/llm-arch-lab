@@ -169,6 +169,14 @@ class DeepSeekMoE(nn.Module):
         return out, logits
 
 
+def build_ffn_layers(n_layers: int, d_model: int, d_dense: int, d_expert: int, n_routed: int, n_shared: int,
+                     top_k: int, first_k_dense_replace: int, moe_layer_freq: int = 1) -> nn.ModuleList:
+    """FFN-часть всех слоёв: SwiGLUFFN(d_dense) для "dense", DeepSeekMoE для "moe"."""
+    return nn.ModuleList(
+        DeepSeekMoE(d_model, d_expert, n_routed, n_shared, top_k) if t == "moe" else SwiGLUFFN(d_model, d_dense)
+        for t in mlp_layer_types(n_layers, first_k_dense_replace, moe_layer_freq))
+
+
 def ffn_params(d_model: int, d_hidden: int) -> int:
     """Параметры одного SwiGLU-FFN без bias: gate, up, down."""
     return 3 * d_model * d_hidden
