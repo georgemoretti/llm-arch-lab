@@ -19,6 +19,9 @@ modules:
   - id: module-4-efficient
     title: "Эффективное внимание и гибриды"
     description: "Sparse attention, gated attention, линейное внимание, Gated DeltaNet, SSM."
+  - id: module-5-final
+    title: "Финальный проект: своя модель на реальных весах"
+    description: "Модель из YAML-конфига, config.json и веса Hugging Face → свои модули, Qwen3-0.6B, генерация."
 baselines:
   gpt2-baseline:
     title: "GPT-2 (базовая модель курса)"

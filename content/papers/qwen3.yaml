@@ -1,0 +1,7 @@
+id: qwen3
+title: "Qwen3 Technical Report"
+authors: "Qwen Team (Yang et al.)"
+year: 2025
+venue: arXiv
+url: https://arxiv.org/abs/2505.09388
+tags: [qwen, decoder-only, qk-norm, gqa, moe]

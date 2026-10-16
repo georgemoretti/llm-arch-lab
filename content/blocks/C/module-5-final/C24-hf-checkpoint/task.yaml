@@ -1,0 +1,25 @@
+id: C24-hf-checkpoint
+title: "Чекпойнт Hugging Face → своя модель: config.json и имена весов"
+block: C
+module: module-5-final
+type: implement
+difficulty: medium
+depends_on: [C06-llama-block, C09-qk-norm]
+diff_from: C06-llama-block
+tags: [weights, safetensors, huggingface, qwen, gpt2, project]
+entrypoint: [config_from_hf, convert_state_dict]
+time_estimate_min: 45
+papers: [qwen3, gpt2]
+reading:
+  - title: "Qwen/Qwen3-0.6B: config.json"
+    url: https://huggingface.co/Qwen/Qwen3-0.6B/blob/main/config.json
+  - title: "Hugging Face transformers: modeling_qwen3.py (Qwen3Attention, q_norm / k_norm)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/qwen3/modeling_qwen3.py
+  - title: "Hugging Face transformers: pytorch_utils.py (Conv1D GPT-2)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/pytorch_utils.py
+  - title: "rasbt/LLMs-from-scratch: загрузка весов Qwen3 в модель с нуля (ch05/11_qwen3)"
+    url: https://github.com/rasbt/LLMs-from-scratch/tree/main/ch05/11_qwen3
+questions: [final-config-*, final-weights-*]
+# Источники: config.json Qwen/Qwen3-0.6B, HuggingFaceTB/SmolLM2-135M, openai-community/gpt2 (скопированы в тесты,
+# сверено 2026-10-17). Имена тензоров — из model.safetensors тех же репозиториев: у Qwen3-0.6B в файле есть и
+# lm_head.weight (равен embed_tokens), у GPT-2 — буферы h.{i}.attn.bias [1, 1, 1024, 1024] и Conv1D-веса [in, out].
