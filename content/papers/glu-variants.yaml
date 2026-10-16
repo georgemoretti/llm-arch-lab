@@ -1,0 +1,7 @@
+id: glu-variants
+title: "GLU Variants Improve Transformer"
+authors: "Shazeer"
+year: 2020
+venue: arXiv
+url: https://arxiv.org/abs/2002.05202
+tags: [ffn, swiglu]

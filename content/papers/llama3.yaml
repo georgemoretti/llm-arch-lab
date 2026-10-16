@@ -1,0 +1,7 @@
+id: llama3
+title: "The Llama 3 Herd of Models"
+authors: "Llama Team, AI @ Meta (Grattafiori et al.)"
+year: 2024
+venue: arXiv
+url: https://arxiv.org/abs/2407.21783
+tags: [llama, decoder-only]

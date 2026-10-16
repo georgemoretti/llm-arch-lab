@@ -1,0 +1,7 @@
+id: roformer
+title: "RoFormer: Enhanced Transformer with Rotary Position Embedding"
+authors: "Su, Lu, Pan, Murtadha, Wen, Liu"
+year: 2021
+venue: arXiv
+url: https://arxiv.org/abs/2104.09864
+tags: [positional-encoding, rope]

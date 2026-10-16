@@ -1,0 +1,7 @@
+id: llama
+title: "LLaMA: Open and Efficient Foundation Language Models"
+authors: "Touvron, Lavril, Izacard, Martinet, Lachaux, Lacroix, Rozière, Goyal, Hambro, Azhar, Rodriguez, Joulin, Grave, Lample"
+year: 2023
+venue: arXiv
+url: https://arxiv.org/abs/2302.13971
+tags: [llama, decoder-only]

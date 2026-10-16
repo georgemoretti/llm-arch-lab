@@ -1,0 +1,7 @@
+id: rmsnorm
+title: "Root Mean Square Layer Normalization"
+authors: "Zhang, Sennrich"
+year: 2019
+venue: NeurIPS 2019
+url: https://arxiv.org/abs/1910.07467
+tags: [normalization, rmsnorm]

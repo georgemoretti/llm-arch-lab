@@ -1,0 +1,23 @@
+id: C01-rmsnorm
+title: RMSNorm (вместо LayerNorm)
+block: C
+module: module-1-llama
+type: implement
+difficulty: easy
+depends_on: [C00-causal-mha]
+diff_from: gpt2-baseline
+tags: [normalization, rmsnorm, llama]
+entrypoint: [rms_norm, RMSNorm]
+time_estimate_min: 20
+papers: [rmsnorm, llama]
+reading:
+  - title: "The Big LLM Architecture Comparison (Sebastian Raschka)"
+    url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
+  - title: "Hugging Face transformers: modeling_llama.py (LlamaRMSNorm)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/llama/modeling_llama.py
+questions: [rmsnorm-*]
+# Источник: config.json Llama 3 8B (meta-llama/Meta-Llama-3-8B; сверено по открытому зеркалу
+# NousResearch/Meta-Llama-3-8B): rms_norm_eps = 1e-05. Pre-Norm + финальная норма — modeling_llama.py.
+arch:
+  llama-3:
+    norm: "RMSNorm (eps = 1e-5), Pre-Norm + финальная норма"
