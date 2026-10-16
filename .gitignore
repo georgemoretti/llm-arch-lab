@@ -15,3 +15,7 @@ notes/
 # Frontend
 web/node_modules/
 web/*.tsbuildinfo
+
+# Сырая база вопросов с собесов — личные данные пользователя, в git только README
+data/interview_raw/*
+!data/interview_raw/README.md
