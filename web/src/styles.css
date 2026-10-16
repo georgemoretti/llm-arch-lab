@@ -1784,3 +1784,58 @@ mark {
 .layer-cell.nope {
   box-shadow: inset 0 0 0 2px var(--text);
 }
+
+/* --- V-moe-routing --- */
+.moe-main {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px 24px;
+  align-items: flex-start;
+  margin-top: 8px;
+}
+.moe-heat {
+  display: grid;
+  gap: 1px;
+  font: 10px var(--mono);
+}
+.moe-heat .viz-axis {
+  height: 14px;
+}
+.moe-cell {
+  height: 12px;
+  border-radius: 2px;
+  cursor: default;
+}
+.moe-cell.chosen,
+.mask-swatch.moe-chosen-swatch {
+  box-shadow: inset 0 0 0 1.5px var(--text);
+}
+.moe-load {
+  flex: 1 1 260px;
+  max-width: 360px;
+}
+.moe-load-title {
+  font-size: 12px;
+  margin-bottom: 4px;
+}
+.moe-load svg {
+  width: 100%;
+  height: auto;
+}
+.moe-bar {
+  fill: var(--series-1);
+}
+.moe-bar:hover {
+  fill: color-mix(in srgb, var(--series-1) 75%, var(--text));
+}
+.moe-bar-label {
+  font: 10px var(--mono);
+  fill: var(--muted);
+}
+.moe-ideal {
+  stroke: var(--muted);
+  stroke-dasharray: 4 3;
+}
+.moe-axis {
+  stroke: var(--border-strong);
+}

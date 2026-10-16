@@ -6,11 +6,13 @@ import type { ComponentType } from "react";
 import CausalMask from "./CausalMask";
 import KvCache from "./KvCache";
 import Masks from "./Masks";
+import MoeRouting from "./MoeRouting";
 import RopeRotation from "./RopeRotation";
 
 export const VIZ_REGISTRY: Record<string, ComponentType> = {
   "causal-mask": CausalMask,
   "kv-cache": KvCache,
   "masks": Masks,
+  "moe-routing": MoeRouting,
   "rope-rotation": RopeRotation,
 };

@@ -16,6 +16,9 @@ interface Preset {
   source: string;
   window?: number; // sliding_window
   pattern?: number; // каждый pattern-й слой (с 1) — full; 0 — все слои sliding
+  // MLA (C16b): на токен и слой в кеше kv_lora_rank + qk_rope_head_dim чисел. Чтобы формула
+  // 2·kvHeads·headDim осталась общей, kvHeads у такого пресета — «эквивалент» (r + d_r) / (2·headDim).
+  mla?: { rank: number; rope: number };
 }
 
 // head_dim = hidden_size / num_attention_heads, если head_dim не задан явно.
@@ -29,6 +32,8 @@ const PRESETS: Preset[] = [
   { id: "mistral-7b", name: "Mistral 7B v0.1 (SWA)", layers: 32, heads: 32, kvHeads: 8, headDim: 128, ctx: 32768, source: "mistralai/Mistral-7B-v0.1", window: 4096, pattern: 0 },
   { id: "gemma2-9b", name: "Gemma 2 9B (1:1)", layers: 42, heads: 16, kvHeads: 8, headDim: 256, ctx: 8192, source: "google/gemma-2-9b", window: 4096, pattern: 2 },
   { id: "gemma3-4b", name: "Gemma 3 4B (5:1)", layers: 34, heads: 8, kvHeads: 4, headDim: 256, ctx: 131072, source: "google/gemma-3-4b-pt", window: 1024, pattern: 6 },
+  // DeepSeek-V3: MHA-эквивалент — ключ 128 + 64, значение 128 на голову, то есть в среднем headDim = 160.
+  { id: "deepseek-v3", name: "DeepSeek-V3 (MLA)", layers: 61, heads: 128, kvHeads: 576 / 320, headDim: 160, ctx: 163840, source: "deepseek-ai/DeepSeek-V3", mla: { rank: 512, rope: 64 } },
   { id: "gemma3-27b", name: "Gemma 3 27B (5:1)", layers: 62, heads: 32, kvHeads: 16, headDim: 128, ctx: 131072, source: "google/gemma-3-27b-pt", window: 1024, pattern: 6 },
 ];
 
@@ -79,8 +84,9 @@ export default function KvCache() {
   // Три режима для тех же слоёв и head_dim: у каждой головы свои K/V, как у модели, одна общая.
   const variants = useMemo(() => {
     const v: { id: string; label: string; kv: number }[] = [{ id: "mha", label: `MHA (${p.heads})`, kv: p.heads }];
-    if (p.kvHeads !== p.heads && p.kvHeads !== 1) v.push({ id: "gqa", label: `GQA (${p.kvHeads})`, kv: p.kvHeads });
-    v.push({ id: "mqa", label: "MQA (1)", kv: 1 });
+    if (p.mla) v.push({ id: "mla", label: `MLA (${p.mla.rank} + ${p.mla.rope})`, kv: p.kvHeads });
+    else if (p.kvHeads !== p.heads && p.kvHeads !== 1) v.push({ id: "gqa", label: `GQA (${p.kvHeads})`, kv: p.kvHeads });
+    if (!p.mla) v.push({ id: "mqa", label: "MQA (1)", kv: 1 }); // у MLA сравниваем с MHA тех же голов
     return v;
   }, [p]);
   const own = variants.find((v) => v.kv === p.kvHeads)!;
@@ -135,7 +141,17 @@ export default function KvCache() {
       </div>
 
       <div className="kv-config mono">
-        {p.layers} слоёв · {p.heads} голов запросов · <b>{p.kvHeads} KV-голов</b> · head_dim {p.headDim} · обучен на{" "}
+        {p.layers} слоёв · {p.heads} голов запросов ·{" "}
+        {p.mla ? (
+          <b>
+            MLA: латент {p.mla.rank} + RoPE-ключ {p.mla.rope} на токен
+          </b>
+        ) : (
+          <>
+            <b>{p.kvHeads} KV-голов</b> · head_dim {p.headDim}
+          </>
+        )}{" "}
+        · обучен на{" "}
         {fmtCtx(p.ctx)} ·{" "}
         {p.window && (
           <>
@@ -199,7 +215,8 @@ export default function KvCache() {
         контекста, поэтому на длинных контекстах кеш легко обгоняет сами веса. ★ — конфигурация выбранной
         модели; остальные линии — те же слои и head_dim, но с другим числом KV-голов. Шкала по x логарифмическая.
         У моделей со sliding window кеш sliding-слоя не больше окна (кольцевой буфер, C11): у Mistral 7B кривая
-        выходит на плато после 4K, у Gemma 3 растут только full-слои. Сжатие кеша (MLA) появится в модуле 3.
+        выходит на плато после 4K, у Gemma 3 растут только full-слои. У DeepSeek-V3 (MLA) в кеше латент и общий RoPE-ключ — 576 чисел
+        на токен и слой (C16b); «MHA» для неё посчитан с ключом 192 и значением 128 на голову.
       </p>
     </div>
   );
