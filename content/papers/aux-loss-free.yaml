@@ -1,0 +1,7 @@
+id: aux-loss-free
+title: "Auxiliary-Loss-Free Load Balancing Strategy for Mixture-of-Experts"
+authors: "Wang, Gao, Zhao, et al."
+year: 2024
+venue: arXiv
+url: https://arxiv.org/abs/2408.15664
+tags: [moe, load-balancing, router-bias]

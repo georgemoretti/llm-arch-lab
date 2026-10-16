@@ -1,0 +1,16 @@
+id: C12d-router-debug
+title: "Отладка: маршрут токена зависит от соседей по батчу"
+block: C
+module: module-3-moe
+type: debug
+difficulty: easy
+depends_on: [C12-router]
+diff_from: C12-router
+tags: [moe, router, softmax, debug]
+entrypoint: [route, TopKRouter]
+time_estimate_min: 15
+papers: [mixtral]
+reading:
+  - title: "Hugging Face transformers: modeling_mixtral.py (MixtralTopKRouter)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/mixtral/modeling_mixtral.py
+questions: [router-softmax-*]

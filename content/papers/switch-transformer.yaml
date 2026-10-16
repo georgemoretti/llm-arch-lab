@@ -1,0 +1,7 @@
+id: switch-transformer
+title: "Switch Transformers: Scaling to Trillion Parameter Models with Simple and Efficient Sparsity"
+authors: "Fedus, Zoph, Shazeer"
+year: 2021
+venue: JMLR 2022
+url: https://arxiv.org/abs/2101.03961
+tags: [moe, top-1, load-balancing, capacity]

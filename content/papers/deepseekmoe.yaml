@@ -1,0 +1,7 @@
+id: deepseekmoe
+title: "DeepSeekMoE: Towards Ultimate Expert Specialization in Mixture-of-Experts Language Models"
+authors: "Dai, Deng, Zhao, et al. (DeepSeek-AI)"
+year: 2024
+venue: arXiv
+url: https://arxiv.org/abs/2401.06066
+tags: [moe, shared-expert, fine-grained-experts]

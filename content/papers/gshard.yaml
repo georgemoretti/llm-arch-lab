@@ -1,0 +1,7 @@
+id: gshard
+title: "GShard: Scaling Giant Models with Conditional Computation and Automatic Sharding"
+authors: "Lepikhin, Lee, Xu, et al."
+year: 2020
+venue: ICLR 2021
+url: https://arxiv.org/abs/2006.16668
+tags: [moe, top-2, capacity, load-balancing]

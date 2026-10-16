@@ -1,0 +1,7 @@
+id: sparsely-gated-moe
+title: "Outrageously Large Neural Networks: The Sparsely-Gated Mixture-of-Experts Layer"
+authors: "Shazeer, Mirhoseini, Maziarz, Davis, Le, Hinton, Dean"
+year: 2017
+venue: ICLR 2017
+url: https://arxiv.org/abs/1701.06538
+tags: [moe, router, load-balancing]

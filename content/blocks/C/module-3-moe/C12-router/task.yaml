@@ -1,0 +1,25 @@
+id: C12-router
+title: "Роутер MoE: оценки → top-k → перенормировка"
+block: C
+module: module-3-moe
+type: implement
+difficulty: easy
+depends_on: [C02-swiglu]
+diff_from: C02-swiglu
+tags: [moe, router, top-k, softmax, deepseek, mixtral]
+entrypoint: [route, TopKRouter]
+time_estimate_min: 30
+papers: [sparsely-gated-moe, switch-transformer, mixtral, deepseek-v3]
+reading:
+  - title: "The Big LLM Architecture Comparison (Sebastian Raschka) — разделы про MoE в DeepSeek-V3 и Qwen3"
+    url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
+  - title: "Hugging Face transformers: modeling_mixtral.py (MixtralTopKRouter)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/mixtral/modeling_mixtral.py
+  - title: "Hugging Face transformers: modeling_deepseek_v3.py (DeepseekV3TopkRouter)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/deepseek_v3/modeling_deepseek_v3.py
+questions: [router-*]
+# Источники (config.json на HF): mistralai/Mixtral-8x7B-v0.1 — num_local_experts = 8, num_experts_per_tok = 2;
+# deepseek-ai/DeepSeek-V3 — n_routed_experts = 256, num_experts_per_tok = 8, scoring_func = sigmoid,
+# norm_topk_prob = true, routed_scaling_factor = 2.5, n_group = 8, topk_group = 4;
+# Qwen/Qwen3-30B-A3B — num_experts = 128, num_experts_per_tok = 8, norm_topk_prob = true;
+# allenai/OLMoE-1B-7B-0924 — num_experts = 64, num_experts_per_tok = 8, norm_topk_prob = false.

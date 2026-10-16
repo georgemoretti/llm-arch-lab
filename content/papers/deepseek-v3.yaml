@@ -1,0 +1,7 @@
+id: deepseek-v3
+title: "DeepSeek-V3 Technical Report"
+authors: "DeepSeek-AI"
+year: 2024
+venue: arXiv
+url: https://arxiv.org/abs/2412.19437
+tags: [moe, mla, mtp, load-balancing]

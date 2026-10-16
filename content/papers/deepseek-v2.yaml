@@ -1,0 +1,7 @@
+id: deepseek-v2
+title: "DeepSeek-V2: A Strong, Economical, and Efficient Mixture-of-Experts Language Model"
+authors: "DeepSeek-AI"
+year: 2024
+venue: arXiv
+url: https://arxiv.org/abs/2405.04434
+tags: [moe, mla, kv-cache]

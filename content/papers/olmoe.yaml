@@ -1,0 +1,7 @@
+id: olmoe
+title: "OLMoE: Open Mixture-of-Experts Language Models"
+authors: "Muennighoff, Soldaini, Groeneveld, et al."
+year: 2024
+venue: arXiv
+url: https://arxiv.org/abs/2409.02060
+tags: [moe, open-models, load-balancing]

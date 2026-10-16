@@ -1,0 +1,7 @@
+id: st-moe
+title: "ST-MoE: Designing Stable and Transferable Sparse Expert Models"
+authors: "Zoph, Bello, Kumar, et al."
+year: 2022
+venue: arXiv
+url: https://arxiv.org/abs/2202.08906
+tags: [moe, router-z-loss, training-stability]

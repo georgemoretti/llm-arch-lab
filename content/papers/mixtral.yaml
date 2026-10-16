@@ -1,0 +1,7 @@
+id: mixtral
+title: "Mixtral of Experts"
+authors: "Jiang, Sablayrolles, Roux, Mensch, Savary, Bamford, et al."
+year: 2024
+venue: arXiv
+url: https://arxiv.org/abs/2401.04088
+tags: [moe, top-2, router]
