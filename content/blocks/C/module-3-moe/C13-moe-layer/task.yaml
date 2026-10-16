@@ -1,0 +1,23 @@
+id: C13-moe-layer
+title: "MoE-слой: отправить каждый токен к его экспертам"
+block: C
+module: module-3-moe
+type: implement
+difficulty: medium
+depends_on: [C12-router]
+diff_from: C06-llama-block
+tags: [moe, dispatch, experts, scatter, sparse]
+entrypoint: [MoELayer]
+time_estimate_min: 45
+papers: [switch-transformer, mixtral, gshard]
+reading:
+  - title: "Hugging Face transformers: modeling_mixtral.py (MixtralExperts.forward — цикл по экспертам)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/mixtral/modeling_mixtral.py
+  - title: "The Big LLM Architecture Comparison (Sebastian Raschka) — MoE в DeepSeek-V3, Qwen3, gpt-oss"
+    url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
+questions: [moe-layer-*]
+# Источник: deepseek-ai/DeepSeek-V3 config.json: hidden_size = 7168, moe_intermediate_size = 2048
+# (ширина эксперта), intermediate_size = 18432 (dense-слои), hidden_act = silu.
+arch:
+  deepseek-v3:
+    ffn: "SwiGLU: эксперты шириной 2048 (moe_intermediate_size), dense-слои — 18 432"

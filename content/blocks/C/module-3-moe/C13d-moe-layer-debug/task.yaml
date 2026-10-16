@@ -1,0 +1,16 @@
+id: C13d-moe-layer-debug
+title: "Отладка: с top-1 всё верно, с top-2 токены теряют экспертов"
+block: C
+module: module-3-moe
+type: debug
+difficulty: medium
+depends_on: [C13-moe-layer]
+diff_from: C13-moe-layer
+tags: [moe, dispatch, scatter, debug]
+entrypoint: [MoELayer]
+time_estimate_min: 20
+papers: [mixtral]
+reading:
+  - title: "PyTorch: Tensor.index_add_"
+    url: https://pytorch.org/docs/stable/generated/torch.Tensor.index_add_.html
+questions: [moe-layer-*]
