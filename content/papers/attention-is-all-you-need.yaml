@@ -1,0 +1,7 @@
+id: attention-is-all-you-need
+title: "Attention Is All You Need"
+authors: "Vaswani, Shazeer, Parmar, Uszkoreit, Jones, Gomez, Kaiser, Polosukhin"
+year: 2017
+venue: NeurIPS
+url: https://arxiv.org/abs/1706.03762
+tags: [attention, transformer]

@@ -1,0 +1,19 @@
+id: C00-causal-mha
+title: Causal Multi-Head Self-Attention (GPT-2)
+block: C
+module: module-0-gpt2
+type: implement
+difficulty: easy
+depends_on: []
+diff_from: gpt2-baseline
+tags: [attention, causal-mask, multi-head]
+entrypoint: [causal_attention, CausalSelfAttention]
+time_estimate_min: 30
+papers: [attention-is-all-you-need, gpt2]
+reading:
+  - title: "The Big LLM Architecture Comparison (Sebastian Raschka)"
+    url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
+  - title: "PyTorch: torch.nn.functional.scaled_dot_product_attention (документация)"
+    url: https://pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html
+viz: []
+questions: [attention-*]

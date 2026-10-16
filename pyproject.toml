@@ -1,0 +1,51 @@
+[build-system]
+requires = ["hatchling>=1.24"]
+build-backend = "hatchling.build"
+
+[project]
+name = "llmlab"
+version = "0.0.1"
+description = "LLM Arch Lab — локальный интерактивный курс по эволюции LLM-архитектур (GPT-2 → Llama → MoE → гибриды)"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.11"
+dependencies = [
+    "torch>=2.2",
+    "numpy>=1.26",
+    "pytest>=8.0",
+    "fastapi>=0.110",
+    "uvicorn>=0.29",
+    "typer>=0.12",
+    "pyyaml>=6.0",
+    "pydantic>=2.6",
+    "safetensors>=0.4",
+    "rich>=13.0",
+]
+
+[project.optional-dependencies]
+weights = ["huggingface_hub>=0.23"]
+
+[project.scripts]
+llmlab = "llmlab.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["llmlab"]
+
+# На Linux/Windows ставим CPU-сборку PyTorch (без CUDA, ~200 МБ вместо ~2 ГБ).
+# На macOS колёса с PyPI и так CPU/MPS.
+[tool.uv.sources]
+torch = [{ index = "pytorch-cpu", marker = "sys_platform != 'darwin'" }]
+
+[[tool.uv.index]]
+name = "pytorch-cpu"
+url = "https://download.pytorch.org/whl/cpu"
+explicit = true
+
+[tool.pytest.ini_options]
+# По умолчанию `pytest` гоняет только тесты платформы. Тесты задач запускает `llmlab test`.
+testpaths = ["tests"]
+# Все тесты задач называются test_task.py — без importlib-режима они конфликтуют по имени.
+addopts = "--import-mode=importlib -p no:cacheprovider"
+markers = [
+    "weights: тест скачивает реальные веса с Hugging Face (по умолчанию не запускается)",
+]

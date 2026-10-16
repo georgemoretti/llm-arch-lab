@@ -1,1 +1,16 @@
 .DS_Store
+__pycache__/
+*.pyc
+.venv/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
+
+# Состояние пользователя: прогресс, рабочие копии решений, конспекты
+.llmlab/
+workspace/
+notes/
+
+# Frontend
+web/node_modules/

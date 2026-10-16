@@ -1,0 +1,26 @@
+id: C
+title: "Эволюция декодеров: от GPT-2 к современным LLM"
+description: >
+  Шаг за шагом превращаем GPT-2 в Llama, затем добавляем идеи Gemma 3 / Olmo 2,
+  Mixture-of-Experts и MLA из DeepSeek, и заканчиваем гибридами с линейным вниманием.
+modules:
+  - id: module-0-gpt2
+    title: "Отправная точка: GPT-2"
+    description: "Вспоминаем causal multi-head attention — фундамент, который будем менять."
+  - id: module-1-llama
+    title: "GPT-2 → Llama"
+    description: "RMSNorm, SwiGLU, RoPE, GQA, KV-cache."
+  - id: module-2-gemma-olmo
+    title: "Gemma 3 / Olmo 2 / SmolLM3"
+    description: "Sliding window attention, размещение нормализаций, QK-Norm, NoPE."
+  - id: module-3-moe
+    title: "MoE и DeepSeek"
+    description: "Роутер, MoE-слой, балансировка, shared expert, MLA, MTP."
+  - id: module-4-efficient
+    title: "Эффективное внимание и гибриды"
+    description: "Sparse attention, gated attention, линейное внимание, Gated DeltaNet, SSM."
+baselines:
+  gpt2-baseline:
+    title: "GPT-2 (базовая модель курса)"
+    path: llmlab/core/gpt2.py
+    description: "LayerNorm, обучаемые абсолютные позиции, MHA, GELU-MLP, bias везде."
