@@ -1,8 +1,9 @@
 // V-masks: маски внимания — causal и sliding window, расписание sliding/full (и RoPE/NoPE) по слоям
-// реальных моделей, рост поля зрения при наложении SWA-слоёв. Числа расписаний — из config.json на HF.
+// реальных моделей, рост поля зрения при наложении SWA-слоёв, sparse-маска top-k в стиле DSA (C18).
+// Числа расписаний — из config.json на HF.
 import { useState } from "react";
 
-type Mode = "mask" | "layers" | "field";
+type Mode = "mask" | "layers" | "field" | "sparse";
 
 export default function Masks() {
   const [mode, setMode] = useState<Mode>("mask");
@@ -14,6 +15,7 @@ export default function Masks() {
             ["mask", "Маска слоя"],
             ["layers", "Расписание слоёв"],
             ["field", "Поле зрения стека"],
+            ["sparse", "Sparse (DSA)"],
           ] as [Mode, string][]
         ).map(([id, label]) => (
           <button key={id} role="tab" aria-selected={mode === id} className={mode === id ? "active" : ""} onClick={() => setMode(id)}>
@@ -24,6 +26,7 @@ export default function Masks() {
       {mode === "mask" && <MaskView />}
       {mode === "layers" && <LayersView />}
       {mode === "field" && <FieldView />}
+      {mode === "sparse" && <SparseView />}
     </div>
   );
 }
@@ -106,8 +109,9 @@ function Row(props: {
   kind: (t: number, s: number) => string;
   active: boolean;
   onHover: (t: number | null) => void;
+  tip?: (t: number, s: number, kind: string) => string;
 }) {
-  const { t, T, cell, kind, active, onHover } = props;
+  const { t, T, cell, kind, active, onHover, tip } = props;
   return (
     <>
       <div className={`viz-axis ${active ? "active" : ""}`}>q{t}</div>
@@ -120,7 +124,7 @@ function Row(props: {
             style={{ height: cell }}
             onMouseEnter={() => onHover(t)}
             title={
-              k === "future" ? `j=${s} > p=${t}: будущее` : k === "outside" ? `p − j = ${t - s} ≥ W: за окном` : `p − j = ${t - s}: в окне`
+              tip ? tip(t, s, k) : k === "future" ? `j=${s} > p=${t}: будущее` : k === "outside" ? `p − j = ${t - s} ≥ W: за окном` : `p − j = ${t - s}: в окне`
             }
           />
         );
@@ -278,6 +282,106 @@ function FieldRow({ label, T, lo, hi }: { label: string; T: number; lo: number; 
       {Array.from({ length: T }, (_, s) => (
         <div key={s} className={`mask-cell ${s >= lo && s <= hi ? "allowed" : "outside"}`} style={{ height: 16 }} title={`токен ${s}`} />
       ))}
+    </>
+  );
+}
+
+// ---------------------------------------------------------------- sparse-маска top-k (DSA, C18)
+
+function mulberry32(seed: number) {
+  return () => {
+    seed |= 0;
+    seed = (seed + 0x6d2b79f5) | 0;
+    let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function SparseView() {
+  const [T, setT] = useState(16);
+  const [k, setK] = useState(4);
+  const [loc, setLoc] = useState(1.5);
+  const [seed, setSeed] = useState(7);
+  const [row, setRow] = useState<number | null>(null);
+  const cell = T > 16 ? 18 : 24;
+
+  // Игрушечные оценки индексатора: «важность» ключа (несколько якорных токенов) + близость + шум пары.
+  const rnd = mulberry32(seed);
+  const anchors = new Set<number>([0, 2 + Math.floor(rnd() * (T - 4))]);
+  const imp = Array.from({ length: T }, (_, s) => (anchors.has(s) ? 2.2 : 0.3 * rnd()));
+  const score = Array.from({ length: T }, (_, t) =>
+    Array.from({ length: T }, (_, s) => (s > t ? -Infinity : imp[s] + loc * Math.exp(-(t - s) / 3) + 0.6 * rnd())),
+  );
+  const keep = score.map((r) => {
+    const order = r.map((v, s) => [v, s] as [number, number]).filter(([v]) => isFinite(v)).sort((a, b) => b[0] - a[0]);
+    return new Set(order.slice(0, k).map(([, s]) => s));
+  });
+  const kind = (t: number, s: number) => (s > t ? "future" : keep[t].has(s) ? "allowed" : "outside");
+  const farPicks = keep.reduce((acc, ks, t) => acc + [...ks].filter((s) => t - s >= k).length, 0);
+  const total = keep.reduce((a, ks) => a + ks.size, 0);
+
+  return (
+    <>
+      <div className="viz-controls">
+        <label>
+          T = {T}
+          <input type="range" min={6} max={24} value={T} onChange={(e) => setT(+e.target.value)} />
+        </label>
+        <label>
+          top-k = {k}
+          <input type="range" min={1} max={12} value={k} onChange={(e) => setK(+e.target.value)} />
+        </label>
+        <label>
+          вес близости = {loc.toFixed(1)}
+          <input type="range" min={0} max={4} step={0.1} value={loc} onChange={(e) => setLoc(+e.target.value)} />
+        </label>
+        <button onClick={() => setSeed((x) => x + 1)}>новые оценки</button>
+      </div>
+      <div className="viz-matrix" style={{ gridTemplateColumns: `30px repeat(${T}, ${cell}px)` }} onMouseLeave={() => setRow(null)}>
+        <div />
+        {Array.from({ length: T }, (_, s) => (
+          <div key={s} className="viz-axis" title={anchors.has(s) ? "якорный токен: высокая «важность» для всех запросов" : undefined}>
+            {anchors.has(s) ? `★${s}` : T > 16 && s % 2 ? "" : `k${s}`}
+          </div>
+        ))}
+        {Array.from({ length: T }, (_, t) => (
+          <Row
+            key={t}
+            t={t}
+            T={T}
+            cell={cell}
+            kind={kind}
+            active={row === t}
+            onHover={setRow}
+            tip={(t, s, kd) => (kd === "future" ? `s=${s} > t=${t}: будущее` : `оценка ${score[t][s].toFixed(2)}: ${kd === "allowed" ? "выбран" : "не выбран"}`)}
+          />
+        ))}
+      </div>
+      <div className="mask-legend">
+        <span>
+          <i className="mask-swatch allowed" /> выбран индексатором (top-k)
+        </span>
+        <span>
+          <i className="mask-swatch outside" /> прошлое, не выбрано
+        </span>
+        <span>
+          <i className="mask-swatch future" /> будущее (−inf ещё до top-k)
+        </span>
+      </div>
+      <p className="viz-caption">
+        Каждый запрос выбирает свои k ключей по оценкам индексатора — маска разная в каждой строке, в отличие от окна. Оценки
+        здесь игрушечные: «важность» ключа (★ — якорные токены) + бонус за близость + шум. В первых k строках допустимых ключей
+        меньше k — выбираются все (topk_mask отбрасывает −inf). Пар в attention: {total} вместо {(T * (T + 1)) / 2}; из них{" "}
+        {farPicks} — дальше, чем дотянулось бы окно W = k. Поставь вес близости 4 — маска почти превратится в sliding window;
+        0 — в выбор по важности. У DeepSeek-V3.2-Exp k = 2048 (index_topk в config.json) при контексте в десятки тысяч токенов.
+        {row !== null && (
+          <>
+            {" "}
+            Сейчас: q<sub>{row}</sub> смотрит на ключи {[...keep[row]].sort((a, b) => a - b).join(", ")}.
+          </>
+        )}
+      </p>
     </>
   );
 }

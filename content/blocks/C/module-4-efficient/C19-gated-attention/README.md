@@ -31,7 +31,7 @@ $$o = \operatorname{Attn}(x) \odot \sigma(W_g x)$$
 
 | | C09 (`QKNormAttention`, режим `head`) | C19 (`GatedAttention`) |
 |---|---|---|
-| `q_proj` | $C \to H \cdot D$ | $C \to H \cdot 2D$: у каждой головы `[запрос | гейт]` |
+| `q_proj` | $C \to H \cdot D$ | $C \to H \cdot 2D$: у каждой головы сначала $D$ каналов запроса, затем $D$ каналов гейта |
 | выход | $W_O \cdot \operatorname{Attn}$ | $W_O \cdot (\operatorname{Attn} \odot \sigma(\text{гейт}))$ |
 | RoPE | на всех $D$ каналах | на первых $R = D \cdot \text{factor}$ каналах, частоты считаются для размера $R$ |
 | `head_dim` | $C / H$ | задаётся явно (у Qwen3-Next 256 при $C = 2048$, $H = 16$, т. е. $H \cdot D = 2C$) |
