@@ -1,4 +1,4 @@
-"""CLI курса: ``llmlab list | test | validate | init-workspace | serve | notes | questions``."""
+"""CLI курса: ``llmlab list | test | validate | init-workspace | serve | notes | questions | model | generate``."""
 
 from __future__ import annotations
 
@@ -99,6 +99,7 @@ def test_cmd(
     impl: str = typer.Option("workspace", help="workspace | reference | starter | buggy"),
     impl_path: Optional[Path] = typer.Option(None, help="проверить произвольный файл"),
     timeout: float = typer.Option(DEFAULT_TIMEOUT_S, help="таймаут, с"),
+    weights: bool = typer.Option(False, "--weights", help="запустить и тесты с реальными весами (скачает их с HF)"),
 ) -> None:
     """Прогнать тесты задачи (по умолчанию — на твоей рабочей копии)."""
     course = _course()
@@ -110,8 +111,11 @@ def test_cmd(
         path = init_workspace(task, course.root)
         console.print(f"[dim]Рабочей копии не было — создал {path.relative_to(course.root)} из заготовки.[/]")
     console.print(f"[bold]{task.id}[/] — {task.title} [dim](impl={impl if impl_path is None else impl_path})[/]")
+    if weights:
+        timeout = max(timeout, 1800.0)       # скачивание ~1.5 ГБ и сверка с transformers — минуты, а не секунды
+        console.print("[dim]--weights: тесты с реальными весами (первый запуск скачивает их в ~/.cache/huggingface)[/]")
     result = run_task_tests(task, impl=impl, impl_path=impl_path.resolve() if impl_path else None,
-                            timeout_s=timeout, root=course.root)
+                            timeout_s=timeout, root=course.root, extra_args=["--weights"] if weights else None)
     _print_result(result)
     if result["status"] == "passed" and impl == "workspace" and impl_path is None:
         _after_solve(course, task)
@@ -313,6 +317,108 @@ def questions_check() -> None:
     if hits:
         raise typer.Exit(1)
     console.print("[green]Совпадений с сырым текстом нет.[/]")
+
+
+# ---------------------------------------------------------------------------- Фаза 8: модель
+
+MODEL_REPOS = {"qwen3-0.6b": "Qwen/Qwen3-0.6B", "gpt2": "openai-community/gpt2",
+               "smollm2-135m": "HuggingFaceTB/SmolLM2-135M"}
+
+
+@app.command("model")
+def model_cmd(name: Optional[str] = typer.Argument(None, help="имя конфига из llmlab/configs (без .yaml)")) -> None:
+    """Готовые конфиги модели; с именем — расписание слоёв и число параметров."""
+    import torch
+
+    from llmlab.core.model import Model, ModelConfig, available_configs
+
+    if name is None:
+        table = Table(title="llmlab/configs")
+        for col in ("конфиг", "слоёв", "d_model", "attention", "ffn", "параметров"):
+            table.add_column(col)
+        for n in available_configs():
+            cfg = ModelConfig.named(n)
+            with torch.device("meta"):
+                params = Model(cfg).num_params()
+            table.add_row(n, str(cfg.n_layers), str(cfg.d_model), cfg.attention.type,
+                          cfg.ffn.type + (" + moe" if cfg.moe else ""), f"{params:,}".replace(",", " "))
+        console.print(table)
+        console.print("[dim]Подробно: llmlab model <имя>. Генерация на реальных весах: llmlab generate qwen3-0.6b \"…\"[/]")
+        return
+    try:
+        cfg = ModelConfig.named(name)
+    except FileNotFoundError as exc:
+        console.print(f"[red]{exc}[/]")
+        raise typer.Exit(2) from None
+    with torch.device("meta"):
+        model = Model(cfg)
+    console.print(f"[bold]{cfg.name}[/]" + (f"  [dim]{cfg.source}[/]" if cfg.source else ""))
+    console.print(f"параметров: {model.num_params():,} (без эмбеддингов {model.num_params(True):,})".replace(",", " "))
+    console.print(f"norm: {cfg.norm.type} ({cfg.norm.placement}), позиции: {cfg.position.type}, "
+                  f"tie: {cfg.tie_embeddings}, head_dim: {cfg.head_dim}")
+    table = Table(title="слои")
+    for col in ("#", "mixer", "окно", "RoPE θ", "FFN"):
+        table.add_column(col)
+    for i, sp in enumerate(model.specs):
+        table.add_row(str(i), sp.mixer, str(sp.window or "—"), f"{sp.rope_theta:g}" if sp.use_rope else "NoPE", sp.ffn)
+    console.print(table)
+
+
+@app.command("generate")
+def generate_cmd(
+    model: str = typer.Argument("qwen3-0.6b", help="qwen3-0.6b | gpt2 | smollm2-135m | repo id HF | папка"),
+    prompt: str = typer.Argument("The capital of France is", help="начало текста"),
+    max_new_tokens: int = typer.Option(40, "--max-new-tokens", "-n"),
+    temperature: float = typer.Option(0.0, "--temperature", "-t", help="0 — жадно"),
+    top_k: Optional[int] = typer.Option(None, "--top-k"),
+    top_p: Optional[float] = typer.Option(None, "--top-p"),
+    seed: int = typer.Option(0, "--seed"),
+    chat: bool = typer.Option(False, "--chat", help="Qwen3: обернуть в чат-шаблон (без размышлений)"),
+    impl: str = typer.Option("core", help="core — эталон llmlab/core/hf.py; workspace — твоё решение C25"),
+) -> None:
+    """Сгенерировать текст своей моделью на реальных весах (нужно `uv sync --extra weights`)."""
+    import time
+
+    import torch
+
+    from llmlab.core import hf
+
+    path = Path(model)
+    try:
+        if not path.is_dir():
+            path = hf.download(MODEL_REPOS.get(model, model))
+        tokenizer = hf.load_tokenizer(path)
+    except Exception as exc:  # noqa: BLE001 — нет пакетов или сети: показать причину
+        console.print(f"[red]{escape(str(exc))}[/]")
+        raise typer.Exit(2) from None
+    mod = hf
+    if impl == "workspace":
+        import importlib.util
+
+        course = _course()
+        file = workspace_file(_get_task(course, "C25-qwen3-project"), course.root)
+        if not file.exists():
+            console.print(f"[red]Нет {file}. Начни задачу: llmlab init-workspace C25-qwen3-project[/]")
+            raise typer.Exit(2)
+        spec = importlib.util.spec_from_file_location("llmlab_c25_workspace", file)
+        mod = importlib.util.module_from_spec(spec)
+        spec.loader.exec_module(mod)
+    t0 = time.perf_counter()
+    lm = mod.load_pretrained(path)
+    console.print(f"[dim]{model}: {lm.num_params():,} параметров, загрузка {time.perf_counter() - t0:.1f} с "
+                  f"(impl={impl})[/]".replace(",", " "))
+    text, eos = prompt, None
+    if chat:
+        text = f"<|im_start|>user\n{prompt}<|im_end|>\n<|im_start|>assistant\n<think>\n\n</think>\n\n"
+        eos = tokenizer.token_to_id("<|im_end|>")
+    idx = torch.tensor([tokenizer.encode(text).ids])
+    t0 = time.perf_counter()
+    out = mod.generate(lm, idx, max_new_tokens, temperature=temperature, top_k=top_k, top_p=top_p,
+                       eos_token_id=eos, generator=torch.Generator().manual_seed(seed))
+    dt = time.perf_counter() - t0
+    new = out[0, idx.shape[1]:].tolist()
+    console.print(("" if chat else f"[bold]{escape(prompt)}[/]") + escape(tokenizer.decode(new)))
+    console.print(f"[dim]{len(new)} токенов за {dt:.1f} с ({len(new) / dt:.1f} ток/с)[/]")
 
 
 @app.command("serve")
