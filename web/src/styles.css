@@ -1669,7 +1669,12 @@ mark {
 }
 .rope-score {
   flex: 1;
-  min-width: 300px;
+  min-width: 260px;
+}
+.lc-title {
+  font-size: 12px;
+  font-weight: 600;
+  margin-top: 10px;
 }
 .rope-ring {
   fill: none;

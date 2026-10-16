@@ -235,11 +235,12 @@ class Course:
             if tid in seen or tid not in self.tasks:
                 return
             seen.add(tid)
-            for dep in sorted(self.tasks[tid].depends_on):
+            for dep in sorted(self.tasks[tid].depends_on, key=lambda t: (t in self.tasks and self.tasks[t].type in ("paper", "quiz"), t)):
                 visit(dep)
             order.append(tid)
 
-        for tid in sorted(self.tasks):
+        # paper/quiz — в конце модуля; иначе «C-P1» (дефис < цифры) встал бы перед «C01».
+        for tid in sorted(self.tasks, key=lambda t: (self.tasks[t].type in ("paper", "quiz"), t)):
             visit(tid)
         return order
 

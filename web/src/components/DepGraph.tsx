@@ -33,18 +33,23 @@ export function DepGraph({
 
   const columns: TaskSummary[][] = [];
   for (const t of tasks) (columns[depth.get(t.id)!] ??= []).push(t);
-  columns.forEach((col) => col.sort((a, b) => a.id.localeCompare(b.id)));
-
+  // Внутри столбца — по среднему положению родителей (меньше пересечений рёбер), затем по id.
   const pos = new Map<string, { x: number; y: number }>();
-  columns.forEach((col, i) =>
-    col.forEach((t, j) => pos.set(t.id, { x: 4 + i * (NODE_W + GAP_X), y: 4 + j * (NODE_H + GAP_Y) })),
-  );
+  columns.forEach((col, i) => {
+    const bary = (t: TaskSummary) => {
+      const ys = t.depends_on.filter((d) => pos.has(d)).map((d) => pos.get(d)!.y);
+      return ys.length ? ys.reduce((a, b) => a + b, 0) / ys.length : 0;
+    };
+    col.sort((a, b) => bary(a) - bary(b) || a.id.localeCompare(b.id));
+    col.forEach((t, j) => pos.set(t.id, { x: 4 + i * (NODE_W + GAP_X), y: 4 + j * (NODE_H + GAP_Y) }));
+  });
   const width = 8 + columns.length * (NODE_W + GAP_X) - GAP_X;
   const height = 8 + Math.max(1, ...columns.map((c) => c.length)) * (NODE_H + GAP_Y) - GAP_Y;
 
   return (
     <div className="depgraph">
-      <svg width={width} height={height} role="img" aria-label={label}>
+      {/* viewBox: широкий граф сжимается под ширину контейнера, а не уезжает за край */}
+      <svg width={width} height={height} viewBox={`0 0 ${width} ${height}`} style={{ maxWidth: "100%", height: "auto" }} role="img" aria-label={label}>
         {tasks.flatMap((t) =>
           t.depends_on
             .filter((d) => pos.has(d))

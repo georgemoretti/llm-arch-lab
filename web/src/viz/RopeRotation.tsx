@@ -170,20 +170,22 @@ export default function RopeRotation() {
               </b>
             </div>
           </div>
-          <LineChart
-            xs={DELTAS}
-            series={[{ id: "s", label: "score", color: "var(--series-1)", ys: curve }]}
-            xTicks={[0, 64, 128, 192, 256]}
-            xFormat={(x) => String(x)}
-            yFormat={(y) => y.toFixed(1)}
-            yLabel="⟨R_m q, R_{m+Δ} q⟩ / |q|²"
-            xLabel="расстояние Δ"
-            markerX={Math.min(Math.abs(m - n), 256)}
-            height={190}
-            zeroLine
-          />
         </div>
       </div>
+
+      <div className="lc-title">Сходство q с самим собой на расстоянии Δ: ⟨R_m q, R_(m+Δ) q⟩ / |q|²</div>
+      <LineChart
+        xs={DELTAS}
+        series={[{ id: "s", label: "score", color: "var(--series-1)", ys: curve }]}
+        xTicks={[0, 64, 128, 192, 256]}
+        xFormat={(x) => String(x)}
+        yFormat={(y) => String(+y.toFixed(2))}
+        yLabel="сходство"
+        xLabel="расстояние Δ"
+        markerX={Math.min(Math.abs(m - n), 256)}
+        height={190}
+        zeroLine
+      />
 
       <p className="viz-caption">
         Сдвиньте обе позиции ползунком «сдвиг» — score не меняется: важна только разность m − n. Круги сверху — все

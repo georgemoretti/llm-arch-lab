@@ -24,7 +24,7 @@ interface Props {
 }
 
 const W = 560;
-const PAD = { l: 52, r: 96, t: 10, b: 34 };
+const PAD = { l: 68, r: 96, t: 10, b: 34 };
 
 export function LineChart(p: Props) {
   const H = p.height ?? 220;
@@ -111,7 +111,7 @@ export function LineChart(p: Props) {
           <text x={(PAD.l + W - PAD.r) / 2} y={H - 4} className="lc-axis" textAnchor="middle">
             {p.xLabel}
           </text>
-          <text x={12} y={(PAD.t + H - PAD.b) / 2} className="lc-axis" textAnchor="middle" transform={`rotate(-90 12 ${(PAD.t + H - PAD.b) / 2})`}>
+          <text x={10} y={(PAD.t + H - PAD.b) / 2} className="lc-axis" textAnchor="middle" transform={`rotate(-90 10 ${(PAD.t + H - PAD.b) / 2})`}>
             {p.yLabel}
           </text>
           {p.markerX !== undefined && (
