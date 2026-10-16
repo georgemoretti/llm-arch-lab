@@ -1,0 +1,12 @@
+id: C-Q2-gemma-olmo-quiz
+title: "Квиз модуля: Gemma 3 / OLMo 2 / SmolLM3"
+block: C
+module: module-2-gemma-olmo
+type: quiz
+difficulty: medium
+depends_on: [C11-swa-kv-cache]
+diff_from: C06-llama-block
+tags: [quiz, gemma, olmo, smollm3, interview]
+time_estimate_min: 30
+papers: []
+questions: [swa-*, local-global-*, norm-placement-*, qk-norm-*, nope-*, swa-cache-*]
