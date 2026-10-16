@@ -1,0 +1,17 @@
+id: C-P1-roformer-gqa
+title: "Статьи: RoFormer (RoPE), MQA и GQA"
+block: C
+module: module-1-llama
+type: paper
+difficulty: medium
+depends_on: [C03-rope, C04-gqa]
+diff_from: null
+tags: [paper, positional-encoding, rope, attention, gqa, mqa]
+time_estimate_min: 60
+papers: [roformer, mqa, gqa]
+reading:
+  - title: "The Big LLM Architecture Comparison (Sebastian Raschka) — разборы GQA и других деталей"
+    url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
+  - title: "EleutherAI blog: Rotary Embeddings — A Relative Revolution"
+    url: https://blog.eleuther.ai/rotary-embeddings/
+questions: [paper-roformer-*, paper-mqa-*, paper-gqa-*]

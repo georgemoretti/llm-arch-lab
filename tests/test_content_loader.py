@@ -89,6 +89,20 @@ def test_questions_and_papers(toy_root):
     assert {q.id for q in course.questions_for(course.tasks["Z01-add"])} == {"add-01", "other-01"}
 
 
+def test_mcq_requires_correct_option(toy_root):
+    (toy_root / "content" / "questions" / "q.yaml").write_text(yaml.safe_dump([
+        {"id": "ok-01", "topic": "t", "kind": "mcq", "question": "?", "answer": "a",
+         "options": ["a", "b"], "correct": 0},
+        {"id": "bad-01", "topic": "t", "kind": "mcq", "question": "?", "answer": "a", "options": ["a", "b"]},
+        {"id": "bad-02", "topic": "t", "kind": "mcq", "question": "?", "answer": "a",
+         "options": ["a", "b"], "correct": 2},
+        {"id": "bad-03", "topic": "t", "question": "?", "answer": "a", "correct": 0},
+    ], allow_unicode=True))
+    course = load_course(toy_root)
+    assert set(course.questions) == {"ok-01"}
+    assert sum("correct" in e for e in _errors(course)) == 3
+
+
 def test_find_cycles_unit():
     assert find_cycles({"a": ["b"], "b": []}) == []
     assert find_cycles({"a": ["a"]}) == [["a", "a"]]

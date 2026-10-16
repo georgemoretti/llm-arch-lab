@@ -1,0 +1,12 @@
+id: C-Q1-llama-quiz
+title: "Квиз модуля: GPT-2 → Llama"
+block: C
+module: module-1-llama
+type: quiz
+difficulty: medium
+depends_on: [C06-llama-block]
+diff_from: gpt2-baseline
+tags: [quiz, llama, interview]
+time_estimate_min: 30
+papers: []
+questions: [rmsnorm-*, swiglu-*, rope-*, gqa-*, kvcache-*, llama-block-*]

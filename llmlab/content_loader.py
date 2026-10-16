@@ -23,7 +23,7 @@ from pathlib import Path
 from typing import Literal
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field, ValidationError
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, model_validator
 
 from llmlab.paths import content_dir
 
@@ -112,7 +112,19 @@ class Question(_Strict):
     question: str
     answer: str
     options: list[str] = Field(default_factory=list)
+    correct: int | None = None    # mcq: индекс верного варианта в options (с нуля)
     source: str = "course"
+
+    @model_validator(mode="after")
+    def _check_mcq(self) -> "Question":
+        if self.kind == "mcq":
+            if len(self.options) < 2:
+                raise ValueError("mcq: нужно хотя бы 2 варианта в options")
+            if self.correct is None or not 0 <= self.correct < len(self.options):
+                raise ValueError("mcq: correct — индекс верного варианта в options (с нуля)")
+        elif self.correct is not None:
+            raise ValueError("correct задаётся только для kind: mcq")
+        return self
 
 
 class Paper(_Strict):
