@@ -1,0 +1,19 @@
+id: C11-swa-kv-cache
+title: "KV-cache для sliding window: кольцевой буфер"
+block: C
+module: module-2-gemma-olmo
+type: implement
+difficulty: hard
+depends_on: [C05-kv-cache, C07-swa]
+diff_from: C05-kv-cache
+tags: [attention, kv-cache, sliding-window, inference, ring-buffer]
+entrypoint: [RingKVCache, SlidingWindowCachedAttention, swa_kv_cache_bytes]
+time_estimate_min: 50
+papers: [mistral-7b, gemma-3]
+reading:
+  - title: "Hugging Face transformers: cache_utils.py (SlidingWindowLayer / sliding window cache)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/cache_utils.py
+  - title: "The Big LLM Architecture Comparison (Sebastian Raschka) — экономия KV-cache в Gemma 3"
+    url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
+viz: [kv-cache]
+questions: [swa-cache-*]
