@@ -29,6 +29,11 @@ models:
     year: 2024
     module: module-2-gemma-olmo
     source: https://huggingface.co/allenai/OLMo-2-1124-7B/blob/main/config.json
+  - id: smollm3
+    title: SmolLM3 (3B)
+    year: 2025
+    module: module-2-gemma-olmo
+    source: https://huggingface.co/HuggingFaceTB/SmolLM3-3B/blob/main/config.json
   - id: deepseek-v3
     title: DeepSeek-V3
     year: 2024

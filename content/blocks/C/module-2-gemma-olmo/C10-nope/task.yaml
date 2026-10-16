@@ -1,0 +1,27 @@
+id: C10-nope
+title: "NoPE: слои без позиционного кодирования"
+block: C
+module: module-2-gemma-olmo
+type: implement
+difficulty: easy
+depends_on: [C05-kv-cache]
+diff_from: C05-kv-cache
+tags: [positional-encoding, nope, rope, smollm3, length-generalization]
+entrypoint: [rope_layers, NoPEAttention, build_attention_layers]
+time_estimate_min: 30
+papers: [nope-length-generalization, rope-to-nope]
+reading:
+  - title: "Hugging Face blog: SmolLM3 — smol, multilingual, long-context reasoner"
+    url: https://huggingface.co/blog/smollm3
+  - title: "The Big LLM Architecture Comparison (Sebastian Raschka) — раздел про SmolLM3 и NoPE"
+    url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
+  - title: "Hugging Face transformers: modeling_smollm3.py (use_rope = no_rope_layers[layer_idx])"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/smollm3/modeling_smollm3.py
+questions: [nope-*]
+# Источник: HuggingFaceTB/SmolLM3-3B config.json: num_hidden_layers = 36, no_rope_layer_interval = 4,
+# no_rope_layers = [1, 1, 1, 0] × 9 (1 = RoPE, 0 = NoPE), num_attention_heads = 16,
+# num_key_value_heads = 4, rope_theta = 5 000 000.
+arch:
+  smollm3:
+    position: "RoPE (θ = 5 000 000) в 3 слоях из 4, каждый 4-й слой — NoPE (без позиционного кодирования)"
+    attention: "GQA: 16 голов запросов, 4 KV-головы, полное causal (без SWA)"
