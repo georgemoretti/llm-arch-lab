@@ -3,23 +3,24 @@
 > Обновляется в конце КАЖДОЙ сессии Claude Code. Пиши кратко и конкретно.
 
 ## Текущая фаза
-Фаза 3b — **завершена** (2026-10-16). Модуль 1 (GPT-2 → Llama) закрыт целиком. Следующая:
-Фаза 4 — модуль 2 (Gemma 3 / Olmo 2 / SmolLM3). `data/interview_raw/` по-прежнему пуст.
+Фаза 4 — **завершена** (2026-10-16). Модуль 2 (Gemma 3 / OLMo 2 / SmolLM3) закрыт целиком. Следующая:
+Фаза 5a — модуль 3, MoE (C12–C15). `data/interview_raw/` по-прежнему пуст.
 
 ## Следующий шаг (точный)
-Запустить Фазу 4 по шаблону «фазы с контентом» из `docs/PROMPTS.md` в
-`content/blocks/C/module-2-gemma-olmo/` (модуль уже описан в `block.yaml`):
-- C07 SWA (маска с окном + паттерн local:global по слоям), C08 размещение норм (Post/Pre/Olmo 2/
-  sandwich; тест на градиент при инициализации), C09 QK-Norm (до RoPE), C10 NoPE, C11 KV-cache для
-  SWA (кольцевой буфер) + debug (off-by-one в окне; QK-Norm после RoPE; global-слои по неверному
-  индексу) + paper/quiz (Longformer, NoPE) + viz V-masks (маски causal/SWA/local-global) и
-  расширение V-kvcache на SWA (в `web/src/viz/KvCache.tsx` добавить окно в пресеты).
-- Опираться на `llmlab/core/llama.py` (там уже RMSNorm, RoPE, repeat_kv, KVCache, LlamaAttention);
-  новые эталоны модуля 2, которые понадобятся позже, класть в `llmlab/core/` и добавлять в
-  `tests/test_core_llama.py` (или новый тест).
-- Строки `gemma-3` и `olmo-2` в `content/architectures.yaml` уже есть; гиперпараметры (окно,
-  local:global, qk_norm) брать из config.json и указывать источник.
-- Вопросы — новый файл `content/questions/gemma-olmo.yaml`; mcq — с полем `correct`.
+Запустить Фазу 5a по шаблону «фазы с контентом» из `docs/PROMPTS.md` в
+`content/blocks/C/module-3-moe/` (модуль уже описан в `block.yaml`):
+- C12 роутер (логиты → softmax → top-k → перенормировка), C13 MoE-слой (наивная диспетчеризация и через
+  сортировку/scatter; тест «каждый токен обработан ровно top-k экспертами»), C14 балансировка (aux loss
+  Switch-style + упоминание bias-based из DeepSeek-V3), C15 shared expert + первые dense-слои;
+- debug-задачи 5a: softmax по неверной оси; нет перенормировки top-k; (переполнение capacity — к C13);
+  оставшийся баг PLAN («в MLA кешируется не латент») — в 5b;
+- эксперты — `SwiGLUFFN` из `llmlab/core/llama.py`; новые эталоны — в `llmlab/core/moe.py` +
+  `tests/test_core_moe.py` (по образцу `tests/test_core_gemma_olmo.py`);
+- гиперпараметры DeepSeek-V3 (n_routed_experts, num_experts_per_tok, n_shared_experts,
+  first_k_dense_replace, routed_scaling_factor, scoring_func) — из config.json `deepseek-ai/DeepSeek-V3`
+  (открыт); строка `deepseek-v3` в `content/architectures.yaml` уже есть (столбцы moe/ffn/attention);
+- вопросы — `content/questions/moe.yaml`; paper/quiz и V-moe-routing — в 5b (по PLAN), но вопросы к
+  задачам писать сразу.
 
 ## Сделано
 **Фаза 0:**
@@ -141,6 +142,42 @@
   сценарий в копии репо: C04 решена → конспект с mcq-вариантами и ячейкой таблицы.
 - Тесты платформы: 64.
 
+**Фаза 4:**
+- `llmlab/core/gemma_olmo.py` — эталоны C07–C11 (`sliding_window_mask`, `layer_types`,
+  `SlidingWindowAttention`, 4 блока с разным местом нормы, `QKNormAttention`, `rope_layers`,
+  `NoPEAttention`, `build_attention_layers`, `RingKVCache`, `SlidingWindowCachedAttention`,
+  `swa_kv_cache_bytes`); `tests/test_core_gemma_olmo.py` сверяет их с `solution.py` задач.
+- `C07-swa` (11 тестов): маска-окно `[T, S]` со сдвигом, расписание Gemma (`layer_types`), SWA-attention;
+  свойства: W=1 → диагональ, W ≥ T → `LlamaAttention`, локальность, 3 слоя видят на 3·(W−1) назад
+  (через градиент); диагност: окно ±1, нет causal, окно от начала, `i % pattern`.
+- `C08-norm-placement` (7): Post / Pre / OLMo 2 / sandwich; формулы при случайных весах норм, тождество при
+  нулевых подслоях, RMS остатка (Post = 1, OLMo/sandwich ≈ √(1+2L)), эффект Xiong et al. (Xavier-init:
+  ‖∇W‖ последнего блока у Post не зависит от L, у Pre падает > 2× при L 1 → 16).
+- `C09-qk-norm` (6): режимы `head` (Gemma 3) и `full` (OLMo 2), норма до RoPE, |score| ≤ √D,
+  инвариантность к масштабу W_Q/W_K.
+- `C10-nope` (8): `rope_layers` = `no_rope_layers` SmolLM3, NoPE = «мешок слов» для последнего токена,
+  но различает позиции через маску; RoPE-слой = `LlamaAttention`.
+- `C11-swa-kv-cache` (10): кольцевой буфер (ячейка p % W, позиции −1 для пустых), `update` возвращает
+  буфер ДО записи + новые, маска по абсолютным позициям; по токену / prefill 11 + decode / куски /
+  W=1 / W>T == полный SWA; `swa_kv_cache_bytes` (Gemma 3 27B на 128K: 10.4 ГиБ против 62).
+  Диагност — симуляция трёх типичных ошибок (позиции RoPE, пустые ячейки, маска по индексам).
+- Debug: `C07d` (окно на 1 шире: `k_pos >= q_pos - W`), `C09d` (QK-Norm после RoPE — видно только при
+  неединичных весах норм), `C10d` (NoPE-слои `i % k` вместо `(i+1) % k`).
+- `C-P2-longformer-nope` (Longformer, NoPE-статья, Xiong et al.; 6 вопросов), `C-Q2-gemma-olmo-quiz`
+  (19 вопросов модуля по глобам). Статьи: `longformer`, `mistral-7b`, `gemma-2`, `gemma-3`, `olmo-2`,
+  `nope-length-generalization`, `rope-to-nope`, `layernorm-placement`, `qk-norm`, `vit-22b`.
+- Вопросы: `content/questions/gemma-olmo.yaml` (19), `papers-module-2.yaml` (6).
+- Таблица архитектур: + строка SmolLM3; ячейки Gemma 3 (attention, position — C07; norm — C08),
+  OLMo 2 (norm — C08; attention, position — C09), SmolLM3 (position, attention — C10).
+- Визуализации: `masks` (V-masks: маска слоя со слайдером окна, расписание слоёв 5 моделей с
+  sliding/full/NoPE, поле зрения стека) → C07, C07d; `kv-cache` расширен пресетами Mistral 7B, Gemma 2 9B,
+  Gemma 3 4B/27B и флажком «учитывать окно SWA» (плитка «без окна ×N»).
+- Проверено: мутации эталонов C07 (4), C08 (5), C09 (2), C11 (5) падают с понятными сообщениями;
+  152 формулы новых README/summary проходят KaTeX; скриншоты V-masks (3 режима) и V-kvcache (Gemma 3,
+  Mistral) в обеих темах, 860 px — без ошибок в консоли; сквозной сценарий в копии репо: C09 решена →
+  конспект с вопросами, ячейки OLMo 2 открыты в `notes/index.md`.
+- Тесты платформы: 69.
+
 ## Не сделано / долги
 - E2E-сценарий UI не в репозитории (Playwright ставился во временную папку). Если UI начнёт
   ломаться — завести `web/e2e/` с Playwright и отдельный CI-job.
@@ -165,6 +202,19 @@
 - `llmlab/core/llama.py` дублирует эталоны C01–C05 (сверяется тестом) — при правке эталона править оба.
 - Локальный `.venv` был скопирован из другого проекта (activate указывал на чужой venv) —
   пересоздан `rm -rf .venv && uv sync`. Если `llmlab` «не находится» — первым делом это.
+
+- Фаза 4: тесты C07d/C09d/C10d — копии тестов C07/C09/C10 без подсказок, называющих баг. При правке тестов
+  C07, C09, C10 синхронизировать debug-копии. `llmlab/core/gemma_olmo.py` дублирует эталоны C07–C11
+  (страховка — `tests/test_core_gemma_olmo.py`).
+- Ячейки `gemma-3.ffn` (GeGLU, `gelu_pytorch_tanh`) и `olmo-2.ffn` (SwiGLU) никакая задача не открывает —
+  FFN в модуле 2 не меняется. Решить в Фазе 9: либо открывать вместе с C08, либо допустить ячейки «по
+  config.json» без задачи.
+- Ячейки `moe` у Gemma 3 / OLMo 2 / SmolLM3 («dense») тоже пока никем не открываются (у Llama 3 это делает
+  C06) — можно добавить в Фазе 5a в C15 (dense vs MoE).
+- Разные θ RoPE для local/global слоёв Gemma 3 описаны в README C07, но не реализованы ни в одной задаче
+  (в C07 один θ) — учесть в Фазе 8 (конфигурируемая модель).
+- Тест градиента C08 опирается на статистику (3 сида, пороги 0.7–1.4 и > 2; фактически ≈ 1.0 и ≈ 2.9). При
+  смене версии torch/инициализации пересчитать запас.
 
 ## Решения (почему сделано так, а не иначе)
 - **pytest-плагин в пакете** (`llmlab/pytest_plugin.py`), а корневой `conftest.py` только
@@ -276,6 +326,30 @@
   (8 030 261 248, посчитано по config.json), остальные не выдумывал. Mistral не в пресетах —
   у него SWA, добавить в Фазе 4. Llama 3.2 1B сверен по зеркалу `unsloth/Llama-3.2-1B`.
 
+- **Фаза 4: гиперпараметры Gemma** сверены по открытым зеркалам `unsloth/gemma-2-9b`,
+  `unsloth/gemma-3-{1b,4b,27b}-pt` (оригинальные репозитории Google закрыты соглашением); SmolLM3, OLMo 2,
+  Mistral — по оригинальным config.json. Правило «слой i full ⇔ (i+1) % pattern == 0» и семантика окна
+  (`kv_idx > q_idx − W`, окно включает сам токен) — из `configuration_gemma3.py` / `masking_utils.py`.
+- **C08: эффект градиентов проверяется при Xavier-инициализации**, а не при дефолтной `nn.Linear`: с
+  дефолтной (выходы подслоёв малы) разница Pre/Post почти не видна, с Xavier — ровно картина Xiong et al.
+  (Post ≈ константа, Pre ~ 1/√L; проверено экспериментом на 3 сидах). Конструкторы блоков даны, пользователь
+  пишет только `forward` (по две строки) — суть задачи в сравнении, а не в сборке.
+- **C08: у Gemma `RMSNorm` умножает на (1 + w)** — в задаче обычный RMSNorm, отличие описано в README.
+  Учесть в Фазе 8 при загрузке весов Gemma.
+- **C09: метод `scores()`** вынесен в интерфейс, чтобы проверить ограниченность логитов напрямую.
+  Режим OLMo 2 (`full`) тоже в задаче: разница «по голове / по всей проекции» — частый вопрос.
+- **C10: расписание NoPE «последний в группе»** проверено по `no_rope_layers` SmolLM3-3B. Debug
+  «global-слои по неверному индексу» из PLAN сделан на расписании NoPE (`C10d`), а не Gemma: у C07 уже
+  есть debug (окно), а формула расписания та же; ловушка Gemma описана в C07 (диагност `i % pattern`).
+- **C11: `update` возвращает буфер ДО записи + новые токены** (`[W + T]` ключей, пустые с позицией −1), а
+  не «последние W»: иначе кусок из нескольких токенов теряет ключи, вытесненные собственной записью.
+  Тест `test_update_returns_needed_keys` проверяет семантику (нужные позиции есть, позиции ↔ ключи), а не
+  точный формат, — допускаются и другие корректные реализации.
+- **C11 без debug-задачи**: три бага PLAN распределены по C07d/C09d/C10d.
+- **V-masks: три режима в одном компоненте** (маска / расписание / поле зрения), а не три viz: одна
+  тема, одна вкладка. Полоса слоёв — сетка по 12 (кратно 6, 4, 2), чтобы паттерн выстраивался столбцами.
+- **Таблица архитектур: добавлена строка SmolLM3** (модуль назван в честь трёх моделей, NoPE — её фича).
+
 ## Известные проблемы
 - Холодный старт subprocess с torch ≈ 1–1.5 с на прогон — приемлемо для UI, но заметно.
 
@@ -287,3 +361,4 @@
 | 2026-10-16 | 2 | Автоконспекты, FTS5-поиск, экспорт, таблица архитектур, вкладка «Конспекты», модалка вывода, 57 тестов | см. `git log` |
 | 2026-10-16 | 3a | C01 RMSNorm, C02 SwiGLU, C03 RoPE + 3 debug-задачи, 5 статей, 8 вопросов, строка Llama 3 | см. `git log` |
 | 2026-10-16 | 3b | C04 GQA, C05 KV-cache, C06 Llama + 3 debug, C-P1, C-Q1, V-rope, V-kvcache, вкладка «Вопросы», core/llama.py, 64 теста | см. `git log` |
+| 2026-10-16 | 4 | C07 SWA, C08 нормы, C09 QK-Norm, C10 NoPE, C11 кольцевой KV-cache + 3 debug, C-P2, C-Q2, V-masks, SWA в V-kvcache, core/gemma_olmo.py, 69 тестов | см. `git log` |
