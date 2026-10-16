@@ -1,0 +1,25 @@
+id: C19-gated-attention
+title: "Gated attention: выходной гейт и partial RoPE (Qwen3-Next)"
+block: C
+module: module-4-efficient
+type: implement
+difficulty: medium
+depends_on: [C09-qk-norm]
+diff_from: C09-qk-norm
+tags: [attention, gating, positional-encoding, rope, attention-sink, qwen]
+entrypoint: [apply_partial_rope, GatedAttention]
+time_estimate_min: 35
+papers: [gated-attention, roformer]
+reading:
+  - title: "Hugging Face transformers: modeling_qwen3_next.py (Qwen3NextAttention, apply_rotary_pos_emb)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/qwen3_next/modeling_qwen3_next.py
+  - title: "The Big LLM Architecture Comparison (Sebastian Raschka) — Qwen3-Next"
+    url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
+questions: [gated-attn-*, partial-rope-*]
+# Источник: Qwen/Qwen3-Next-80B-A3B-Instruct config.json: num_attention_heads 16, num_key_value_heads 2,
+# head_dim 256, partial_rotary_factor 0.25, rope_theta 10000000, full_attention_interval 4, hidden_size 2048.
+# Раскладка гейта ([запрос | гейт] внутри каждой головы) и σ после SDPA — modeling_qwen3_next.py.
+arch:
+  qwen3-next:
+    attention: "в каждом 4-м слое — gated attention (σ-гейт на выходе), GQA 16 / 2, head_dim 256, QK-Norm"
+    position: "partial RoPE: 64 из 256 каналов (factor 0.25), θ = 10⁷"
