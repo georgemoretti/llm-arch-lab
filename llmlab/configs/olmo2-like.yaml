@@ -1,0 +1,13 @@
+# OLMo 2-подобная модель игрушечного размера (модуль 2): нормы на выходе подслоёв внутри остатка,
+# QK-Norm по всей проекции (до разбиения на головы), RoPE, SwiGLU, раздельные embed/lm_head.
+# θ = 500 000, rms_norm_eps 1e-6, tie_word_embeddings false — как в config.json
+# https://huggingface.co/allenai/OLMo-2-0425-1B. Размеры игрушечные.
+name: olmo2-like
+vocab_size: 256
+d_model: 64
+n_layers: 4
+tie_embeddings: false
+norm: {type: rmsnorm, eps: 1.0e-6, placement: olmo}
+position: {type: rope, theta: 500000}
+attention: {type: gqa, n_heads: 4, qk_norm: full}
+ffn: {type: swiglu, d_hidden: 176}

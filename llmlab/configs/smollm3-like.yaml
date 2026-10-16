@@ -1,0 +1,12 @@
+# SmolLM3-подобная модель игрушечного размера (C10): каждый 4-й слой без RoPE (NoPE), GQA 4 : 1.
+# no_rope_layer_interval 4, rope_theta 5 000 000, num_attention_heads 16 / num_key_value_heads 4,
+# tie_word_embeddings true — как в config.json https://huggingface.co/HuggingFaceTB/SmolLM3-3B.
+name: smollm3-like
+vocab_size: 256
+d_model: 64
+n_layers: 8
+tie_embeddings: true
+norm: {type: rmsnorm, eps: 1.0e-6, placement: pre}
+position: {type: rope, theta: 5000000, no_rope_layer_interval: 4}
+attention: {type: gqa, n_heads: 8, n_kv_heads: 2}
+ffn: {type: swiglu, d_hidden: 176}

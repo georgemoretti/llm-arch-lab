@@ -1,0 +1,15 @@
+# GPT-2 small (124M) — базовая модель блока C в виде конфига.
+# Источник: https://huggingface.co/openai-community/gpt2/blob/main/config.json
+#   vocab_size 50257, n_positions 1024, n_embd 768, n_layer 12, n_head 12, layer_norm_epsilon 1e-5,
+#   activation_function gelu_new (= GELU с tanh-аппроксимацией), выход связан с wte.
+# Веса загружаются `llmlab.core.hf.load_pretrained` (bonus-тест C25, Conv1D → Linear).
+name: gpt2
+source: https://huggingface.co/openai-community/gpt2/blob/main/config.json
+vocab_size: 50257
+d_model: 768
+n_layers: 12
+tie_embeddings: true
+norm: {type: layernorm, eps: 1.0e-5, placement: pre}
+position: {type: learned, max_positions: 1024}
+attention: {type: gqa, n_heads: 12, bias: true}          # n_kv_heads = n_heads → обычный MHA
+ffn: {type: gelu, d_hidden: 3072, bias: true}

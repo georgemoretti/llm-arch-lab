@@ -1,0 +1,12 @@
+# Llama-подобная модель игрушечного размера: Pre-Norm RMSNorm, RoPE, GQA, SwiGLU, без bias (модуль 1).
+# Структура — как у Llama 3 (C06); размеры игрушечные, чтобы гонять на CPU со случайными весами.
+# θ = 500 000 и раздельные embed/lm_head — как в config.json meta-llama/Meta-Llama-3-8B.
+name: llama-like
+vocab_size: 256
+d_model: 64
+n_layers: 4
+tie_embeddings: false
+norm: {type: rmsnorm, eps: 1.0e-5, placement: pre}
+position: {type: rope, theta: 500000}
+attention: {type: gqa, n_heads: 4, n_kv_heads: 2}
+ffn: {type: swiglu, d_hidden: 176}

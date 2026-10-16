@@ -1,0 +1,24 @@
+# Gemma 3-подобная модель игрушечного размера (модуль 2): sandwich-нормы с весом (1 + w), QK-Norm по
+# голове, 5 sliding : 1 full, свой θ RoPE для sliding-слоёв, GeGLU, эмбеддинги × √d, связанный выход.
+# Структурные числа — как в config.json Gemma 3 1B (зеркало https://huggingface.co/unsloth/gemma-3-1b-pt):
+#   sliding_window_pattern 6, rope_theta 1 000 000, rope_local_base_freq 10 000, rms_norm_eps 1e-6,
+#   hidden_activation gelu_pytorch_tanh, query_pre_attn_scalar = head_dim (256), num_key_value_heads 1.
+# Размеры игрушечные: окно 8 вместо 512, head_dim 16 вместо 256.
+name: gemma3-like
+vocab_size: 256
+d_model: 64
+n_layers: 6
+tie_embeddings: true
+embed_scale: true
+norm: {type: gemma_rmsnorm, eps: 1.0e-6, placement: sandwich}
+position: {type: rope, theta: 1000000, local_theta: 10000}
+attention:
+  type: gqa
+  n_heads: 4
+  n_kv_heads: 1
+  head_dim: 16
+  qk_norm: head
+  query_scale: 0.25            # query_pre_attn_scalar ** -0.5 при query_pre_attn_scalar = 16
+  window: 8
+  sliding_window_pattern: 6
+ffn: {type: geglu, d_hidden: 128}

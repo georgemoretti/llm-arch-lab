@@ -1,0 +1,28 @@
+# DeepSeek-V3-подобная модель игрушечного размера (модуль 3): MLA с decoupled RoPE (C16b), первые слои
+# dense, дальше DeepSeekMoE — sigmoid-роутер, top-k, перенормировка, routed_scaling_factor и shared expert
+# (C12–C15). Без MTP, сжатия запроса (q_lora_rank), группового выбора экспертов и bias-коррекции роутера.
+# Структура — по config.json https://huggingface.co/deepseek-ai/DeepSeek-V3 (first_k_dense_replace 3,
+# n_shared_experts 1, scoring_func sigmoid, routed_scaling_factor 2.5); размеры игрушечные.
+name: deepseek-tiny
+vocab_size: 256
+d_model: 64
+n_layers: 4
+tie_embeddings: false
+norm: {type: rmsnorm, eps: 1.0e-6, placement: pre}
+position: {type: rope, theta: 10000}
+attention:
+  type: mla
+  n_heads: 4
+  kv_lora_rank: 16
+  qk_nope_head_dim: 16
+  qk_rope_head_dim: 8
+  v_head_dim: 16
+ffn: {type: swiglu, d_hidden: 176}           # dense-слои
+moe:
+  n_routed: 8
+  n_shared: 1
+  top_k: 2
+  d_expert: 32
+  scoring_func: sigmoid
+  routed_scaling_factor: 2.5
+  first_k_dense_replace: 1

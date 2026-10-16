@@ -13,7 +13,9 @@
 
 - ``--impl=workspace|reference|starter|buggy`` (по умолчанию ``workspace``);
 - ``--impl-path=<file.py>`` — проверить произвольный файл (перекрывает ``--impl``);
-- ``--llmlab-report=<file.json>`` — записать структурированный отчёт (использует раннер).
+- ``--llmlab-report=<file.json>`` — записать структурированный отчёт (использует раннер);
+- ``--weights`` (или ``LLMLAB_WEIGHTS=1``) — запускать тесты ``@pytest.mark.weights``, которые скачивают
+  реальные веса с Hugging Face. Без флага они пропускаются.
 """
 
 from __future__ import annotations
@@ -40,13 +42,29 @@ def pytest_addoption(parser: pytest.Parser) -> None:
                     help="какую реализацию тестировать: workspace (по умолчанию), reference, starter, buggy")
     group.addoption("--impl-path", default=None, help="путь к произвольному файлу реализации")
     group.addoption("--llmlab-report", default=None, help="куда записать JSON-отчёт о прогоне")
+    group.addoption("--weights", action="store_true", default=False,
+                    help="запускать тесты с реальными весами (@pytest.mark.weights)")
 
 
 def pytest_configure(config: pytest.Config) -> None:
     config.stash[_impl_path_key] = {}
+    config.addinivalue_line("markers", "weights: тест скачивает реальные веса с Hugging Face (нужен --weights)")
     report_path = config.getoption("--llmlab-report", default=None)
     if report_path:
         config.pluginmanager.register(_JsonReporter(Path(report_path)), "llmlab-json-reporter")
+
+
+def weights_enabled(config: pytest.Config) -> bool:
+    return bool(config.getoption("--weights", default=False)) or os.environ.get("LLMLAB_WEIGHTS") == "1"
+
+
+def pytest_collection_modifyitems(config: pytest.Config, items: list[pytest.Item]) -> None:
+    if weights_enabled(config):
+        return
+    skip = pytest.mark.skip(reason="нужны реальные веса: запусти с --weights (llmlab test <id> --weights)")
+    for item in items:
+        if item.get_closest_marker("weights") is not None:
+            item.add_marker(skip)
 
 
 # ---------------------------------------------------------------------------

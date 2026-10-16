@@ -1,0 +1,15 @@
+# Гибрид в стиле Qwen3-Next игрушечного размера (модуль 4): 3 слоя Gated DeltaNet (C21) : 1 слой gated
+# attention (C19: QK-Norm, partial RoPE на четверти головы, σ-гейт), нормы с весом (1 + w).
+# full_attention_interval 4, partial_rotary_factor 0.25, rms_norm_eps 1e-6, tie_word_embeddings false —
+# как в config.json https://huggingface.co/Qwen/Qwen3-Next-80B-A3B-Instruct. Упрощения DeltaNet (нет conv1d,
+# выходного гейта, 32 value / 16 key голов) — см. C21. MoE Qwen3-Next здесь заменён dense SwiGLU.
+name: hybrid-tiny
+vocab_size: 256
+d_model: 64
+n_layers: 8
+tie_embeddings: false
+norm: {type: gemma_rmsnorm, eps: 1.0e-6, placement: pre}
+position: {type: rope, theta: 10000000, partial_rotary_factor: 0.25}
+attention: {type: gqa, n_heads: 4, n_kv_heads: 2, head_dim: 16, qk_norm: head, output_gate: true}
+linear_attention: {type: gated_deltanet, full_attention_interval: 4, n_heads: 4, head_k_dim: 16, head_v_dim: 16}
+ffn: {type: swiglu, d_hidden: 176}

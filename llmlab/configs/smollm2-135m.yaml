@@ -1,0 +1,14 @@
+# SmolLM2-135M — маленькая открытая модель архитектуры Llama (бонус Фазы 8: вторые реальные веса).
+# Источник: https://huggingface.co/HuggingFaceTB/SmolLM2-135M/blob/main/config.json
+#   hidden_size 576, num_hidden_layers 30, num_attention_heads 9, num_key_value_heads 3 (head_dim 64),
+#   intermediate_size 1536, rope_theta 100000, rms_norm_eps 1e-5, tie_word_embeddings true, vocab 49152.
+name: smollm2-135m
+source: https://huggingface.co/HuggingFaceTB/SmolLM2-135M/blob/main/config.json
+vocab_size: 49152
+d_model: 576
+n_layers: 30
+tie_embeddings: true
+norm: {type: rmsnorm, eps: 1.0e-5, placement: pre}
+position: {type: rope, theta: 100000}
+attention: {type: gqa, n_heads: 9, n_kv_heads: 3}
+ffn: {type: swiglu, d_hidden: 1536}

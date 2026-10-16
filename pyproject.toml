@@ -23,7 +23,8 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-weights = ["huggingface_hub>=0.23"]
+# Фаза 8: скачивание реальных весов, токенизатор и сверка логитов с transformers.
+weights = ["huggingface_hub>=0.23", "tokenizers>=0.19", "transformers>=4.51"]
 
 [project.scripts]
 llmlab = "llmlab.cli:app"
@@ -49,7 +50,7 @@ pythonpath = ["tests"]
 addopts = "--import-mode=importlib -p no:cacheprovider"
 filterwarnings = ["ignore:Using `httpx` with `starlette.testclient` is deprecated"]
 markers = [
-    "weights: тест скачивает реальные веса с Hugging Face (по умолчанию не запускается)",
+    "weights: тест скачивает реальные веса с Hugging Face (запускается только с --weights)",
 ]
 
 [dependency-groups]

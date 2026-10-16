@@ -1,0 +1,19 @@
+# Qwen3-0.6B — модель финального проекта (C24, C25).
+# Источник: https://huggingface.co/Qwen/Qwen3-0.6B/blob/main/config.json (сверено 2026-10-17):
+#   vocab_size 151936, hidden_size 1024, num_hidden_layers 28, num_attention_heads 16,
+#   num_key_value_heads 8, head_dim 128 (≠ 1024 / 16 = 64!), intermediate_size 3072, hidden_act silu,
+#   rms_norm_eps 1e-6, rope_theta 1000000, rope_scaling null, attention_bias false,
+#   use_sliding_window false, tie_word_embeddings true.
+# QK-Norm по голове (q_norm / k_norm размера head_dim) — из modeling_qwen3.py (Qwen3Attention).
+# Параметров: 596 049 920 (embed 155 582 464 + остальное 440 467 456), ср. «0.6B / 0.44B non-embedding»
+# в карточке модели.
+name: qwen3-0.6b
+source: https://huggingface.co/Qwen/Qwen3-0.6B/blob/main/config.json
+vocab_size: 151936
+d_model: 1024
+n_layers: 28
+tie_embeddings: true
+norm: {type: rmsnorm, eps: 1.0e-6, placement: pre}
+position: {type: rope, theta: 1000000}
+attention: {type: gqa, n_heads: 16, n_kv_heads: 8, head_dim: 128, qk_norm: head}
+ffn: {type: swiglu, d_hidden: 3072}
