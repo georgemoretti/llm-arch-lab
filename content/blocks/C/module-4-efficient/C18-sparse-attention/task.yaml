@@ -1,0 +1,23 @@
+id: C18-sparse-attention
+title: "Sparse attention в стиле DSA: индексатор и top-k ключей"
+block: C
+module: module-4-efficient
+type: implement
+difficulty: medium
+depends_on: [C07-swa]
+diff_from: C07-swa
+tags: [attention, sparse-attention, long-context, deepseek, dsa]
+entrypoint: [LightningIndexer, topk_mask, sparse_attention, DSAttention]
+time_estimate_min: 45
+papers: [deepseek-v32]
+reading:
+  - title: "DeepSeek-V3.2-Exp: эталонный инференс-код (inference/model.py, класс Indexer)"
+    url: https://github.com/deepseek-ai/DeepSeek-V3.2-Exp/blob/main/inference/model.py
+  - title: "Sebastian Raschka — LLM Architecture Gallery: DeepSeek Sparse Attention"
+    url: https://sebastianraschka.com/llm-architecture-gallery/deepseek-sparse-attention/
+viz: [masks]
+questions: [sparse-*]
+# Источник: deepseek-ai/DeepSeek-V3.2-Exp config.json: index_n_heads 64, index_head_dim 128, index_topk 2048,
+# kv_lora_rank 512, qk_rope_head_dim 64; формула индексатора — inference/model.py (Indexer, fp8_index) и arXiv 2512.02556.
+arch:
+  deepseek-v3.2: {attention: "MLA + DSA: индексатор 64 × 128 (ReLU), top-2048 ключей на запрос"}

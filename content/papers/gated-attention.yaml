@@ -1,0 +1,7 @@
+id: gated-attention
+title: "Gated Attention for Large Language Models: Non-linearity, Sparsity, and Attention-Sink-Free"
+authors: "Qiu et al. (Qwen Team, Alibaba)"
+year: 2025
+venue: NeurIPS
+url: https://arxiv.org/abs/2505.06708
+tags: [attention, gating, attention-sink, qwen]

@@ -1,0 +1,7 @@
+id: transformers-are-rnns
+title: "Transformers are RNNs: Fast Autoregressive Transformers with Linear Attention"
+authors: "Katharopoulos, Vyas, Pappas, Fleuret"
+year: 2020
+venue: ICML
+url: https://arxiv.org/abs/2006.16236
+tags: [linear-attention, kernel, recurrent]
