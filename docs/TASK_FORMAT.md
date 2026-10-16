@@ -199,11 +199,18 @@ def test_something(impl, ref):
   options: []                   # для mcq — варианты ответа
   correct: null                 # для mcq — индекс верного варианта (с нуля); обязателен для mcq
   source: course                # course | user-db | …
+  tags: []                      # подтема для фильтров Interview (обязательна для topic: other)
+  source_ref: []                # только user-db: хэши сырых вопросов, ["a1b2c3d4e5"] — в кавычках
 ```
 
 Вопросы задачи (`questions_for`) показываются во вкладке **«Вопросы»** на странице задачи
-(mcq — с проверкой выбора, open — с кнопкой «Показать эталонный ответ») и в конспекте. Для
-paper/quiz-задач это основной способ самопроверки до Фазы 7.
+(mcq — с проверкой выбора, open — с кнопкой «Показать эталонный ответ», затем самооценка для
+интервального повторения), в конспекте (со ссылкой на карточку) и во вкладке **Interview** (все
+вопросы курса: повторение SM-2, квиз по модулю, список). Модуль вопроса — модули задач, к которым он
+привязан; вопросы без задач попадают в Interview в раздел «без привязки к задачам».
+
+Вопросы с собеседований пользователя (`source: user-db`, файлы `interview-*.yaml`) импортируются по
+`docs/QUESTIONS_IMPORT.md`; сырой текст из `data/interview_raw/` в репозиторий не копируется.
 
 ### `content/papers/<id>.yaml`
 
@@ -368,8 +375,22 @@ CREATE TABLE notes_index (path TEXT PRIMARY KEY, task_id TEXT, mtime_ns INTEGER 
 -- без FTS5 поиск идёт сканом файлов.
 ```
 
+```sql
+-- v3 (интервальное повторение, llmlab/srs.py)
+CREATE TABLE srs_cards (
+    qid TEXT PRIMARY KEY, ease REAL NOT NULL, interval_days REAL NOT NULL, reps INTEGER NOT NULL,
+    lapses INTEGER NOT NULL, due_at TEXT, last_grade TEXT, last_review_at TEXT
+);
+CREATE TABLE srs_reviews (id INTEGER PRIMARY KEY AUTOINCREMENT, qid TEXT NOT NULL, grade TEXT NOT NULL,
+                          mode TEXT NOT NULL, created_at TEXT NOT NULL);   -- mode: review | quiz | task
+```
+
+SM-2: оценки again / hard / good / easy → q = 2 / 3 / 4 / 5; провал — повтор через 10 минут; успешные
+интервалы 1 день, 6 дней, затем × ease (easy — ещё × 1.3); ease ≥ 1.3.
+
 Статус задачи вычисляется из попыток (`db.task_statuses()`): `solved` — была попытка
-`passed`, `attempted` — были попытки, иначе `new`.
+`passed`, `attempted` — были попытки, иначе `new`. У paper/quiz тестов нет: кнопка «Отметить
+пройденным» пишет попытку с `impl = 'manual'`.
 
 ### 4.5 CLI
 
@@ -381,6 +402,8 @@ llmlab validate <id> | --all [-j 4]
 llmlab serve [--port 8765] [--no-open]   # веб-интерфейс на 127.0.0.1
 llmlab notes build [<id>] [--insight "строка\nстрока"]   # создать/пересобрать конспект(ы)
 llmlab notes export [--out llmlab-notes.zip]             # vault для Obsidian
+llmlab questions import [пути…]     # сырая база вопросов → .llmlab/questions_import/raw.jsonl
+llmlab questions status | batch [-n 50] | check   # разметка, следующая пачка, нет ли копий сырого текста
 ```
 
 После зелёного `llmlab test` конспект обновляется; если его ещё нет, в терминале спрашивается
@@ -406,6 +429,10 @@ llmlab notes export [--out llmlab-notes.zip]             # vault для Obsidian
 | POST | `/api/notes` | пересобрать все конспекты |
 | GET | `/api/notes/export.zip` | zip всей папки `notes/` |
 | GET | `/api/architectures` | таблица архитектур; закрытые ячейки без значения |
+| POST | `/api/tasks/{id}/complete` | отметить paper/quiz пройденной (400 для задач с кодом) |
+| GET | `/api/interview` | все вопросы + `tasks`, `modules`, `card` (SM-2: `due`, `is_new`, `preview` интервалов) + `stats` |
+| POST | `/api/interview/review` | `{qid, grade, mode}` → новое состояние карточки; пишет историю |
+| GET | `/api/interview/{qid}/history` | история оценок вопроса |
 
 `POST /run` при `status: passed` добавляет к RunResult поле `note`: `{"status": "needs_insight"}`
 (конспекта ещё нет → UI показывает модалку) или `{"status": "updated", "path": …}`.
