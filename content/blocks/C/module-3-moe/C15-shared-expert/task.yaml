@@ -1,0 +1,33 @@
+id: C15-shared-expert
+title: "DeepSeekMoE: shared expert и первые dense-слои"
+block: C
+module: module-3-moe
+type: implement
+difficulty: medium
+depends_on: [C13-moe-layer]
+diff_from: C13-moe-layer
+tags: [moe, shared-expert, fine-grained-experts, deepseek, params]
+entrypoint: [mlp_layer_types, DeepSeekMoE, build_ffn_layers, moe_param_counts]
+time_estimate_min: 35
+papers: [deepseekmoe, deepseek-v3]
+reading:
+  - title: "The Big LLM Architecture Comparison (Sebastian Raschka) — DeepSeek-V3: shared expert, активные параметры"
+    url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
+  - title: "Hugging Face transformers: modeling_deepseek_v3.py (DeepseekV3MoE, shared_experts)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/deepseek_v3/modeling_deepseek_v3.py
+questions: [shared-expert-*, moe-params-*]
+# Источники: deepseek-ai/DeepSeek-V3 config.json — num_hidden_layers 61, first_k_dense_replace 3,
+# moe_layer_freq 1, n_routed_experts 256, n_shared_experts 1, num_experts_per_tok 8,
+# moe_intermediate_size 2048, intermediate_size 18432, routed_scaling_factor 2.5, scoring_func sigmoid,
+# topk_method noaux_tc. Gemma 3, OLMo 2, SmolLM3: в config.json нет полей экспертов (num_experts и т. п.),
+# FFN dense: google/gemma-3-27b-pt (intermediate_size 21504), allenai/OLMo-2-1124-7B (11008),
+# HuggingFaceTB/SmolLM3-3B (11008).
+arch:
+  deepseek-v3:
+    moe: "256 routed (top-8, sigmoid + bias без aux loss, ×2.5) + 1 shared expert; первые 3 из 61 слоя — dense"
+  gemma-3:
+    moe: "нет — dense FFN (27B: ширина 21 504)"
+  olmo-2:
+    moe: "нет — dense SwiGLU (7B: ширина 11 008)"
+  smollm3:
+    moe: "нет — dense SwiGLU (ширина 11 008)"

@@ -160,3 +160,60 @@
     (перенормированные и умноженные на routed_scaling_factor). Bias обновляется фиксированным шагом по
     знаку перекоса нагрузки, без градиента.
   source: course
+- id: shared-expert-why-01
+  topic: moe
+  tasks: [C15-shared-expert]
+  difficulty: medium
+  kind: open
+  question: "Зачем в DeepSeekMoE shared experts и чем они отличаются от routed?"
+  answer: >
+    Shared expert обрабатывает каждый токен, без роутера и без веса; routed-эксперты выбираются
+    роутером (top-k). Идея: общее для всех токенов знание выучивает shared expert один раз, вместо того
+    чтобы каждый routed-эксперт хранил свою копию, — routed-эксперты могут сильнее специализироваться.
+    В DeepSeek-V3 один shared expert и 256 routed (top-8); в HF shared-эксперты хранятся как один
+    SwiGLU шириной n_shared · moe_intermediate_size.
+  source: course
+- id: shared-expert-fine-grained-01
+  topic: moe
+  tasks: [C15-shared-expert]
+  difficulty: hard
+  kind: open
+  question: >
+    Что даёт «fine-grained» сегментация экспертов (много узких вместо нескольких широких) при тех же
+    вычислениях на токен?
+  answer: >
+    Если каждый эксперт разделить на m узких и выбирать в m раз больше экспертов, FLOPs и параметры
+    не меняются, а число возможных комбинаций экспертов для токена растёт комбинаторно (C(mE, mk) против
+    C(E, k)). Это даёт роутеру гораздо более гибкую специализацию. Поэтому DeepSeek-V3 использует 256
+    экспертов шириной 2048 при dense-ширине 18 432, а Qwen3-30B-A3B — 128 экспертов шириной 768.
+    Цена — больше накладных расходов на диспетчеризацию и маленькие матрицы, которые хуже загружают GPU.
+  source: course
+- id: moe-params-active-01
+  topic: moe
+  tasks: [C15-shared-expert]
+  difficulty: medium
+  kind: open
+  question: "Что значат «671B всего, 37B активных» у DeepSeek-V3 и откуда берётся разница?"
+  answer: >
+    Всего — все веса модели, которые нужно хранить в памяти. Активных — те, что участвуют в обработке
+    одного токена. В MoE-слоях токен проходит через 8 из 256 routed-экспертов и shared expert, поэтому
+    почти все параметры экспертов на токен не используются. FFN-часть V3 — около 658B, из них на токен
+    около 24B; остальное в активных — attention (MLA), dense-слои, эмбеддинги. Память определяется
+    «всего», а вычисления на токен — «активными».
+  source: course
+- id: moe-params-dense-first-01
+  topic: moe
+  tasks: [C15-shared-expert]
+  difficulty: easy
+  kind: mcq
+  question: "Что означает first_k_dense_replace = 3 в config.json DeepSeek-V3?"
+  options:
+    - "Первые 3 слоя используют обычный dense FFN вместо MoE"
+    - "Каждые 3 слоя один MoE"
+    - "3 эксперта всегда активны"
+    - "Первые 3 эксперта заменяются dense FFN"
+  correct: 0
+  answer: >
+    Слои 0, 1, 2 — обычные SwiGLU-FFN шириной intermediate_size = 18 432, остальные 58 из 61 — MoE.
+    Ранним слоям роутинг мало что даёт, а нестабильность роутера там особенно вредна.
+  source: course
