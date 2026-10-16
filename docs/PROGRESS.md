@@ -88,9 +88,8 @@ C02-swiglu, C03-rope и их debug-версии (C01d…C03d) в `content/blocks
   пока нет (карточки и вкладка Interview — Фаза 7, тогда добавить ссылку `#/interview/<qid>`).
 - Конспекты только для задач с тестами; для paper/quiz — решить в Фазе 7 (квиз → конспект?).
 - Граф связей сейчас из одного узла — проверить раскладку, когда появятся C01–C06.
-- `.venv/bin/pytest` и `llmlab` в локальном venv имеют shebang на чужой venv
-  (`nlp_from_scratch`) — `uv run pytest` падает; работают `uv run python -m pytest` и
-  `uv run llmlab`. Лечится `uv sync --reinstall` (не трогал окружение пользователя).
+- Локальный `.venv` был скопирован из другого проекта (activate указывал на чужой venv) —
+  пересоздан `rm -rf .venv && uv sync`. Если `llmlab` «не находится» — первым делом это.
 
 ## Решения (почему сделано так, а не иначе)
 - **pytest-плагин в пакете** (`llmlab/pytest_plugin.py`), а корневой `conftest.py` только
