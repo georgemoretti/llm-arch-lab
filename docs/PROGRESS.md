@@ -3,24 +3,23 @@
 > Обновляется в конце КАЖДОЙ сессии Claude Code. Пиши кратко и конкретно.
 
 ## Текущая фаза
-Фаза 4 — **завершена** (2026-10-16). Модуль 2 (Gemma 3 / OLMo 2 / SmolLM3) закрыт целиком. Следующая:
-Фаза 5a — модуль 3, MoE (C12–C15). `data/interview_raw/` по-прежнему пуст.
+Фаза 5a — **завершена** (2026-10-16). Модуль 3, часть 1 (MoE: C12–C15 + 3 debug). Следующая:
+Фаза 5b — MLA, MTP, paper/quiz модуля, V-moe-routing, V-kvcache + MLA. `data/interview_raw/` пуст.
 
 ## Следующий шаг (точный)
-Запустить Фазу 5a по шаблону «фазы с контентом» из `docs/PROMPTS.md` в
-`content/blocks/C/module-3-moe/` (модуль уже описан в `block.yaml`):
-- C12 роутер (логиты → softmax → top-k → перенормировка), C13 MoE-слой (наивная диспетчеризация и через
-  сортировку/scatter; тест «каждый токен обработан ровно top-k экспертами»), C14 балансировка (aux loss
-  Switch-style + упоминание bias-based из DeepSeek-V3), C15 shared expert + первые dense-слои;
-- debug-задачи 5a: softmax по неверной оси; нет перенормировки top-k; (переполнение capacity — к C13);
-  оставшийся баг PLAN («в MLA кешируется не латент») — в 5b;
-- эксперты — `SwiGLUFFN` из `llmlab/core/llama.py`; новые эталоны — в `llmlab/core/moe.py` +
-  `tests/test_core_moe.py` (по образцу `tests/test_core_gemma_olmo.py`);
-- гиперпараметры DeepSeek-V3 (n_routed_experts, num_experts_per_tok, n_shared_experts,
-  first_k_dense_replace, routed_scaling_factor, scoring_func) — из config.json `deepseek-ai/DeepSeek-V3`
-  (открыт); строка `deepseek-v3` в `content/architectures.yaml` уже есть (столбцы moe/ffn/attention);
-- вопросы — `content/questions/moe.yaml`; paper/quiz и V-moe-routing — в 5b (по PLAN), но вопросы к
-  задачам писать сразу.
+Запустить Фазу 5b по шаблону «фазы с контентом» из `docs/PROMPTS.md` в `content/blocks/C/module-3-moe/`:
+- C16 MLA (сжатие KV в латент `kv_lora_rank`, восстановление K/V; затем decoupled RoPE —
+  `qk_rope_head_dim` / `qk_nope_head_dim`; кешируется латент + общий rope-ключ); C17 MTP (дополнительные
+  головы t+2..t+k, суммарный loss; у DeepSeek-V3 `num_nextn_predict_layers = 1`);
+- debug: «в MLA кешируется не латент» (C16d); при желании — второй (например, RoPE на сжатой части);
+- гиперпараметры MLA — из config.json `deepseek-ai/DeepSeek-V3` (kv_lora_rank, q_lora_rank,
+  qk_rope_head_dim, qk_nope_head_dim, v_head_dim) и `DeepSeek-V2-Lite`; конфиги уже скачивались, открыты;
+- эталоны — дописать в `llmlab/core/moe.py` (или новый `core/mla.py`) + тест в `tests/test_core_moe.py`;
+- paper `C-P3` (Switch, DeepSeekMoE, DeepSeek-V2 (MLA), MTP/DeepSeek-V3), квиз `C-Q3` по глобам
+  `router-*`, `moe-layer-*`, `load-balance-*`, `shared-expert-*`, `moe-params-*` + новые mla-*/mtp-*;
+- V-moe-routing (heatmap токены × эксперты, гистограмма загрузки, эффект aux loss / bias — можно
+  считать в браузере на игрушечном роутере), V-kvcache: пресет DeepSeek-V3 с MLA (кеш = латент + rope-ключ);
+- ячейки таблицы: `deepseek-v3.attention` (C16), `deepseek-v3.position` (C16, decoupled RoPE).
 
 ## Сделано
 **Фаза 0:**
@@ -178,6 +177,30 @@
   конспект с вопросами, ячейки OLMo 2 открыты в `notes/index.md`.
 - Тесты платформы: 69.
 
+**Фаза 5a:**
+- `llmlab/core/moe.py` — эталоны C12–C15 (`route`, `TopKRouter`, `MoELayer` (наивный и сортировочный
+  forward), `load_balancing_loss`, `expert_load`, `route_with_bias`, `update_bias`, `mlp_layer_types`,
+  `DeepSeekMoE`, `build_ffn_layers`, `moe_param_counts`); `tests/test_core_moe.py`.
+- `C12-router` (8 тестов): softmax/sigmoid, top-k, перенормировка, `routed_scaling_factor`; свойства —
+  независимость от батча, softmax(top-k логитов) = перенормированный top-k, fp32 при bf16, градиент к
+  роутеру (top-1 с перенормировкой → 0 — почему Switch не перенормирует).
+- `C13-moe-layer` (6): `forward_naive` и `forward` через argsort/bincount/index_add; хуками проверяется,
+  что эксперт видит ровно свои токены (Σ = N·k), невыбранный эксперт не вызывается и без градиента.
+- `C14-load-balancing` (9): aux loss Switch-style (баланс → 1, коллапс → E, = HF Mixtral / k, градиент
+  только через P, 30 шагов SGD разгоняют коллапс), bias-балансировка DeepSeek-V3 (выбор с bias, веса без;
+  ±γ по знаку; симуляция 300 шагов выравнивает нагрузку).
+- `C15-shared-expert` (7): `mlp_layer_types` (V3: 3 dense + 58 MoE), `DeepSeekMoE` = routed + shared,
+  `build_ffn_layers`, `moe_param_counts` (V3 FFN: 657.8B / 24.3B; Qwen3-30B-A3B: 29.0B / 1.82B).
+- Debug: `C12d` (softmax по оси токенов — маскируется перенормировкой), `C13d` (`out[tok] = y` вместо
+  `index_add_` — видно только при top-k ≥ 2), `C14d` (знак шага bias — положительная обратная связь).
+- Статьи: `sparsely-gated-moe`, `gshard`, `switch-transformer`, `st-moe`, `mixtral`, `deepseekmoe`,
+  `deepseek-v2`, `deepseek-v3`, `aux-loss-free`, `olmoe`. Вопросы: `content/questions/moe.yaml` (15).
+- Таблица архитектур: `deepseek-v3.ffn` (C13), `deepseek-v3.moe`, `gemma-3.moe`, `olmo-2.moe`,
+  `smollm3.moe` (C15, «нет — dense» закрывает долг Фазы 4).
+- Проверено: мутации C12 (4), C13 (3), C14 (4), C15 (3) падают с понятными сообщениями; 108 формул —
+  KaTeX без ошибок; сквозной сценарий в копии репо: C15 решена → конспект, ячейки MoE открыты.
+- Тесты платформы: 73.
+
 ## Не сделано / долги
 - E2E-сценарий UI не в репозитории (Playwright ставился во временную папку). Если UI начнёт
   ломаться — завести `web/e2e/` с Playwright и отдельный CI-job.
@@ -209,12 +232,16 @@
 - Ячейки `gemma-3.ffn` (GeGLU, `gelu_pytorch_tanh`) и `olmo-2.ffn` (SwiGLU) никакая задача не открывает —
   FFN в модуле 2 не меняется. Решить в Фазе 9: либо открывать вместе с C08, либо допустить ячейки «по
   config.json» без задачи.
-- Ячейки `moe` у Gemma 3 / OLMo 2 / SmolLM3 («dense») тоже пока никем не открываются (у Llama 3 это делает
-  C06) — можно добавить в Фазе 5a в C15 (dense vs MoE).
 - Разные θ RoPE для local/global слоёв Gemma 3 описаны в README C07, но не реализованы ни в одной задаче
   (в C07 один θ) — учесть в Фазе 8 (конфигурируемая модель).
 - Тест градиента C08 опирается на статистику (3 сида, пороги 0.7–1.4 и > 2; фактически ≈ 1.0 и ≈ 2.9). При
   смене версии torch/инициализации пересчитать запас.
+
+- Фаза 5a: тесты C12d/C13d/C14d — копии тестов C12/C13/C14 без подсказок про баг; при правке тестов
+  синхронизировать. `llmlab/core/moe.py` дублирует эталоны C12–C15 (страховка — `tests/test_core_moe.py`).
+- Тест C14 `test_bias_balancing_simulation` статистический (сид фиксирован; фактически max 0.145 / min 0.113
+  при порогах 0.18 / 0.08) — при смене версии torch пересчитать запас.
+- Визуальную проверку UI в 5a не делал (новых viz нет); README отдаются API, KaTeX проверен скриптом.
 
 ## Решения (почему сделано так, а не иначе)
 - **pytest-плагин в пакете** (`llmlab/pytest_plugin.py`), а корневой `conftest.py` только
@@ -350,6 +377,23 @@
   тема, одна вкладка. Полоса слоёв — сетка по 12 (кратно 6, 4, 2), чтобы паттерн выстраивался столбцами.
 - **Таблица архитектур: добавлена строка SmolLM3** (модуль назван в честь трёх моделей, NoPE — её фича).
 
+- **Фаза 5a: эксперты — `SwiGLUFFN` в `nn.ModuleList`** (имена `experts.{i}.gate_proj` как у DeepSeek в
+  HF), а не 3D-параметры `gate_up_proj` нового Mixtral в HF: так понятнее и проще диспетчеризация. Для
+  загрузки весов Mixtral в Фазе 8 понадобится конвертация.
+- **C12 включает sigmoid-роутер и `routed_scaling_factor`** (DeepSeek-V3), но не групповой выбор
+  (`n_group`/`topk_group`) — он нужен для распределения по устройствам, описан в README.
+- **C14: aux loss нормирован так, что минимум = 1** (f_i делится на N·k, как в статье Switch для k = 1);
+  HF Mixtral делит на N (минимум = k) — тест сверяет `HF / k` и объясняет разницу.
+- **Capacity factor / drop токенов не реализованы**: современные открытые MoE (Mixtral, DeepSeek-V3,
+  Qwen3 в HF) — dropless. Debug «токены теряются» из PLAN сделан как C13d (вклады экспертов
+  перезаписываются → токен теряет эксперта). Capacity упомянуть в C-P3 (Switch).
+- **Debug «нет перенормировки top-k» из PLAN** не отдельная задача: его ловит диагност C12; вместо него
+  C14d (знак шага bias) — баг, специфичный для DeepSeek-V3.
+- **C15 считает только FFN-часть** параметров (+ роутер): attention (MLA) и эмбеддинги — в 5b, поэтому
+  671B / 37B в тестах не проверяется, только упоминается.
+- **C15 открывает «moe: нет — dense»** у Gemma 3 / OLMo 2 / SmolLM3 — решение долга Фазы 4 без новой
+  задачи (ячейку открывает задача, которая объясняет MoE vs dense).
+
 ## Известные проблемы
 - Холодный старт subprocess с torch ≈ 1–1.5 с на прогон — приемлемо для UI, но заметно.
 
@@ -362,3 +406,4 @@
 | 2026-10-16 | 3a | C01 RMSNorm, C02 SwiGLU, C03 RoPE + 3 debug-задачи, 5 статей, 8 вопросов, строка Llama 3 | см. `git log` |
 | 2026-10-16 | 3b | C04 GQA, C05 KV-cache, C06 Llama + 3 debug, C-P1, C-Q1, V-rope, V-kvcache, вкладка «Вопросы», core/llama.py, 64 теста | см. `git log` |
 | 2026-10-16 | 4 | C07 SWA, C08 нормы, C09 QK-Norm, C10 NoPE, C11 кольцевой KV-cache + 3 debug, C-P2, C-Q2, V-masks, SWA в V-kvcache, core/gemma_olmo.py, 69 тестов | см. `git log` |
+| 2026-10-16 | 5a | C12 роутер, C13 MoE-слой, C14 балансировка, C15 DeepSeekMoE + 3 debug, 10 статей, 15 вопросов, core/moe.py, 73 теста | см. `git log` |
