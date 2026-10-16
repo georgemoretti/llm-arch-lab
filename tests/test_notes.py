@@ -82,6 +82,7 @@ def test_note_has_all_sections_and_obsidian_frontmatter(course_root):
     assert "```python\n" + GOOD.rstrip() in body
     assert "Код совпадает с эталоном" in body
     assert "> [!question]- Сколько будет 2+3?" in body and "Пять." in body
+    assert "](http://127.0.0.1:8765/#/interview/q/" in body, "у вопроса в конспекте — ссылка на карточку Interview"
     assert "[Ссылка](https://example.com)" in body
     assert "Дальше: [[Z02-more]]" in body, "должна быть wiki-ссылка на задачи, которые опираются на эту"
 

@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { CourseMap } from "./components/CourseMap";
+import { InterviewPage } from "./components/InterviewPage";
 import { NotesPage } from "./components/NotesPage";
 import { useRoute } from "./router";
 import { useTheme } from "./theme";
@@ -31,6 +32,9 @@ export function App() {
           <a href="#/notes" className={route.name === "notes" ? "active" : ""}>
             Конспекты
           </a>
+          <a href="#/interview" className={route.name === "interview" ? "active" : ""}>
+            Interview
+          </a>
         </nav>
         <div className="topbar-right">
           <span className="muted kbd-hint">
@@ -48,6 +52,8 @@ export function App() {
           </Suspense>
         ) : route.name === "notes" ? (
           <NotesPage view={route.view} />
+        ) : route.name === "interview" ? (
+          <InterviewPage key={route.qid ?? ""} qid={route.qid} />
         ) : (
           <CourseMap />
         )}

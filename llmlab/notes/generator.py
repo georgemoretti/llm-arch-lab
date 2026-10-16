@@ -238,6 +238,9 @@ def _render_diff(code: str, reference: str) -> str:
     return f"> [!example]- Diff: эталон → мой код (+{added} −{removed})\n" + _quote(body)
 
 
+# Ссылка на карточку вопроса в локальном UI (порт по умолчанию `llmlab serve`).
+INTERVIEW_URL = "http://127.0.0.1:8765/#/interview/q/"
+
 def _render_questions(course: Course, task: Task) -> str:
     qs = course.questions_for(task)
     if not qs:
@@ -249,7 +252,9 @@ def _render_questions(course: Course, task: Task) -> str:
         if q.kind == "mcq":
             opts = "\n".join(f"- {'✅ ' if i == q.correct else ''}{o}" for i, o in enumerate(q.options))
             body = f"{opts}\n\n{body}"
-        out.append(f"> [!question]- {title}\n" + _quote(body) + f"\n>\n> `{q.id}` · {q.difficulty}")
+        src = " · с собеседования" if q.source == "user-db" else ""
+        out.append(f"> [!question]- {title}\n" + _quote(body)
+                   + f"\n>\n> `{q.id}` · {q.difficulty}{src} · [повторить в Interview]({INTERVIEW_URL}{q.id})")
     return "\n\n".join(out)
 
 

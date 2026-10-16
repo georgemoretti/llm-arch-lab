@@ -259,7 +259,7 @@ kbd {
 }
 .crumbs {
   display: flex;
-  gap: 8px;
+  gap: 8px 14px;
   align-items: center;
   min-width: 0;
 }
@@ -1428,8 +1428,8 @@ mark {
   max-width: none;
 }
 
-/* --- вкладка «Вопросы» --- */
-.questions .q-card {
+/* --- вкладка «Вопросы» и карточки Interview --- */
+.q-card {
   margin: 10px 0 14px;
   padding: 10px 14px;
   border: 1px solid var(--border);
@@ -1505,6 +1505,142 @@ mark {
 }
 .q-verdict.bad {
   color: var(--bad);
+}
+.q-tasks {
+  font-size: 12.5px;
+  margin: 2px 0 6px;
+}
+.q-grade {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  font-size: 13px;
+}
+.q-grade .btn {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: auto;
+  padding: 3px 10px;
+  line-height: 1.25;
+  min-width: 80px;
+}
+.q-grade-int {
+  font-size: 10.5px;
+  color: var(--muted);
+}
+.q-grade .btn.grade-again {
+  border-color: color-mix(in srgb, var(--bad) 55%, var(--border-strong));
+}
+.q-grade .btn.grade-good,
+.q-grade .btn.grade-easy {
+  border-color: color-mix(in srgb, var(--ok) 55%, var(--border-strong));
+}
+.q-grade .btn.suggested {
+  box-shadow: 0 0 0 2px var(--accent);
+}
+.chip.src-user {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+.chip.ok {
+  border-color: var(--ok);
+  color: var(--ok);
+}
+
+/* --- Interview --- */
+.interview {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 20px 16px 48px;
+}
+.iv-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px 20px;
+  margin-bottom: 10px;
+}
+.iv-head h1 {
+  font-size: 22px;
+  margin: 0;
+}
+.iv-stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 16px;
+  font-size: 13px;
+}
+.iv-panel {
+  margin-top: 14px;
+}
+.iv-help {
+  font-size: 12.5px;
+  max-width: 640px;
+}
+.iv-progress {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+}
+.iv-bar {
+  flex: 1;
+  height: 6px;
+  border-radius: 3px;
+  background: var(--panel-2);
+  overflow: hidden;
+}
+.iv-bar > div {
+  height: 100%;
+  background: var(--accent);
+}
+.iv-search {
+  font: inherit;
+  font-size: 13px;
+  padding: 4px 8px;
+  border: 1px solid var(--border-strong);
+  border-radius: 5px;
+  background: var(--panel);
+  color: var(--text);
+  min-width: 220px;
+}
+.iv-list {
+  list-style: none;
+  margin: 8px 0 0;
+  padding: 0;
+  border-top: 1px solid var(--border);
+}
+.iv-list li a {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 4px 12px;
+  padding: 8px 4px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  text-decoration: none;
+}
+.iv-list li a:hover {
+  background: var(--panel-2);
+}
+.iv-list-q {
+  flex: 1 1 380px;
+  font-size: 13.5px;
+}
+.iv-list-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+}
+.iv-due {
+  min-width: 96px;
+  text-align: right;
+  color: var(--muted);
 }
 
 /* --- графики в визуализациях (LineChart) --- */

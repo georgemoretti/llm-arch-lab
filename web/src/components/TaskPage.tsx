@@ -41,7 +41,7 @@ export function TaskPage({ id, theme }: { id: string; theme: Theme }) {
 
   return (
     <div className="task-page">
-      <TaskHeader task={task} onCreateNote={() => setAskInsight(true)} />
+      <TaskHeader task={task} onCreateNote={() => setAskInsight(true)} onComplete={() => api.completeTask(task.id).then(refresh)} />
       {noteToast && (
         <div className="toast" role="status">
           {noteToast} — <a href={noteHref(task.id)}>открыть конспект</a>
@@ -74,7 +74,7 @@ export function TaskPage({ id, theme }: { id: string; theme: Theme }) {
   );
 }
 
-function TaskHeader({ task, onCreateNote }: { task: TaskDetail; onCreateNote(): void }) {
+function TaskHeader({ task, onCreateNote, onComplete }: { task: TaskDetail; onCreateNote(): void; onComplete(): void }) {
   return (
     <div className="task-head">
       <StatusIcon status={task.progress.status} />
@@ -105,6 +105,14 @@ function TaskHeader({ task, onCreateNote }: { task: TaskDetail; onCreateNote(): 
         </span>
       )}
       <span className="head-note">
+        {!task.has_code &&
+          (task.progress.status === "solved" ? (
+            <span className="chip ok">✓ пройдено</span>
+          ) : (
+            <button className="btn small primary" onClick={onComplete} title="У статей и квизов нет тестов — отметь сам">
+              Отметить пройденным
+            </button>
+          ))}
         {task.note ? (
           <a className="btn small" href={noteHref(task.id)} title={`notes/${task.note.path}`}>
             📝 Конспект

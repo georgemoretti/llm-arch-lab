@@ -67,6 +67,36 @@ export interface Question {
   correct: number | null;
 }
 
+export type Grade = "again" | "hard" | "good" | "easy";
+
+export interface Card {
+  qid: string;
+  ease: number;
+  interval_days: number;
+  reps: number;
+  lapses: number;
+  due_at: string | null;
+  last_grade: Grade | null;
+  last_review_at: string | null;
+  is_new: boolean;
+  due: boolean;
+  preview: Record<Grade, number>; // через сколько дней вернётся карточка при каждой оценке
+}
+
+export interface InterviewQuestion extends Question {
+  source: string;
+  tags: string[];
+  tasks: string[];
+  modules: string[];
+  card: Card;
+}
+
+export interface InterviewData {
+  questions: InterviewQuestion[];
+  modules: { id: string; title: string }[];
+  stats: { total: number; new: number; due: number; learned: number; reviews_24h: number };
+}
+
 export interface TaskDetail extends TaskSummary {
   entrypoints: string[];
   readme: string;
@@ -227,6 +257,10 @@ export const api = {
   searchNotes: (q: string) =>
     request<{ results: SearchHit[] }>("GET", `/api/notes/search?q=${encodeURIComponent(q)}`),
   architectures: () => request<ArchTable>("GET", "/api/architectures"),
+  completeTask: (id: string) => request<Progress>("POST", `${t(id)}/complete`),
+  interview: () => request<InterviewData>("GET", "/api/interview"),
+  review: (qid: string, grade: Grade, mode: "review" | "quiz" | "task") =>
+    request<Card>("POST", "/api/interview/review", { qid, grade, mode }),
 };
 
 export const NOTES_EXPORT_URL = "/api/notes/export.zip";
