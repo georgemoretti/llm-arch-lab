@@ -102,7 +102,8 @@ def insight_from_file(path: Path) -> str | None:
         return None
     _, body = split_frontmatter(path.read_text(encoding="utf-8"))
     text = parse_sections(body).get(INSIGHT_HEADING, "")
-    lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
+    # В файле вывод записан списком («- строка»), но руками его могли переписать как угодно.
+    lines = [re.sub(r"^[-*+]\s+", "", ln.strip()) for ln in text.splitlines() if ln.strip()]
     return "\n".join(lines) or None
 
 
@@ -188,7 +189,8 @@ def _render_mistakes(attempts: list[dict], first_pass: int) -> str:
     else:
         mins = _minutes_between(attempts[0]["created_at"], attempts[first_pass]["created_at"])
         took = f", от первого запуска до решения — {mins} мин" if mins > 0 else ""
-        lines.append(f"Решено с {first_pass + 1}-й попытки ({n_before} неудачных{took}).")
+        failed = _plural(n_before, "неудачная", "неудачные", "неудачных")
+        lines.append(f"Решено с {first_pass + 1}-й попытки ({n_before} {failed}{took}).")
 
     mistakes = collect_mistakes(attempts)
     if not mistakes:
@@ -313,7 +315,9 @@ def render_note(course: Course, task: Task, *, insight: str, code: str, attempts
     parts.append(f"## Мой код\n\n```python\n{code.rstrip()}\n```")
     parts.append(f"## Отличия от эталона\n\n{_render_diff(code, reference)}")
     parts.append(f"## Мои ошибки по пути\n\n{_render_mistakes(attempts, first_pass)}")
-    parts.append(f"## {INSIGHT_HEADING}\n\n{insight.strip()}")
+    # Списком: так каждая строка вывода остаётся отдельной в любом Markdown-рендерере.
+    insight_md = "\n".join(f"- {ln}" for ln in insight.strip().splitlines())
+    parts.append(f"## {INSIGHT_HEADING}\n\n{insight_md}")
     parts.append(f"## Вопросы для повторения\n\n{_render_questions(course, task)}")
     parts.append(f"## Читать\n\n{_render_reading(course, task)}")
     return "\n\n".join(parts) + "\n"

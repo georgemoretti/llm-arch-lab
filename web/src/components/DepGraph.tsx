@@ -7,7 +7,17 @@ const NODE_H = 30;
 const GAP_X = 52;
 const GAP_Y = 12;
 
-export function DepGraph({ tasks }: { tasks: TaskSummary[] }) {
+export function DepGraph({
+  tasks,
+  hrefFor = taskHref,
+  classFor = () => "",
+  label = "Граф зависимостей задач",
+}: {
+  tasks: TaskSummary[];
+  hrefFor?: (id: string) => string;
+  classFor?: (t: TaskSummary) => string;
+  label?: string;
+}) {
   const byId = new Map(tasks.map((t) => [t.id, t]));
   const depth = new Map<string, number>();
   const level = (id: string, seen = new Set<string>()): number => {
@@ -34,7 +44,7 @@ export function DepGraph({ tasks }: { tasks: TaskSummary[] }) {
 
   return (
     <div className="depgraph">
-      <svg width={width} height={height} role="img" aria-label="Граф зависимостей задач">
+      <svg width={width} height={height} role="img" aria-label={label}>
         {tasks.flatMap((t) =>
           t.depends_on
             .filter((d) => pos.has(d))
@@ -54,8 +64,8 @@ export function DepGraph({ tasks }: { tasks: TaskSummary[] }) {
         {tasks.map((t) => {
           const p = pos.get(t.id)!;
           return (
-            <a key={t.id} href={taskHref(t.id)}>
-              <g className={`node ${t.progress.status} type-${t.type}`} transform={`translate(${p.x},${p.y})`}>
+            <a key={t.id} href={hrefFor(t.id)}>
+              <g className={`node ${t.progress.status} type-${t.type} ${classFor(t)}`} transform={`translate(${p.x},${p.y})`}>
                 <title>{`${t.id}: ${t.title}`}</title>
                 <rect width={NODE_W} height={NODE_H} rx={5} />
                 <text x={10} y={NODE_H / 2 + 4}>

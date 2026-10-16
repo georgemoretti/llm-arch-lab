@@ -68,6 +68,7 @@ export interface TaskDetail extends TaskSummary {
   diff_unlocked: boolean;
   failed_attempts: number;
   diff_unlock_after: number;
+  note: { path: string } | null;
 }
 
 export interface CodeFile {
@@ -107,6 +108,8 @@ export interface RunResult {
   message: string | null;
   output_tail: string;
   attempt_id?: number;
+  // Только у POST /run при status=passed: нужно ли спросить вывод или конспект уже обновлён.
+  note?: { status: "needs_insight" | "updated" | string; path?: string; message?: string };
 }
 
 export interface Attempt {
@@ -119,6 +122,60 @@ export interface Attempt {
   total: number;
   duration_s: number;
   result?: RunResult;
+}
+
+export interface NoteSummary {
+  task_id: string;
+  path: string;
+  title: string;
+  block: string | null;
+  module: string | null;
+  tags: string[];
+  solved_at: string | null;
+  attempts: number | null;
+  parent: string | null;
+  depends_on: string[];
+  mtime_ns: number;
+}
+
+export interface NoteDetail extends NoteSummary {
+  meta: Record<string, unknown>;
+  body: string;
+  abs_path: string;
+  insight: string | null;
+}
+
+export interface NotesList {
+  notes: NoteSummary[];
+  tags: { tag: string; count: number }[];
+  dir: string;
+}
+
+export interface SearchHit {
+  task_id: string;
+  path: string;
+  title: string;
+  snippet: string;
+}
+
+export type ArchCell =
+  | { status: "open"; value: string; task_id: string; task_title: string }
+  | { status: "locked"; task_id: string; task_title: string }
+  | { status: "empty" };
+
+export interface ArchTable {
+  columns: { id: string; title: string }[];
+  rows: {
+    id: string;
+    title: string;
+    year: number | null;
+    module: string | null;
+    module_title: string | null;
+    source: string | null;
+    cells: Record<string, ArchCell>;
+  }[];
+  opened: number;
+  total: number;
 }
 
 export class ApiError extends Error {
@@ -150,4 +207,14 @@ export const api = {
   run: (id: string) => request<RunResult>("POST", `${t(id)}/run`),
   attempts: (id: string) => request<Attempt[]>("GET", `${t(id)}/attempts`),
   reference: (id: string) => request<{ code: string }>("GET", `${t(id)}/reference`),
+  notes: () => request<NotesList>("GET", "/api/notes"),
+  note: (id: string) => request<NoteDetail>("GET", `/api/notes/${encodeURIComponent(id)}`),
+  saveNote: (id: string, insight?: string) =>
+    request<{ task_id: string; path: string; created: boolean }>("POST", `/api/notes/${encodeURIComponent(id)}`, { insight }),
+  rebuildNotes: () => request<{ built: string[]; skipped: { task_id: string; reason: string }[] }>("POST", "/api/notes"),
+  searchNotes: (q: string) =>
+    request<{ results: SearchHit[] }>("GET", `/api/notes/search?q=${encodeURIComponent(q)}`),
+  architectures: () => request<ArchTable>("GET", "/api/architectures"),
 };
+
+export const NOTES_EXPORT_URL = "/api/notes/export.zip";

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { api, ApiError, type Attempt, type RunResult, type TaskDetail } from "../api";
-import { taskHref } from "../router";
+import { noteHref, taskHref } from "../router";
+import { InsightModal } from "./InsightModal";
 import { usePersistent, type Theme } from "../theme";
 import { CodeEditor, DiffView, type CodeEditorHandle, type ErrorMark } from "./CodeEditor";
 import { Markdown, VizBlock } from "./Markdown";
@@ -17,6 +18,8 @@ export function TaskPage({ id, theme }: { id: string; theme: Theme }) {
   const [task, setTask] = useState<TaskDetail | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("readme");
+  const [askInsight, setAskInsight] = useState(false);
+  const [noteToast, setNoteToast] = useState<string | null>(null);
 
   const refresh = useCallback(() => api.task(id).then(setTask), [id]);
 
@@ -30,11 +33,37 @@ export function TaskPage({ id, theme }: { id: string; theme: Theme }) {
   if (error) return <div className="page-msg error">{error}</div>;
   if (!task) return <div className="page-msg">Загрузка…</div>;
 
+  const onNote = (note: RunResult["note"]) => {
+    if (note?.status === "needs_insight") setAskInsight(true);
+    else if (note?.status === "updated") setNoteToast("Конспект обновлён: свежий код и история попыток");
+  };
+
   return (
     <div className="task-page">
-      <TaskHeader task={task} />
+      <TaskHeader task={task} onCreateNote={() => setAskInsight(true)} />
+      {noteToast && (
+        <div className="toast" role="status">
+          {noteToast} — <a href={noteHref(task.id)}>открыть конспект</a>
+          <button className="link-btn" onClick={() => setNoteToast(null)}>
+            закрыть
+          </button>
+        </div>
+      )}
+      {askInsight && (
+        <InsightModal
+          taskId={task.id}
+          title={task.title}
+          mode="create"
+          onClose={() => setAskInsight(false)}
+          onDone={() => {
+            setAskInsight(false);
+            setNoteToast("Конспект создан");
+            void refresh();
+          }}
+        />
+      )}
       {task.has_code ? (
-        <Workbench key={task.id} task={task} theme={theme} tab={tab} setTab={setTab} onProgress={refresh} />
+        <Workbench key={task.id} task={task} theme={theme} tab={tab} setTab={setTab} onProgress={refresh} onNote={onNote} />
       ) : (
         <div className="task-doc">
           <LeftPane task={task} tab={tab} setTab={setTab} attempts={[]} />
@@ -44,7 +73,7 @@ export function TaskPage({ id, theme }: { id: string; theme: Theme }) {
   );
 }
 
-function TaskHeader({ task }: { task: TaskDetail }) {
+function TaskHeader({ task, onCreateNote }: { task: TaskDetail; onCreateNote(): void }) {
   return (
     <div className="task-head">
       <StatusIcon status={task.progress.status} />
@@ -74,6 +103,20 @@ function TaskHeader({ task }: { task: TaskDetail }) {
           ))}
         </span>
       )}
+      <span className="head-note">
+        {task.note ? (
+          <a className="btn small" href={noteHref(task.id)} title={`notes/${task.note.path}`}>
+            📝 Конспект
+          </a>
+        ) : (
+          task.has_code &&
+          task.progress.status === "solved" && (
+            <button className="btn small primary" onClick={onCreateNote} title="Задача решена, но конспекта ещё нет">
+              📝 Создать конспект
+            </button>
+          )
+        )}
+      </span>
     </div>
   );
 }
@@ -218,7 +261,14 @@ function Attempts({ attempts }: { attempts: Attempt[] }) {
 
 // ---------------------------------------------------------------- рабочее место: редактор + тесты
 
-function Workbench(props: { task: TaskDetail; theme: Theme; tab: Tab; setTab(t: Tab): void; onProgress(): Promise<void> }) {
+function Workbench(props: {
+  task: TaskDetail;
+  theme: Theme;
+  tab: Tab;
+  setTab(t: Tab): void;
+  onProgress(): Promise<void>;
+  onNote(note: RunResult["note"]): void;
+}) {
   const { task, theme } = props;
   const editor = useRef<CodeEditorHandle>(null);
   const [initial, setInitial] = useState<string | null>(null);
@@ -356,6 +406,7 @@ function Workbench(props: { task: TaskDetail; theme: Theme; tab: Tab; setTab(t: 
       setResult(r);
       setAttempts(await api.attempts(task.id));
       await props.onProgress();
+      if (r.status === "passed") props.onNote(r.note);
     } catch (e) {
       flash(`Не удалось запустить тесты: ${(e as Error).message}`);
     } finally {

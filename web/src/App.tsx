@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { CourseMap } from "./components/CourseMap";
+import { NotesPage } from "./components/NotesPage";
 import { useRoute } from "./router";
 import { useTheme } from "./theme";
 
@@ -26,6 +27,10 @@ export function App() {
               <span className="mono">{route.id}</span>
             </>
           )}
+          <span className="crumbs-sep" />
+          <a href="#/notes" className={route.name === "notes" ? "active" : ""}>
+            Конспекты
+          </a>
         </nav>
         <div className="topbar-right">
           <span className="muted kbd-hint">
@@ -36,11 +41,13 @@ export function App() {
           </button>
         </div>
       </header>
-      <main className={route.name === "task" ? "main-task" : "main-map"}>
+      <main className={route.name === "task" ? "main-task" : route.name === "notes" ? "main-notes" : "main-map"}>
         {route.name === "task" ? (
           <Suspense fallback={<div className="page-msg">Загрузка редактора…</div>}>
             <TaskPage key={route.id} id={route.id} theme={theme} />
           </Suspense>
+        ) : route.name === "notes" ? (
+          <NotesPage view={route.view} />
         ) : (
           <CourseMap />
         )}

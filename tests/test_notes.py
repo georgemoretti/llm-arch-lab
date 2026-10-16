@@ -130,7 +130,7 @@ def test_rebuild_keeps_insight_and_file_edits_win(course_root):
     built, skipped = notes.build_all(course, course_root)
     assert [b["task_id"] for b in built] == ["Z01-add"] and skipped == []
     text = path.read_text(encoding="utf-8")
-    assert "правка в Obsidian\nвторая мысль" in text
+    assert "- правка в Obsidian\n- вторая мысль" in text
     assert db.get_note("Z01-add", db_path(course_root))["insight"] == "правка в Obsidian\nвторая мысль"
 
     path.unlink()  # файл удалили — вывод восстанавливается из БД
