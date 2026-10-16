@@ -1,0 +1,21 @@
+id: C17-mtp
+title: "Multi-Token Prediction: учим модель смотреть на несколько токенов вперёд"
+block: C
+module: module-3-moe
+type: implement
+difficulty: medium
+depends_on: [C08-norm-placement]
+diff_from: C06-llama-block
+tags: [training, mtp, loss, deepseek, speculative-decoding]
+entrypoint: [MTPModule, mtp_logits, mtp_loss]
+time_estimate_min: 40
+papers: [deepseek-v3]
+reading:
+  - title: "vLLM: deepseek_mtp.py (enorm, hnorm, eh_proj, shared_head)"
+    url: https://github.com/vllm-project/vllm/blob/main/vllm/model_executor/models/deepseek_mtp.py
+  - title: "The Big LLM Architecture Comparison (Sebastian Raschka)"
+    url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
+questions: [mtp-*]
+# Источник: deepseek-ai/DeepSeek-V3 config.json: num_nextn_predict_layers = 1 (один MTP-модуль, D = 1).
+# Порядок конкатенации [enorm(emb); hnorm(h)] — vllm/model_executor/models/deepseek_mtp.py.
+# λ = 0.3, затем 0.1 — из технического отчёта DeepSeek-V3 (arXiv:2412.19437), раздел про обучение.
