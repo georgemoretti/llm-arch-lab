@@ -23,8 +23,12 @@ questions: [norm-placement-*]
 # (modeling_gemma3.py): input_layernorm, post_attention_layernorm, pre_feedforward_layernorm,
 # post_feedforward_layernorm; Gemma3RMSNorm умножает на (1 + weight). config.json OLMo-2-1124-7B:
 # rms_norm_eps = 1e-6; Gemma 3: rms_norm_eps = 1e-6.
+# FFN: config.json OLMo-2-1124-7B — hidden_act silu, 4096 → 11008; Gemma 3 27B (text_config, зеркало
+# unsloth/gemma-3-27b-pt) — hidden_activation gelu_pytorch_tanh, 5376 → 21504; Gemma3MLP = down(act(gate(x)) * up(x)).
 arch:
   gemma-3:
     norm: "RMSNorm (масштаб 1 + w), sandwich: норма до и после каждого подслоя, остаток не нормируется"
+    ffn: "GeGLU: гейт GELU (tanh), 5376 → 21 504 → 5376 у 27B"
   olmo-2:
     norm: "RMSNorm на выходе подслоя внутри остатка: x + n(подслой(x)), без нормы на входе"
+    ffn: "SwiGLU, как у Llama: 4096 → 11 008 → 4096 у 7B"

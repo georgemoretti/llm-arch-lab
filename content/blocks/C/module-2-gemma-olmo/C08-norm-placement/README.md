@@ -30,8 +30,14 @@
 | OLMo 2 | $x \leftarrow x + n(f(x))$ | 1 | `post_attention_layernorm`, `post_feedforward_layernorm` |
 | Sandwich (Gemma 2/3) | $x \leftarrow x + n_2(f(n_1(x)))$ | 2 | `input_layernorm`, `post_attention_layernorm`, `pre_feedforward_layernorm`, `post_feedforward_layernorm` |
 
-Attention и FFN не меняются: `LlamaAttention` и `SwiGLUFFN` из модуля 1. Меняется только порядок
+Attention и FFN в задаче не меняются: `LlamaAttention` и `SwiGLUFFN` из модуля 1. Меняется только порядок
 трёх операций: норма, подслой, сложение с остатком.
+
+FFN у этих моделей и правда почти тот же, что у Llama. OLMo 2 — ровно SwiGLU (`hidden_act: silu`, 4096 → 11 008
+у 7B). Gemma 3 — тот же гейтированный FFN из трёх матриц (`gate_proj`, `up_proj`, `down_proj`), но гейт —
+GELU с tanh-аппроксимацией вместо SiLU (`hidden_activation: gelu_pytorch_tanh`, 5376 → 21 504 у 27B): это
+**GeGLU** из той же статьи Шазира, что и SwiGLU (C02). В конфигурируемой модели финального проекта это одна
+строка: `ffn: {type: geglu}` (`llmlab/configs/gemma3-like.yaml`).
 
 Детали реальных реализаций, которых нет в задаче: у Gemma `RMSNorm` умножает на $(1 + w)$, а не на
 $w$ (веса инициализируются нулями); у Gemma 3 и OLMo 2 в attention есть ещё QK-Norm (C09). У OLMo 2
