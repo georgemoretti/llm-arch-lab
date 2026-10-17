@@ -72,3 +72,10 @@ def test_cli_exit_code(toy_root):
     write_task(toy_root, "Z02-bad", meta={"depends_on": ["Z99-missing"]})
     bad = CliRunner().invoke(app, ["doctor", "--quick", "--port", str(_free_port())])
     assert bad.exit_code == 1 and "Проблем: 1" in bad.output
+
+
+def test_version_flag():
+    from llmlab import __version__
+
+    result = CliRunner().invoke(app, ["--version"])
+    assert result.exit_code == 0 and __version__ in result.output

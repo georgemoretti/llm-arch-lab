@@ -24,6 +24,20 @@ questions_app = typer.Typer(help="База вопросов с собеседо�
                             no_args_is_help=True)
 app.add_typer(questions_app, name="questions")
 
+def _version(value: bool) -> None:
+    if value:
+        from llmlab import __version__
+
+        console.print(f"llmlab {__version__}")
+        raise typer.Exit()
+
+
+@app.callback()
+def main(version: bool = typer.Option(False, "--version", callback=_version, is_eager=True,
+                                      help="показать версию и выйти")) -> None:
+    """LLM Arch Lab — интерактивный курс по архитектурам LLM."""
+
+
 STATUS_STYLE = {"solved": "[green]✓ решена[/]", "attempted": "[yellow]… в процессе[/]", "new": "[dim]· новая[/]"}
 
 
@@ -429,7 +443,10 @@ def doctor_cmd(
     """Проверить окружение: Python, зависимости, torch, курс, бандл, SQLite, порт, запуск тестов."""
     from llmlab.doctor import run_checks
 
+    from llmlab import __version__
+
     icons = {"ok": "[green]✓[/]", "warn": "[yellow]![/]", "fail": "[red]✗[/]"}
+    console.print(f"[bold]llmlab {__version__}[/] — проверка окружения\n")
 
     def show(c) -> None:
         console.print(f"{icons[c.status]} [bold]{c.name}[/]: {escape(c.detail)}")
