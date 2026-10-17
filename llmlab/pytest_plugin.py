@@ -5,7 +5,9 @@
 
 Фикстуры для тестов задач:
 
-- ``impl`` — модуль с реализацией, которую проверяем (выбирается флагом ``--impl``);
+- ``impl`` — модуль с реализацией, которую проверяем (выбирается флагом ``--impl``). Всё, что эталон
+  определяет сам и чего не импортирует заготовка, должно быть определено в этом файле, а не взято из
+  ``llmlab.core`` (``check_own_code``) — иначе все тесты падают с объяснением;
 - ``ref``  — эталон ``solution.py`` той же задачи (для численного сравнения);
 - ``task_info`` — dict из ``task.yaml``.
 
@@ -20,6 +22,7 @@
 
 from __future__ import annotations
 
+import ast
 import importlib.util
 import json
 import os
@@ -128,6 +131,36 @@ def _load_module(path: Path, tag: str) -> ModuleType:
     return _module_cache[path]
 
 
+def _top_level_names(path: Path) -> tuple[set[str], set[str]]:
+    """(определённые def/class, импортированные) имена верхнего уровня файла."""
+    if not path.exists():
+        return set(), set()
+    tree = ast.parse(path.read_text(encoding="utf-8"))
+    defined = {n.name for n in tree.body if isinstance(n, (ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))}
+    imported = {a.asname or a.name.split(".")[0] for n in tree.body if isinstance(n, (ast.Import, ast.ImportFrom))
+                for a in n.names}
+    return defined, imported
+
+
+def check_own_code(module: ModuleType, task_dir: Path) -> None:
+    """То, что задача просит написать, должно быть написано в файле решения, а не импортировано из эталонов
+    ``llmlab`` (``llmlab.core.*`` содержит ответы для следующих задач). Готовые детали, которые импортирует сама
+    заготовка, разрешены."""
+    info = _load_task_info(task_dir)
+    own, _ = _top_level_names(task_dir / "solution.py")
+    _, given = _top_level_names(task_dir / ("buggy.py" if info.get("type") == "debug" else "starter.py"))
+    borrowed = []
+    for name in sorted(own - given):
+        obj = getattr(module, name, None)
+        origin = getattr(obj, "__module__", None)
+        if obj is not None and origin and origin != module.__name__ and origin.startswith("llmlab"):
+            borrowed.append(f"`{name}` из `{origin}`")
+    if borrowed:
+        pytest.fail("Импортированы готовые эталоны: " + ", ".join(borrowed) + ". Это ответы из llmlab, а задача — "
+                    "написать их самому в solution.py (импортировать можно только то, что импортирует заготовка).",
+                    pytrace=False)
+
+
 @pytest.fixture(scope="module")
 def task_info(request: pytest.FixtureRequest) -> dict:
     return _load_task_info(_find_task_dir(Path(request.path).parent))
@@ -143,7 +176,9 @@ def impl(request: pytest.FixtureRequest) -> ModuleType:
         tid = _load_task_info(task_dir)["id"]
         pytest.fail(f"Нет рабочей копии {path}. Создай её: `llmlab init-workspace {tid}`", pytrace=False)
     request.config.stash[_impl_path_key]["path"] = path.resolve()
-    return _load_module(path, mode)
+    module = _load_module(path, mode)
+    check_own_code(module, task_dir)
+    return module
 
 
 @pytest.fixture(scope="module")

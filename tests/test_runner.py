@@ -111,3 +111,16 @@ def test_init_workspace_does_not_overwrite(toy_root):
 def test_debug_workspace_starts_from_buggy_code(toy_root):
     task = _task(toy_root, "Z02-fix", type_="debug")
     assert "abs(b)" in init_workspace(task, toy_root).read_text(encoding="utf-8")
+
+
+def test_importing_reference_from_llmlab_is_rejected(toy_root, tmp_path):
+    """Ответ нельзя «решить» импортом эталона из llmlab; обычные импорты не мешают."""
+    task = _task(toy_root)
+    cheat = tmp_path / "cheat.py"
+    cheat.write_text("from llmlab.paths import project_root as add\n", encoding="utf-8")
+    result = run_task_tests(task, impl_path=cheat, root=toy_root)
+    assert result["status"] == "failed" and result["passed"] == 0
+    assert "llmlab.paths" in result["tests"][0]["message"], result["tests"][0]["message"]
+    honest = tmp_path / "honest.py"
+    honest.write_text("from operator import add\n", encoding="utf-8")
+    assert run_task_tests(task, impl_path=honest, root=toy_root)["status"] == "passed"
