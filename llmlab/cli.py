@@ -1,4 +1,4 @@
-"""CLI курса: ``llmlab list | test | validate | init-workspace | serve | notes | questions | model | generate``."""
+"""CLI курса: ``llmlab list | test | validate | init-workspace | serve | notes | questions | model | generate | doctor``."""
 
 from __future__ import annotations
 
@@ -419,6 +419,31 @@ def generate_cmd(
     new = out[0, idx.shape[1]:].tolist()
     console.print(("" if chat else f"[bold]{escape(prompt)}[/]") + escape(tokenizer.decode(new)))
     console.print(f"[dim]{len(new)} токенов за {dt:.1f} с ({len(new) / dt:.1f} ток/с)[/]")
+
+
+@app.command("doctor")
+def doctor_cmd(
+    port: int = typer.Option(8765, help="порт, который проверить для llmlab serve"),
+    quick: bool = typer.Option(False, "--quick", help="без пробного прогона тестов (~2 с)"),
+) -> None:
+    """Проверить окружение: Python, зависимости, torch, курс, бандл, SQLite, порт, запуск тестов."""
+    from llmlab.doctor import run_checks
+
+    icons = {"ok": "[green]✓[/]", "warn": "[yellow]![/]", "fail": "[red]✗[/]"}
+
+    def show(c) -> None:
+        console.print(f"{icons[c.status]} [bold]{c.name}[/]: {escape(c.detail)}")
+        if c.fix:
+            console.print(f"    [dim]→ {escape(c.fix)}[/]")
+
+    checks = run_checks(port=port, run_tests=not quick, on_check=show)
+    fails = sum(c.status == "fail" for c in checks)
+    warns = sum(c.status == "warn" for c in checks)
+    if fails:
+        console.print(f"\n[red]Проблем: {fails}[/] — курс не заработает, пока их не исправить.")
+        raise typer.Exit(1)
+    console.print("\n[green]Всё готово.[/] Запусти `llmlab serve`." +
+                  (f" [yellow](предупреждений: {warns})[/]" if warns else ""))
 
 
 @app.command("serve")
