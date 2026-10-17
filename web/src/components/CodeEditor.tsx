@@ -63,9 +63,12 @@ export const CodeEditor = forwardRef<CodeEditorHandle, Props>(function CodeEdito
       if (!suppress.current) cb.current.onChange(ed.getValue());
     });
     return () => {
+      // Сначала редактор, потом модель: иначе виджеты редактора (автодополнение, hover) успевают
+      // обратиться к уже уничтоженной модели → «Model is disposed!» в консоли.
+      const model = ed.getModel();
       sub.dispose();
-      ed.getModel()?.dispose();
       ed.dispose();
+      model?.dispose();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
