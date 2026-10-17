@@ -33,7 +33,7 @@ def test_workspace_attempt_is_recorded(toy_root):
     first = run_task_tests(task, root=toy_root)
     assert first["status"] == "failed" and "attempt_id" in first
 
-    path.write_text(GOOD)
+    path.write_text(GOOD, encoding="utf-8")
     second = run_task_tests(task, root=toy_root)
     assert second["status"] == "passed"
 
@@ -48,12 +48,12 @@ def test_workspace_attempt_is_recorded(toy_root):
 def test_assertion_message_and_user_location(toy_root):
     task = _task(toy_root)
     path = init_workspace(task, toy_root)
-    path.write_text("def add(a, b):\n    return a - b\n")
+    path.write_text("def add(a, b):\n    return a - b\n", encoding="utf-8")
     result = run_task_tests(task, root=toy_root)
     failed = [t for t in result["tests"] if t["outcome"] == "failed"]
     assert failed and failed[0]["message"] == "2 + 3 должно быть 5"
 
-    path.write_text("def add(a, b):\n    x = 1\n    return a + b + undefined_name\n")
+    path.write_text("def add(a, b):\n    x = 1\n    return a + b + undefined_name\n", encoding="utf-8")
     result = run_task_tests(task, root=toy_root)
     loc = result["tests"][0]["location"]
     assert loc == {"file": "solution.py", "line": 3, "function": "add",
@@ -63,7 +63,7 @@ def test_assertion_message_and_user_location(toy_root):
 
 def test_syntax_error_in_user_code(toy_root):
     task = _task(toy_root)
-    init_workspace(task, toy_root).write_text("def add(a, b)\n    return a + b\n")
+    init_workspace(task, toy_root).write_text("def add(a, b)\n    return a + b\n", encoding="utf-8")
     result = run_task_tests(task, root=toy_root)
     assert result["status"] == "failed"
     assert all(t["outcome"] == "error" for t in result["tests"])
@@ -79,7 +79,7 @@ def test_missing_workspace_gives_hint(toy_root):
 
 def test_timeout(toy_root):
     task = _task(toy_root)
-    init_workspace(task, toy_root).write_text("def add(a, b):\n    while True:\n        pass\n")
+    init_workspace(task, toy_root).write_text("def add(a, b):\n    while True:\n        pass\n", encoding="utf-8")
     result = run_task_tests(task, root=toy_root, timeout_s=3)
     assert result["status"] == "timeout"
     assert "не уложились" in result["message"]
@@ -96,18 +96,18 @@ def test_broken_test_file_is_error(toy_root):
 def test_init_workspace_does_not_overwrite(toy_root):
     task = _task(toy_root)
     path = init_workspace(task, toy_root)
-    path.write_text("# мой код\n")
+    path.write_text("# мой код\n", encoding="utf-8")
     try:
         init_workspace(task, toy_root)
     except FileExistsError:
         pass
     else:
         raise AssertionError("init_workspace перезаписал код пользователя")
-    assert path.read_text() == "# мой код\n"
+    assert path.read_text(encoding="utf-8") == "# мой код\n"
     init_workspace(task, toy_root, force=True)
-    assert "NotImplementedError" in workspace_file(task, toy_root).read_text()
+    assert "NotImplementedError" in workspace_file(task, toy_root).read_text(encoding="utf-8")
 
 
 def test_debug_workspace_starts_from_buggy_code(toy_root):
     task = _task(toy_root, "Z02-fix", type_="debug")
-    assert "abs(b)" in init_workspace(task, toy_root).read_text()
+    assert "abs(b)" in init_workspace(task, toy_root).read_text(encoding="utf-8")

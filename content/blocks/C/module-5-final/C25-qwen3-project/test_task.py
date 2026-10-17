@@ -52,7 +52,7 @@ def _tiny_model(hf_cfg=TINY_QWEN3, seed=0) -> Model:
 def _write_qwen3_checkpoint(model: Model, path: Path, shards: int = 2) -> Path:
     """Чекпойнт как у HF: config.json + model-0000i-of-0000n.safetensors (bf16) + index.json."""
     path.mkdir(parents=True, exist_ok=True)
-    (path / "config.json").write_text(json.dumps(TINY_QWEN3))
+    (path / "config.json").write_text(json.dumps(TINY_QWEN3), encoding="utf-8")
     sd = {("" if k == "lm_head.weight" else "model.") + k: v.to(torch.bfloat16).clone()
           for k, v in model.state_dict().items()}
     names = sorted(sd)
@@ -65,13 +65,13 @@ def _write_qwen3_checkpoint(model: Model, path: Path, shards: int = 2) -> Path:
         part = {n: sd[n] for n in names[s::shards]}
         save_file(part, str(path / fname))
         weight_map.update({n: fname for n in part})
-    (path / "model.safetensors.index.json").write_text(json.dumps({"metadata": {}, "weight_map": weight_map}))
+    (path / "model.safetensors.index.json").write_text(json.dumps({"metadata": {}, "weight_map": weight_map}), encoding="utf-8")
     return path
 
 
 def _write_gpt2_checkpoint(model: Model, path: Path) -> Path:
     path.mkdir(parents=True, exist_ok=True)
-    (path / "config.json").write_text(json.dumps(TINY_GPT2))
+    (path / "config.json").write_text(json.dumps(TINY_GPT2), encoding="utf-8")
     s = model.state_dict()
     sd = {"wte.weight": s["embed_tokens.weight"], "wpe.weight": s["embed_positions.weight"],
           "ln_f.weight": s["norm.weight"], "ln_f.bias": s["norm.bias"]}

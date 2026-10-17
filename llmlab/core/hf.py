@@ -158,7 +158,7 @@ def load_safetensors(model_dir: str | Path) -> dict[str, torch.Tensor]:
     model_dir = Path(model_dir)
     index = model_dir / "model.safetensors.index.json"
     if index.exists():
-        shards = sorted(set(json.loads(index.read_text())["weight_map"].values()))
+        shards = sorted(set(json.loads(index.read_text(encoding="utf-8"))["weight_map"].values()))
     else:
         shards = ["model.safetensors"]
     sd: dict[str, torch.Tensor] = {}
@@ -170,7 +170,7 @@ def load_safetensors(model_dir: str | Path) -> dict[str, torch.Tensor]:
 def load_pretrained(model_dir: str | Path, dtype: torch.dtype = torch.float32) -> Model:
     """Папка с config.json и *.safetensors → Model с этими весами (eval-режим)."""
     model_dir = Path(model_dir)
-    hf = json.loads((model_dir / "config.json").read_text())
+    hf = json.loads((model_dir / "config.json").read_text(encoding="utf-8"))
     cfg = config_from_hf(hf)
     with torch.device("meta"):                                      # не тратим время на случайную инициализацию
         model = Model(cfg)

@@ -86,12 +86,12 @@ def test_save_pretrained_roundtrip(tmp_path, arch):
     idx = torch.randint(0, 64, (2, 10))
     with torch.no_grad():
         torch.testing.assert_close(model(idx), ref(idx).logits, atol=1e-4, rtol=1e-4)
-    assert json.loads((tmp_path / "config.json").read_text())["model_type"] == arch
+    assert json.loads((tmp_path / "config.json").read_text(encoding="utf-8"))["model_type"] == arch
 
 
 def test_weights_marker_skipped_without_flag(tmp_path):
     """@pytest.mark.weights пропускается без --weights и запускается с ним."""
-    (tmp_path / "test_w.py").write_text("import pytest\n\n@pytest.mark.weights\ndef test_w():\n    assert False\n")
+    (tmp_path / "test_w.py").write_text("import pytest\n\n@pytest.mark.weights\ndef test_w():\n    assert False\n", encoding="utf-8")
     base = [sys.executable, "-m", "pytest", str(tmp_path / "test_w.py"), "-p", "llmlab.pytest_plugin", "-q",
             "-p", "no:cacheprovider", f"--rootdir={tmp_path}"]
     env = {k: v for k, v in os.environ.items() if k != "LLMLAB_WEIGHTS"}   # иначе флаг придёт из окружения

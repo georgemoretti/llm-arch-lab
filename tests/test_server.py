@@ -51,16 +51,16 @@ def test_code_roundtrip_conflict_and_reset(client, toy_root):
     assert path.exists()
 
     saved = client.put("/api/tasks/Z01-add/code", json={"code": GOOD, "base_sha256": first["sha256"]}, headers=H)
-    assert saved.status_code == 200 and path.read_text() == GOOD
+    assert saved.status_code == 200 and path.read_text(encoding="utf-8") == GOOD
 
-    path.write_text(GOOD + "# правка из IDE\n")  # внешний редактор
+    path.write_text(GOOD + "# правка из IDE\n", encoding="utf-8")  # внешний редактор
     meta = client.get("/api/tasks/Z01-add/code/meta").json()
     assert meta["sha256"] != saved.json()["sha256"]
     stale = client.put("/api/tasks/Z01-add/code", json={"code": "x = 1\n", "base_sha256": saved.json()["sha256"]},
                        headers=H)
     assert stale.status_code == 409, "сохранение поверх внешней правки должно требовать подтверждения"
     forced = client.put("/api/tasks/Z01-add/code", json={"code": "x = 1\n", "force": True}, headers=H)
-    assert forced.status_code == 200 and path.read_text() == "x = 1\n"
+    assert forced.status_code == 200 and path.read_text(encoding="utf-8") == "x = 1\n"
 
     reset = client.post("/api/tasks/Z01-add/reset", headers=H).json()
     assert "NotImplementedError" in reset["code"]

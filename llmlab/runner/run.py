@@ -62,12 +62,15 @@ def run_task_tests(
         ]
         if impl_path is not None:
             cmd.append(f"--impl-path={impl_path}")
-        env = {**os.environ, "LLMLAB_ROOT": str(root), "PYTHONDONTWRITEBYTECODE": "1"}
+        # UTF-8 в обе стороны: на Windows кодировка по умолчанию — cp1252, а вывод тестов на русском
+        env = {**os.environ, "LLMLAB_ROOT": str(root), "PYTHONDONTWRITEBYTECODE": "1", "PYTHONUTF8": "1",
+               "PYTHONIOENCODING": "utf-8"}
 
         started = time.perf_counter()
         timed_out = False
         try:
-            proc = subprocess.run(cmd, cwd=root, env=env, capture_output=True, text=True, timeout=timeout_s)
+            proc = subprocess.run(cmd, cwd=root, env=env, capture_output=True, text=True,
+                                  encoding="utf-8", errors="replace", timeout=timeout_s)
             output = proc.stdout + proc.stderr
             exit_code = proc.returncode
         except subprocess.TimeoutExpired as exc:
