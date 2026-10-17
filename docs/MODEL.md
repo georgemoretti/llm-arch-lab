@@ -2,7 +2,7 @@
 
 Одна модель-декодер, которая собирается из YAML. Каждая деталь — норма, позиции, attention, FFN/MoE,
 расписание слоёв — выбирается конфигом и берётся из эталонов задач блока C (`llmlab/core/*.py`).
-Это база финального проекта (C24, C25) и способ быстро собрать «свою» архитектуру.
+Это база финального проекта (C24, C25a, C25) и способ быстро собрать «свою» архитектуру.
 
 ```python
 from llmlab.core.model import Model, ModelConfig, generate
@@ -173,7 +173,7 @@ uv sync --extra weights                                   # huggingface_hub, tok
 llmlab generate qwen3-0.6b "The capital of France is"     # скачает ~1.5 ГБ в ~/.cache/huggingface
 llmlab generate qwen3-0.6b "Name three planets of the solar system" --chat -n 60
 llmlab generate smollm2-135m "Once upon a time" -t 0.8 --top-p 0.9
-llmlab generate qwen3-0.6b "Hello" --impl workspace      # твоё решение C25 вместо эталона
+llmlab generate qwen3-0.6b "Hello" --impl workspace      # твои решения C25 и C25a вместо эталонов
 ```
 
 Поддерживаемые `model_type`: `qwen3`, `llama` (Llama 2/3, SmolLM2), `gpt2`. Остальное `config_from_hf` отклоняет с

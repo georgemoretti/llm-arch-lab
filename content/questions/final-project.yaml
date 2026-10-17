@@ -118,7 +118,7 @@
   source: course
 - id: final-sampling-top-p-01
   topic: generation
-  tasks: [C25-qwen3-project]
+  tasks: [C25a-sampling]
   difficulty: medium
   kind: mcq
   question: "Вероятности токенов: 0.5, 0.3, 0.15, 0.05. Какие токены останутся при top-p = 0.7?"

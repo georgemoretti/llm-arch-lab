@@ -388,7 +388,7 @@ def generate_cmd(
     top_p: Optional[float] = typer.Option(None, "--top-p"),
     seed: int = typer.Option(0, "--seed"),
     chat: bool = typer.Option(False, "--chat", help="Qwen3: обернуть в чат-шаблон (без размышлений)"),
-    impl: str = typer.Option("core", help="core — эталон llmlab/core/hf.py; workspace — твоё решение C25"),
+    impl: str = typer.Option("core", help="core — эталон llmlab/core/hf.py; workspace — твои решения C25 (и C25a, если есть)"),
 ) -> None:
     """Сгенерировать текст своей моделью на реальных весах (нужно `uv sync --extra weights`)."""
     import time
@@ -417,6 +417,12 @@ def generate_cmd(
         spec = importlib.util.spec_from_file_location("llmlab_c25_workspace", file)
         mod = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(mod)
+        sampling = workspace_file(_get_task(course, "C25a-sampling"), course.root)
+        if sampling.exists():                       # своё сэмплирование из C25a вместо эталона, импортированного в C25
+            spec = importlib.util.spec_from_file_location("llmlab_c25a_workspace", sampling)
+            c25a = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(c25a)
+            mod.sample_next = c25a.sample_next
     t0 = time.perf_counter()
     lm = mod.load_pretrained(path)
     console.print(f"[dim]{model}: {lm.num_params():,} параметров, загрузка {time.perf_counter() - t0:.1f} с "

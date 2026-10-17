@@ -5,13 +5,14 @@
 (≠ d / H), QK-Norm по голове до RoPE (θ = 10⁶), SwiGLU 1024 → 3072, связанный выход; 596 M параметров
 (155.6 M — эмбеддинги). Загрузка: `config.json` → `ModelConfig`, `*.safetensors` (шарды по `index.json`) →
 переименование → bf16 → fp32 → `load_state_dict`; связь `lm_head` ↔ `embed_tokens` не должна порваться.
-Логиты совпадают с `transformers` до ~6·10⁻⁵ (fp32), жадная генерация — токен в токен. Сэмплирование:
-`softmax(z / T)`, top-k, top-p (ядро — наименьший префикс с суммой ≥ p, пересекающий порог токен остаётся).
+Логиты совпадают с `transformers` до ~6·10⁻⁵ (fp32), жадная генерация — токен в токен. Генерация: prefill,
+дальше по одному токену с KV-cache, выбор — `sample_next` из C25a, eos останавливает строку.
 
 ## Формула
 
-$$x_{t+1} \sim \operatorname{softmax}(z/T)\big|_{\text{top-}k\,\cap\,\text{ядро}_p},\qquad
-\text{ядро}_p = \Big\{(i) : \sum_{j<i} p_{(j)} < p\Big\}$$
+$$\theta = \operatorname{fp32}(W_{\text{bf16}}),\quad W_{\text{lm\_head}} \equiv E,\quad
+\lVert z^{\text{моя}} - z^{\text{transformers}}\rVert_\infty \le 10^{-3};\qquad
+x_{t+1} = \texttt{sample\_next}\big(f(x_t \mid \text{cache}_{<t})\big)$$
 
 ## Формы тензоров
 
@@ -32,9 +33,10 @@ idx [B,T] → embed [B,T,1024] → 28 × (GQA: q [B,16,T,128], k/v [B,8,S,128]; 
 | блок и модель | [[C06-llama-block]] |
 | QK-Norm по голове | [[C09-qk-norm]] |
 | config.json и имена весов | [[C24-hf-checkpoint]] |
+| сэмплирование (temperature, top-k, top-p) | [[C25a-sampling]] |
 
 ## Что поменялось относительно C24
 
 От словарей к работающей модели на диске: шарды safetensors, сборка без случайной инициализации, сохранение
-связанных весов, сэмплирование (temperature / top-k / top-p) и генерация с остановкой на eos — проверено
+связанных весов и генерация с KV-cache и остановкой на eos (сэмплирование — из C25a) — проверено
 против `transformers` на настоящих весах.

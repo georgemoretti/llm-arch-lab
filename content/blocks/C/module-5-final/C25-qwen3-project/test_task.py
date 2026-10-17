@@ -1,4 +1,4 @@
-"""Тесты C25 (проект): Qwen3-0.6B на своих деталях — загрузка, сэмплирование, генерация.
+"""Тесты C25 (проект): Qwen3-0.6B на своих деталях — загрузка и генерация (сэмплирование — C25a).
 
 Фикстуры (из llmlab.pytest_plugin):
   impl — проверяемая реализация (workspace / reference / starter);
@@ -6,8 +6,7 @@
 
 Без весов (по умолчанию): игрушечный чекпойнт в формате HF (config.json + bf16-шарды + index.json) пишется
 во временную папку; загрузка даёт ровно те логиты, что исходная модель; связь lm_head ↔ embed_tokens
-сохранена; сэмплирование соблюдает temperature / top-k / top-p (проверяется частотами на 4000 выборок);
-генерация совпадает с полным перепрогоном, использует KV-cache и останавливается на eos.
+сохранена; генерация совпадает с полным перепрогоном, использует KV-cache и останавливается на eos.
 
 С весами (`llmlab test C25-qwen3-project --weights`, нужен `uv sync --extra weights`, ~1.5 ГБ): логиты
 настоящей Qwen3-0.6B совпадают с transformers, жадная генерация — токен в токен, модель знает столицу Франции.
@@ -160,75 +159,6 @@ def test_load_pretrained_matches_transformers(impl, tmp_path):
     idx = _idx()
     with torch.no_grad():
         assert_close(model(idx), hf_model(idx).logits, atol=1e-4, rtol=1e-4)
-
-
-# ---------------------------------------------------------------------------
-# Сэмплирование
-# ---------------------------------------------------------------------------
-
-def _draws(impl, logits, n=4000, seed=0, **kw):
-    g = torch.Generator().manual_seed(seed)
-    out = impl.sample_next(logits.expand(n, -1).clone(), generator=g, **kw)
-    assert out.shape == (n, 1), f"sample_next возвращает [B, 1], получено {tuple(out.shape)}."
-    assert out.dtype == torch.long, f"Токены — int64 (long), получено {out.dtype}."
-    return torch.bincount(out[:, 0], minlength=logits.shape[-1]).float() / n
-
-
-PROBS = torch.tensor([[0.5, 0.3, 0.15, 0.05]])
-LOGITS = PROBS.log() + 3.0                                  # логиты определены с точностью до сдвига
-
-
-def test_sample_greedy_and_top_k(impl):
-    """sample_next: temperature = 0 → argmax (без случайности); top_k = 1 → тоже argmax при любой температуре"""
-    logits = torch.randn(5, 64, generator=torch.Generator().manual_seed(3))
-    got = impl.sample_next(logits, temperature=0.0)
-    assert got.shape == (5, 1), f"sample_next возвращает [B, 1], получено {tuple(got.shape)}."
-    assert torch.equal(got[:, 0], logits.argmax(-1)), "temperature = 0 — жадный выбор: argmax по последней оси."
-    freq = _draws(impl, LOGITS, temperature=1.5, top_k=1)
-    assert freq[0] == 1.0, f"top_k = 1 оставляет только самый вероятный токен, а выпадали и другие: {freq.tolist()}."
-    freq = _draws(impl, LOGITS, temperature=1.0, top_k=2)
-    assert freq[2:].sum() == 0, f"top_k = 2: токены 2 и 3 вне двух лучших, но выпадали: {freq.tolist()}."
-    assert abs(freq[0] - 0.625) < 0.03, (
-        f"top_k = 2: после отсечения вероятности перенормируются: 0.5 / 0.8 = 0.625, получено {freq[0]:.3f}.")
-
-
-def test_sample_temperature(impl):
-    """sample_next: логиты делятся на T до softmax — T = 0.5 делает распределение острее, T = 2 — площе"""
-    logits = torch.tensor([[2.0, 0.0]])
-    sharp = _draws(impl, logits, temperature=0.5)[0].item()     # e⁴ / (e⁴ + 1) ≈ 0.982
-    flat = _draws(impl, logits, temperature=2.0)[0].item()      # e / (e + 1) ≈ 0.731
-    assert abs(sharp - 0.982) < 0.015 and abs(flat - 0.731) < 0.03, (
-        f"P(токен 0) при T = 0.5: {sharp:.3f} (нужно ≈ 0.982), при T = 2: {flat:.3f} (нужно ≈ 0.731). "
-        "softmax(logits / T): T < 1 обостряет, T > 1 сглаживает. Умножение вместо деления даёт обратный эффект.")
-
-
-def test_sample_top_p(impl):
-    """sample_next: top-p — наименьший набор самых вероятных токенов с суммой ≥ p; токен, перешедший порог, остаётся"""
-    freq = _draws(impl, LOGITS, temperature=1.0, top_p=0.7)     # 0.5 < 0.7 ≤ 0.5 + 0.3 → ядро {0, 1}
-    if freq[1] == 0:
-        pytest.fail("top_p = 0.7: выпадал только токен 0. Ядро — наименьший набор с суммой ≥ p: 0.5 < 0.7, поэтому "
-                    "токен 1 (накопленная сумма 0.8) тоже входит. Типичная ошибка — маска cumsum > p выкидывает "
-                    "токен, который пересёк порог; сдвинь cumsum на один (масса токенов ДО текущего).", pytrace=False)
-    if freq[2:].sum() > 0:
-        pytest.fail(f"top_p = 0.7: выпадали токены 2–3 (частоты {freq.tolist()}), а ядро — {{0, 1}}: суммы 0.5 и 0.8.",
-                    pytrace=False)
-    assert abs(freq[0] - 0.625) < 0.03, f"Внутри ядра вероятности перенормируются: 0.5 / 0.8 = 0.625, получено {freq[0]:.3f}."
-    freq = _draws(impl, LOGITS, temperature=1.0, top_p=0.4)
-    assert freq[0] == 1.0, "top_p = 0.4 < 0.5: в ядре один самый вероятный токен (он остаётся всегда)."
-    # порядок токенов в словаре не важен: ядро — по вероятностям, а не по индексам
-    perm = torch.tensor([2, 0, 3, 1])
-    freq = _draws(impl, LOGITS[:, perm], temperature=1.0, top_p=0.7)
-    assert freq[0] == 0 and freq[2] == 0 and freq[1] > 0 and freq[3] > 0, (
-        f"Логиты переставлены (вероятные токены — 1 и 3), частоты {freq.tolist()}. Сортируй по вероятности и "
-        "возвращай маску на исходные места (scatter по индексам сортировки).")
-
-
-def test_sample_reproducible(impl):
-    """sample_next: один и тот же torch.Generator с тем же сидом → те же токены"""
-    logits = torch.randn(8, 64, generator=torch.Generator().manual_seed(5))
-    a = impl.sample_next(logits, temperature=1.0, top_p=0.9, generator=torch.Generator().manual_seed(7))
-    b = impl.sample_next(logits, temperature=1.0, top_p=0.9, generator=torch.Generator().manual_seed(7))
-    assert torch.equal(a, b), "Передай generator в torch.multinomial — иначе генерацию не воспроизвести."
 
 
 # ---------------------------------------------------------------------------

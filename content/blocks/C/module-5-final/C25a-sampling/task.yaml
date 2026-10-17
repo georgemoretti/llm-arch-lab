@@ -1,0 +1,17 @@
+id: C25a-sampling
+title: "Сэмплирование: temperature, top-k, top-p"
+block: C
+module: module-5-final
+type: implement
+difficulty: medium
+depends_on: [C06-llama-block]
+diff_from: C06-llama-block
+tags: [sampling, generation, decoding]
+entrypoint: sample_next
+time_estimate_min: 25
+reading:
+  - title: "The Curious Case of Neural Text Degeneration (Holtzman et al., 2019) — nucleus sampling"
+    url: https://arxiv.org/abs/1904.09751
+  - title: "Hugging Face: How to generate text (greedy, beam, top-k, top-p)"
+    url: https://huggingface.co/blog/how-to-generate
+questions: [final-sampling-top-p-01, iv-generation-01, iv-generation-02, iv-generation-03, iv-generation-04]

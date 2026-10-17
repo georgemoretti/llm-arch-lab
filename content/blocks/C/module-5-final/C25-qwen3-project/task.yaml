@@ -4,22 +4,20 @@ block: C
 module: module-5-final
 type: project
 difficulty: hard
-depends_on: [C24-hf-checkpoint, C05-kv-cache]
+depends_on: [C24-hf-checkpoint, C25a-sampling, C05-kv-cache]
 diff_from: C24-hf-checkpoint
-tags: [project, weights, safetensors, sampling, generation, kv-cache, qwen]
-entrypoint: [load_safetensors, load_pretrained, sample_next, generate]
-time_estimate_min: 55
+tags: [project, weights, safetensors, generation, kv-cache, qwen]
+entrypoint: [load_safetensors, load_pretrained, generate]
+time_estimate_min: 40
 papers: [qwen3]
 reading:
   - title: "Qwen/Qwen3-0.6B: карточка модели и файлы"
     url: https://huggingface.co/Qwen/Qwen3-0.6B
   - title: "safetensors: формат и API (load_file, safe_open)"
     url: https://huggingface.co/docs/safetensors/index
-  - title: "The Curious Case of Neural Text Degeneration (Holtzman et al., 2019) — nucleus sampling"
-    url: https://arxiv.org/abs/1904.09751
   - title: "rasbt/LLMs-from-scratch: Qwen3 с нуля (ch05/11_qwen3)"
     url: https://github.com/rasbt/LLMs-from-scratch/tree/main/ch05/11_qwen3
-questions: [final-load-*, final-sampling-*, iv-generation-01, iv-generation-02, iv-generation-03, iv-generation-04]
+questions: [final-load-*, final-sampling-eos-01]
 # Источник: Qwen/Qwen3-0.6B (config.json, model.safetensors, сверено 2026-10-17): 596 049 920 параметров
 # (посчитано по весам и совпадает с transformers), bf16, один файл ~1.5 ГБ, lm_head.weight == embed_tokens.weight.
 # Расхождение логитов с transformers 5.x (fp32, eager attention) на промпте из теста: max |Δ| ≈ 6e-5 при |logit| ≤ 21.

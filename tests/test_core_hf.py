@@ -32,8 +32,8 @@ def _load(task: str):
 
 
 def test_core_matches_task_solutions():
-    """core/hf.py дублирует solution.py задач C24 и C25 — функции должны вести себя одинаково."""
-    c24, c25 = _load("C24-hf-checkpoint"), _load("C25-qwen3-project")
+    """core/hf.py дублирует solution.py задач C24, C25a и C25 — функции должны вести себя одинаково."""
+    c24, c25a, c25 = _load("C24-hf-checkpoint"), _load("C25a-sampling"), _load("C25-qwen3-project")
     for cfg in (TINY_QWEN3, {**TINY_QWEN3, "model_type": "llama", "tie_word_embeddings": False},
                 {"model_type": "gpt2", "vocab_size": 64, "n_embd": 32, "n_layer": 2, "n_head": 4, "n_positions": 16}):
         assert c24.config_from_hf(cfg) == hf.config_from_hf(cfg)
@@ -44,7 +44,7 @@ def test_core_matches_task_solutions():
     assert a.keys() == b.keys() and all(torch.equal(a[k], b[k]) for k in a)
     logits = torch.randn(6, 64, generator=torch.Generator().manual_seed(1))
     for kw in ({"temperature": 0.0}, {"temperature": 0.8, "top_k": 5}, {"temperature": 1.0, "top_p": 0.6}):
-        assert torch.equal(c25.sample_next(logits, generator=torch.Generator().manual_seed(2), **kw),
+        assert torch.equal(c25a.sample_next(logits, generator=torch.Generator().manual_seed(2), **kw),
                            hf.sample_next(logits, generator=torch.Generator().manual_seed(2), **kw))
     idx = torch.randint(0, 64, (2, 4))
     assert torch.equal(c25.generate(model, idx, 5, eos_token_id=3), hf.generate(model, idx, 5, eos_token_id=3))

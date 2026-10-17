@@ -47,7 +47,7 @@ Node.js не нужен: собранный интерфейс лежит в р�
 | 2. Gemma 3 / OLMo 2 / SmolLM3 | sliding window, размещение норм, QK-Norm, NoPE, кольцевой KV-cache | 10 |
 | 3. MoE и DeepSeek | роутер, MoE-слой, балансировка, shared expert, MLA, MTP | 13 |
 | 4. Эффективное внимание | sparse attention, gated attention, линейное внимание, Gated DeltaNet, Mamba-2 | 10 |
-| 5. Финальный проект | модель из YAML, config.json и веса HF, Qwen3-0.6B, генерация | 2 |
+| 5. Финальный проект | модель из YAML, config.json и веса HF, сэмплирование, Qwen3-0.6B, генерация | 3 |
 
 Кроме задач «реализуй» есть задачи на **отладку** (код с одним правдоподобным багом), **чтение статей** с
 вопросами и **квизы** по модулям. Каждая задача начинается с вопроса «что поменялось относительно
@@ -94,9 +94,9 @@ llmlab doctor                         # проверка окружения
 ## Финальный проект: своя модель на настоящих весах
 
 Все детали курса собираются в одну модель из YAML (`llmlab/core/model.py`, конфиги — `llmlab/configs/`,
-схема и как добавить компонент — `docs/MODEL.md`). Задачи **C24** (config.json и имена весов) и **C25**
-(загрузка safetensors, сэмплирование, генерация, сверка логитов с `transformers`) превращают её в
-настоящую Qwen3-0.6B.
+схема и как добавить компонент — `docs/MODEL.md`). Задачи **C24** (config.json и имена весов), **C25a**
+(сэмплирование: temperature, top-k, top-p) и **C25** (загрузка safetensors, генерация, сверка логитов с
+`transformers`) превращают её в настоящую Qwen3-0.6B.
 
 ```bash
 uv sync --extra weights                       # huggingface_hub, tokenizers, transformers (для сверки)
@@ -108,7 +108,7 @@ llmlab generate smollm2-135m "Once upon a time" -t 0.8 --top-p 0.9
 
 llmlab test C25-qwen3-project                 # тесты на случайных весах — без скачивания
 llmlab test C25-qwen3-project --weights       # + логиты и генерация против transformers на реальных весах
-llmlab generate qwen3-0.6b "Hello" --impl workspace   # генерировать своим решением C25
+llmlab generate qwen3-0.6b "Hello" --impl workspace   # генерировать своими решениями C25 и C25a
 ```
 
 Первый запуск с реальными весами скачивает ~1.5 ГБ в `~/.cache/huggingface`. Без `--weights` (и без

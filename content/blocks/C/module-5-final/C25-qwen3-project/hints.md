@@ -15,8 +15,5 @@
 
 ## Подсказка 3
 
-top-p: `sorted_logits, order = logits.sort(dim=-1, descending=True)`; `probs = sorted_logits.softmax(-1)`;
-`before = probs.cumsum(-1) - probs` (масса токенов выше текущего); `sorted_logits[before >= top_p] = -inf`;
-обратно на места: `torch.full_like(logits, -inf).scatter(-1, order, sorted_logits)`.
-Генерация: в цикле `nxt = sample_next(logits[:, -1], ...)`; при eos — `nxt.masked_fill(done[:, None], eos)`,
+Генерация: `caches = model.new_caches()`, `logits = model(idx, caches)`; в цикле `nxt = sample_next(logits[:, -1], ...)`; при eos — `nxt.masked_fill(done[:, None], eos)`,
 `done |= nxt[:, 0] == eos`; выход, если `done.all()` или это последний шаг; иначе `logits = model(nxt, caches)`.

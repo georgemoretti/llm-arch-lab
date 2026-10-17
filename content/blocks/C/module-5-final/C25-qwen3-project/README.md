@@ -18,7 +18,7 @@ C24 перевёл `config.json` и имена тензоров. Здесь — 
 |---|---|---|
 | вход | dict из `config.json`, словарь тензоров | папка на диске: `config.json` + `*.safetensors` (иногда шарды) |
 | выход | `ModelConfig`, `state_dict` | готовая `Model` в `eval()`, со связанным `lm_head` |
-| генерация | — | KV-cache, temperature, top-k, top-p, eos |
+| генерация | — | KV-cache, сэмплирование из C25a, eos |
 | проверка | логиты = исходной случайной модели | логиты = `transformers` на **настоящих** весах |
 
 ## Как устроена твоя модель
@@ -35,20 +35,24 @@ idx [B, T] ──embed_tokens──► x [B, T, 1024]
 посмотри `llmlab/configs/*.yaml` и `tests/test_core_model.py`, где доказано, что частные случаи общей
 `Attention` совпадают с твоими задачами C04, C07, C09, C10, C19.
 
-## Сэмплирование
+## Формула
 
-Модель выдаёт логиты $z \in \mathbb{R}^V$ для следующего токена. Выбор:
-
-- $T = 0$ — жадно: $\arg\max z$;
-- иначе $p = \operatorname{softmax}(z / T)$: $T < 1$ обостряет распределение, $T > 1$ сглаживает;
-- **top-k** — оставить $k$ самых вероятных токенов (остальным $-\infty$) и перенормировать;
-- **top-p** (nucleus, Holtzman et al., 2019) — отсортировать по убыванию и оставить наименьший префикс, чья
-  сумма $\ge p$. Токен $i$ (в порядке убывания) остаётся, если $\sum_{j<i} p_j < p$: токен, который
-  **пересекает** порог, входит в ядро, самый вероятный остаётся всегда.
+Загрузка — это перенос тензоров без вычислений, поэтому формула здесь про то, **что должно сохраниться**.
+Для каждого параметра $\theta$ своей модели и соответствующего тензора чекпойнта $W$ (имена — по C24):
 
 $$
-\text{keep}_i = \Big[\sum_{j < i} p_{(j)} < p\Big],\qquad
-x_{t+1} \sim \operatorname{softmax}\big(z / T \text{ вне ядра} = -\infty\big)
+\theta = \operatorname{fp32}(W_{\text{bf16}}),\qquad
+W_{\text{lm\_head}} \equiv E\ \ (\text{один тензор, а не копия}),\qquad
+\big|\,z^{\text{моя}} - z^{\text{transformers}}\big|_\infty \le 10^{-3}
+$$
+
+Генерация с KV-cache: после prefill промпта $x_{1:T}$ каждый шаг подаёт в модель только новый токен, а
+прошлые $K, V$ берёт из кеша (C05):
+
+$$
+z_{t} = f\big(x_t \mid \text{cache}_{<t}\big),\qquad
+x_{t+1} = \texttt{sample\_next}(z_t;\ T, k, p),\qquad
+x_{t+1} = \text{eos}, \text{ если строка уже выдала eos}
 $$
 
 ## Формы тензоров
@@ -56,7 +60,6 @@ $$
 ```
 load_safetensors:   {"model.layers.0.self_attn.q_proj.weight": [2048, 1024] bf16, …}  (311 тензоров)
 load_pretrained:    Model, 596 049 920 параметров fp32 (≈ 2.4 ГБ), lm_head.weight is embed_tokens.weight
-sample_next:        logits [B, V] → [B, 1] long
 generate:           idx [B, T] → prefill model(idx) [B, T, V] → шаг: model(next [B, 1], caches) [B, 1, V]
                     → [B, T + n], n ≤ max_new_tokens
 ```
@@ -70,10 +73,9 @@ generate:           idx [B, T] → prefill model(idx) [B, T, V] → шаг: mode
 2. `load_pretrained(model_dir, dtype=torch.float32)` — `config.json` → `config_from_hf` → `Model` → веса
    (`convert_state_dict`, `check_state_dict` из C24) → `eval()`. Связь `lm_head` ↔ `embed_tokens` должна
    остаться (если собираешь модель на `meta` и грузишь с `assign=True` — связь рвётся, восстанови).
-3. `sample_next(logits, temperature=0.0, top_k=None, top_p=None, generator=None)`.
-4. `generate(model, idx, max_new_tokens, temperature=0.0, top_k=None, top_p=None, eos_token_id=None,
-   generator=None)` — prefill, дальше по одному токену с кешем; после `eos` строка дополняется `eos`;
-   все строки закончили — выход.
+3. `generate(model, idx, max_new_tokens, temperature=0.0, top_k=None, top_p=None, eos_token_id=None,
+   generator=None)` — prefill, дальше по одному токену с кешем; выбор токена — `sample_next` из C25a (импортирован
+   в заготовке); после `eos` строка дополняется `eos`; все строки закончили — выход.
 
 ## Как запустить на настоящих весах
 
@@ -103,8 +105,6 @@ argmax во всех позициях. Любая настоящая ошибк�
 - шарды по `index.json` читаются все;
 - игрушечный Qwen3-чекпойнт (bf16, 2 шарда) даёт те же логиты, что исходная модель; `eval()`, fp32, связь
   `lm_head` сохранена; `dtype=bfloat16` работает; GPT-2-чекпойнт грузится той же функцией;
-- temperature, top-k, top-p — частоты на 4000 выборках совпадают с теорией; ядро top-p не зависит от порядка
-  токенов в словаре; генератор делает выборку воспроизводимой;
 - жадная генерация == перепрогон префикса; после prefill в модель идёт по одному токену, лишних прогонов нет;
   eos останавливает генерацию;
 - `--weights`: 596 049 920 параметров, логиты == `transformers`, «…Germany is» → «Berlin», жадная генерация

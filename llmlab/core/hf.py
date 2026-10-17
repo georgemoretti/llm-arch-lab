@@ -1,16 +1,14 @@
-"""Загрузка реальных весов с Hugging Face в конфигурируемую модель (Фаза 8) — эталоны задач C24 и C25.
+"""Загрузка реальных весов с Hugging Face в конфигурируемую модель (Фаза 8) — эталоны задач C24, C25a и C25.
 
 C24: ``config_from_hf`` (config.json → ModelConfig) и ``convert_state_dict`` (имена и формы тензоров
-чекпойнта → имена ``llmlab.core.model.Model``). C25: ``load_safetensors``, ``load_pretrained``,
-``sample_next``, ``generate``. Утилиты ``download`` и ``load_tokenizer`` нужны CLI (``llmlab generate``) и
+чекпойнта → имена ``llmlab.core.model.Model``). C25a: ``sample_next``. C25: ``load_safetensors``,
+``load_pretrained``, ``generate``. Утилиты ``download`` и ``load_tokenizer`` нужны CLI (``llmlab generate``) и
 тестам с ``@pytest.mark.weights``.
 
-⚠️ Это готовые ответы на задачи C24 и C25. Если ещё не решил их — не подглядывай.
+⚠️ Это готовые ответы на задачи C24, C25a и C25. Если ещё не решил их — не подглядывай.
 
-Код намеренно совпадает с ``solution.py`` задач C24/C25 (``content/blocks/C/module-5-final/``);
+Код намеренно совпадает с ``solution.py`` задач C24/C25a/C25 (``content/blocks/C/module-5-final/``);
 расхождение ловит ``tests/test_core_hf.py``.
-
-Поддерживаемые ``model_type``: ``qwen3`` (Qwen3 dense), ``llama`` (Llama 2/3, SmolLM2), ``gpt2``.
 """
 
 from __future__ import annotations
@@ -182,7 +180,7 @@ def load_pretrained(model_dir: str | Path, dtype: torch.dtype = torch.float32) -
     return model.eval()
 
 
-# ---------------------------------------------------------------------------- C25 генерация
+# ---------------------------------------------------------------------------- C25a сэмплирование, C25 генерация
 
 
 def sample_next(logits: torch.Tensor, temperature: float = 0.0, top_k: int | None = None,
