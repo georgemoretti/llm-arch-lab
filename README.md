@@ -44,9 +44,9 @@ Node.js не нужен: собранный интерфейс лежит в р�
 |---|---|---|
 | 0. Отправная точка | causal multi-head attention GPT-2 | 1 |
 | 1. GPT-2 → Llama | RMSNorm, SwiGLU, RoPE, GQA, KV-cache, блок Llama | 14 |
-| 2. Gemma 3 / OLMo 2 / SmolLM3 | sliding window, размещение норм, QK-Norm, NoPE, кольцевой KV-cache | 10 |
-| 3. MoE и DeepSeek | роутер, MoE-слой, балансировка, shared expert, MLA, MTP | 13 |
-| 4. Эффективное внимание | sparse attention, gated attention, линейное внимание, Gated DeltaNet, Mamba-2 | 10 |
+| 2. Gemma 3 / OLMo 2 / SmolLM3 | sliding window, размещение норм, QK-Norm, NoPE, кольцевой KV-cache | 11 |
+| 3. MoE и DeepSeek | роутер, MoE-слой, балансировка, shared expert, MLA, MTP | 14 |
+| 4. Эффективное внимание | sparse attention, gated attention, линейное внимание, Gated DeltaNet, Mamba-2 | 11 |
 | 5. Финальный проект | модель из YAML, config.json и веса HF, сэмплирование, Qwen3-0.6B, генерация | 3 |
 
 Кроме задач «реализуй» есть задачи на **отладку** (код с одним правдоподобным багом), **чтение статей** с

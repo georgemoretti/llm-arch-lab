@@ -1,0 +1,15 @@
+id: C-P3b-deepseek-v2-v3
+title: "Статьи: DeepSeek-V2 (MLA) и DeepSeek-V3 (балансировка, MTP)"
+block: C
+module: module-3-moe
+type: paper
+difficulty: hard
+depends_on: [C14-load-balancing, C16b-mla-rope, C17-mtp]
+diff_from: null
+tags: [paper, mla, load-balancing, mtp, deepseek]
+time_estimate_min: 50
+papers: [deepseek-v2, deepseek-v3, aux-loss-free]
+reading:
+  - title: "The Big LLM Architecture Comparison (Sebastian Raschka) — DeepSeek-V3, Qwen3, gpt-oss"
+    url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
+questions: [paper-dsv2-*, paper-dsv3-*]

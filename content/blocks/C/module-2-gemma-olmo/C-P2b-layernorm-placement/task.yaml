@@ -1,0 +1,15 @@
+id: C-P2b-layernorm-placement
+title: "Статья: On Layer Normalization in the Transformer Architecture (Xiong et al.)"
+block: C
+module: module-2-gemma-olmo
+type: paper
+difficulty: medium
+depends_on: [C08-norm-placement]
+diff_from: null
+tags: [paper, normalization, training-stability]
+time_estimate_min: 25
+papers: [layernorm-placement]
+reading:
+  - title: "The Big LLM Architecture Comparison (Sebastian Raschka) — OLMo 2, Gemma 3"
+    url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
+questions: [paper-xiong-*]

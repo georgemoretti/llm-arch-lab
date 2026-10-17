@@ -45,7 +45,7 @@ CODE_TASK_TYPES = frozenset({"implement", "debug", "project"})
 # Директива вставки визуализации в README: строка ``:::viz rope-rotation:::``.
 VIZ_DIRECTIVE_RE = re.compile(r"^:::viz\s+([a-z0-9][a-z0-9-]*)\s*:::\s*$", re.MULTILINE)
 
-TASK_ID_RE = re.compile(r"^[A-Z]\d{2}[a-z]?(-[a-z0-9]+)+$|^[A-Z]-[A-Z]\d+(-[a-z0-9]+)*$")
+TASK_ID_RE = re.compile(r"^[A-Z]\d{2}[a-z]?(-[a-z0-9]+)+$|^[A-Z]-[A-Z]\d+[a-z]?(-[a-z0-9]+)*$")
 
 
 class _Strict(BaseModel):

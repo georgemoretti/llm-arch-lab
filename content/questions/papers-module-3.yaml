@@ -42,7 +42,7 @@
   source: course
 - id: paper-dsv2-mla-01
   topic: attention
-  tasks: [C-P3-moe-deepseek]
+  tasks: [C-P3b-deepseek-v2-v3]
   difficulty: hard
   kind: open
   question: "Зачем в DeepSeek-V2 сжимают не только K/V, но и запрос (q_lora_rank), если запрос не кешируется?"
@@ -53,7 +53,7 @@
   source: course
 - id: paper-dsv3-balance-01
   topic: moe
-  tasks: [C-P3-moe-deepseek]
+  tasks: [C-P3b-deepseek-v2-v3]
   difficulty: hard
   kind: open
   question: >
@@ -67,7 +67,7 @@
   source: course
 - id: paper-dsv3-mtp-01
   topic: training
-  tasks: [C-P3-moe-deepseek]
+  tasks: [C-P3b-deepseek-v2-v3]
   difficulty: medium
   kind: open
   question: "Чем MTP в DeepSeek-V3 отличается от более ранних вариантов с независимыми выходными головами?"

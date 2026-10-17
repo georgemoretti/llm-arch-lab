@@ -39,7 +39,7 @@
   source: course
 - id: paper-gattn-position-01
   topic: attention
-  tasks: [C-P4-efficient-attention]
+  tasks: [C-P4b-gated-attention-dsa]
   difficulty: medium
   kind: mcq
   question: "Какой вариант гейта авторы Gated Attention считают лучшим и ставят в Qwen3-Next?"
@@ -55,7 +55,7 @@
   source: course
 - id: paper-gattn-sink-01
   topic: attention
-  tasks: [C-P4-efficient-attention]
+  tasks: [C-P4b-gated-attention-dsa]
   difficulty: hard
   kind: open
   question: "Как выходной гейт связан с attention sink и massive activations?"
@@ -80,7 +80,7 @@
   source: course
 - id: paper-dsa-training-01
   topic: sparse-attention
-  tasks: [C-P4-efficient-attention]
+  tasks: [C-P4b-gated-attention-dsa]
   difficulty: medium
   kind: open
   question: "Как DeepSeek-V3.2 переводит готовую плотную модель на DSA, не обучая её с нуля?"
