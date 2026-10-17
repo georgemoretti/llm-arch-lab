@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import { api, type CourseData, type TaskSummary } from "../api";
-import { TYPE_ICON, taskLabel } from "../courseIndex";
+import { api, type CourseData } from "../api";
+import { TYPE_ICON, taskLabel, withDebugUnderParent } from "../courseIndex";
 import { taskHref } from "../router";
 import { usePersistent } from "../theme";
 import { DepGraph } from "./DepGraph";
@@ -132,11 +132,3 @@ export function CourseMap() {
 }
 
 const capitalize = (s: string) => s.charAt(0).toUpperCase() + s.slice(1);
-
-// Задача на отладку идёт сразу под задачей, которую чинит (у C16 → C16b → C16d порядок по id другой).
-function withDebugUnderParent(tasks: TaskSummary[]): TaskSummary[] {
-  const ids = new Set(tasks.map((t) => t.id));
-  const children = new Map<string, TaskSummary[]>();
-  for (const t of tasks) if (t.parent && ids.has(t.parent)) children.set(t.parent, [...(children.get(t.parent) ?? []), t]);
-  return tasks.filter((t) => !(t.parent && ids.has(t.parent))).flatMap((t) => [t, ...(children.get(t.id) ?? [])]);
-}

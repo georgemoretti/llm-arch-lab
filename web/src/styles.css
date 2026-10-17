@@ -2475,3 +2475,128 @@ button.ssd-pos.spike {
 .sampling-bars {
   overflow-x: auto;
 }
+
+/* ---------- навигация по курсу со страницы задачи (CourseNav) ---------- */
+
+.course-nav-btns {
+  display: inline-flex;
+  gap: 4px;
+  margin-right: 4px;
+}
+.btn.small.icon {
+  padding-left: 9px;
+  padding-right: 9px;
+}
+.btn.disabled {
+  opacity: 0.35;
+  pointer-events: none;
+}
+a.btn:hover {
+  text-decoration: none;
+}
+.course-nav-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  background: rgb(0 0 0 / 0.25);
+}
+.course-nav {
+  position: absolute;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: min(340px, 88vw);
+  overflow-y: auto;
+  background: var(--panel);
+  border-right: 1px solid var(--border);
+  box-shadow: 4px 0 18px rgb(0 0 0 / 0.12);
+  animation: course-nav-in 0.14s ease-out;
+}
+@keyframes course-nav-in {
+  from {
+    transform: translateX(-24px);
+    opacity: 0;
+  }
+}
+.course-nav-head {
+  position: sticky;
+  top: 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px 10px 16px;
+  background: var(--panel);
+  border-bottom: 1px solid var(--border);
+  font-weight: 600;
+}
+.course-nav-empty {
+  padding: 16px;
+}
+.course-nav-module {
+  border-bottom: 1px solid var(--border);
+}
+.course-nav-module-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: none;
+  color: var(--text);
+  font: 600 13px var(--sans);
+  text-align: left;
+  cursor: pointer;
+}
+.course-nav-module-head:hover {
+  background: var(--panel-2);
+}
+.course-nav-module-head .module-num {
+  margin-right: 0;
+  flex: none;
+}
+.course-nav-module-title {
+  flex: 1;
+  min-width: 0;
+}
+.course-nav-module-head .mono {
+  font-size: 11.5px;
+  font-weight: 400;
+}
+.course-nav-tasks {
+  padding: 0 0 6px;
+}
+.course-nav-task {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 5px 14px 5px 18px;
+  color: var(--text);
+  font-size: 13px;
+  border-left: 3px solid transparent;
+}
+.course-nav-task:hover {
+  background: var(--panel-2);
+  text-decoration: none;
+}
+.course-nav-task.sub {
+  padding-left: 40px;
+  color: var(--muted);
+}
+.course-nav-task.active {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border-left-color: var(--accent);
+  color: var(--text);
+  font-weight: 600;
+}
+.course-nav-num {
+  min-width: 26px;
+  font-size: 11.5px;
+}
+.course-nav-name {
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}

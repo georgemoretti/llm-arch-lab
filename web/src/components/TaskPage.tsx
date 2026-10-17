@@ -8,6 +8,7 @@ import { Markdown, VizBlock } from "./Markdown";
 import { DIFFICULTY_LABEL, StatusIcon, TYPE_LABEL } from "./StatusIcon";
 import { TestResults } from "./TestResults";
 import { TYPE_ICON, labelById, useCourseIndex } from "../courseIndex";
+import { CourseNav } from "./CourseNav";
 import { Questions } from "./Questions";
 
 type Tab = "readme" | "hints" | "reading" | "viz" | "questions" | "attempts";
@@ -79,6 +80,7 @@ function TaskHeader({ task, onCreateNote, onComplete }: { task: TaskDetail; onCr
   const index = useCourseIndex();
   return (
     <div className="task-head">
+      <CourseNav currentId={task.id} progressKey={`${task.progress.status}/${task.progress.attempts}`} />
       <StatusIcon status={task.progress.status} />
       {(task.number || TYPE_ICON[task.type]) && (
         <span className="task-num-badge" title={task.parent ? `Отладка к задаче ${labelById(index, task.parent)}` : undefined}>

@@ -55,3 +55,11 @@ export const TYPE_ICON: Record<TaskSummary["type"], string> = {
   paper: "📄",
   quiz: "❓",
 };
+
+// Задача на отладку идёт сразу под задачей, которую чинит (у C16 → C16b → C16d порядок по id другой).
+export function withDebugUnderParent(tasks: TaskSummary[]): TaskSummary[] {
+  const ids = new Set(tasks.map((t) => t.id));
+  const children = new Map<string, TaskSummary[]>();
+  for (const t of tasks) if (t.parent && ids.has(t.parent)) children.set(t.parent, [...(children.get(t.parent) ?? []), t]);
+  return tasks.filter((t) => !(t.parent && ids.has(t.parent))).flatMap((t) => [t, ...(children.get(t.id) ?? [])]);
+}
