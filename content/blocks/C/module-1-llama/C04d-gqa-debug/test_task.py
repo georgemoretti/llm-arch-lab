@@ -97,7 +97,7 @@ def test_repeat_kv_layout(impl):
     if got != expected:
         hint = ""
         pytest.fail(f"Номера KV-голов по головам запросов: {got}, ожидалось {expected}.{hint}", pytrace=False)
-    assert_close(impl.repeat_kv(x, 1), x, msg=lambda _: "При n_rep = 1 (обычный MHA) тензор не должен меняться.")
+    assert_close(impl.repeat_kv(x, 1), x, atol=0, rtol=0, msg=lambda _: "При n_rep = 1 (обычный MHA) тензор не должен меняться.")
 
 
 # ---------------------------------------------------------------------------

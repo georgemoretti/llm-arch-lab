@@ -66,7 +66,7 @@ def test_forward_is_routed_plus_shared(impl):
         routed, logits_ref = m.routed(x)
         shared = m.shared_experts(x)
     assert tuple(out.shape) == (B, T, C), f"out формы {tuple(out.shape)}, ожидалось {(B, T, C)}."
-    assert_close(logits, logits_ref, msg=lambda _: "router_logits — те, что вернул self.routed.")
+    assert_close(logits, logits_ref, atol=0, rtol=0, msg=lambda _: "router_logits — те, что вернул self.routed.")
     if not torch.allclose(out, routed + shared, atol=1e-5, rtol=1e-4):
         hint = ""
         if torch.allclose(out, routed, atol=1e-5):

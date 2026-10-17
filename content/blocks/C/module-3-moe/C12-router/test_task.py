@@ -83,7 +83,7 @@ def _check(impl, logits, k, scoring="softmax", norm=True, scale=1.0, label=""):
 def test_softmax_topk_renorm(impl):
     """softmax по экспертам → top-2 → перенормировка (Mixtral): веса каждого токена суммируются в 1"""
     w, _ = _check(impl, _logits(), K, label="Mixtral-роутер (softmax, top-2, norm)")
-    assert_close(w.sum(-1), torch.ones(N), msg=lambda _: "Сумма весов выбранных экспертов должна быть 1.")
+    assert_close(w.sum(-1), torch.ones(N), atol=1e-6, rtol=1e-5, msg=lambda _: "Сумма весов выбранных экспертов должна быть 1.")
 
 
 def test_no_renorm(impl):
@@ -110,7 +110,7 @@ def test_sigmoid_deepseek_v3(impl):
     logits = _logits(n=6, e=256, seed=3)
     w, _ = _check(impl, logits, 8, "sigmoid", True, 2.5, label="DeepSeek-V3 (sigmoid, top-8, norm, ×2.5)")
     assert_close(w.sum(-1), torch.full((6,), 2.5),
-                 msg=lambda _: "После перенормировки и умножения на routed_scaling_factor сумма весов = 2.5.")
+                 atol=1e-6, rtol=1e-5, msg=lambda _: "После перенормировки и умножения на routed_scaling_factor сумма весов = 2.5.")
     w2, _ = _check(impl, logits, 8, "sigmoid", False, 1.0, label="sigmoid без перенормировки")
     assert ((w2 > 0) & (w2 < 1)).all(), "sigmoid-оценки лежат в (0, 1) и не обязаны суммироваться в 1."
 

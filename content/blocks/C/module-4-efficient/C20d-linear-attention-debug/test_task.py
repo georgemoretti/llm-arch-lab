@@ -60,7 +60,7 @@ def test_feature_map(impl):
     assert (out > 0).all(), (
         "φ(x) должна быть строго положительной: тогда все веса φ(q)·φ(k) > 0 и знаменатель не обращается в 0 "
         "(ReLU даёт нули при x < 0 — у такого запроса может не оказаться ни одного ненулевого веса).")
-    assert_close(out, F.elu(x) + 1, msg=lambda _: "Ожидалась φ(x) = elu(x) + 1 (как в статье Katharopoulos et al.).")
+    assert_close(out, F.elu(x) + 1, atol=1e-6, rtol=1e-5, msg=lambda _: "Ожидалась φ(x) = elu(x) + 1 (как в статье Katharopoulos et al.).")
 
 
 def test_noncausal_matches_oracle(impl):
@@ -107,7 +107,7 @@ def test_causal_no_future_leak(impl):
     for z in (q2, k2, v2):
         z[:, :, 7:] = torch.randn_like(z[:, :, 7:])
     out2 = impl.linear_attention(q2, k2, v2)
-    assert_close(out[:, :, :7], out2[:, :, :7], msg=lambda _: (
+    assert_close(out[:, :, :7], out2[:, :, :7], atol=1e-6, rtol=1e-5, msg=lambda _: (
         "Выход позиций < 7 изменился после замены токенов 7… → будущее протекает (в числитель или знаменатель)."))
 
 

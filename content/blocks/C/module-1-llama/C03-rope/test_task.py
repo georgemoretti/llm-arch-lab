@@ -147,7 +147,7 @@ def test_rotate_half(impl):
                     pytrace=False)
     batched = _x()
     assert_close(impl.rotate_half(batched)[0, 1, 2], impl.rotate_half(batched[0, 1, 2]),
-                 msg=lambda _: "rotate_half должна работать по последней оси при любом числе ведущих осей.")
+                 atol=0, rtol=0, msg=lambda _: "rotate_half должна работать по последней оси при любом числе ведущих осей.")
 
 
 def test_apply_position_zero_is_identity(impl):

@@ -108,13 +108,13 @@ def test_cache_update(impl):
     k1, v1 = torch.randn(B, H_KV, 3, D), torch.randn(B, H_KV, 3, D)
     k2, v2 = torch.randn(B, H_KV, 1, D), torch.randn(B, H_KV, 1, D)
     K, V = cache.update(k1, v1)
-    assert_close(K, k1, msg=lambda _: "После первого update кеш должен совпадать с первыми k.")
+    assert_close(K, k1, atol=0, rtol=0, msg=lambda _: "После первого update кеш должен совпадать с первыми k.")
     K, V = cache.update(k2, v2)
     assert tuple(K.shape) == (B, H_KV, 4, D), (
         f"После 3 + 1 токенов кеш K имеет форму {tuple(K.shape)} вместо {(B, H_KV, 4, D)}. "
         "Склеивать нужно по оси времени (dim=2), а не по батчу или головам.")
-    assert_close(K, torch.cat((k1, k2), 2), msg=lambda _: "Порядок в кеше: сначала старые токены, потом новые.")
-    assert_close(V, torch.cat((v1, v2), 2), msg=lambda _: "V кешируется так же, как K.")
+    assert_close(K, torch.cat((k1, k2), 2), atol=0, rtol=0, msg=lambda _: "Порядок в кеше: сначала старые токены, потом новые.")
+    assert_close(V, torch.cat((v1, v2), 2), atol=0, rtol=0, msg=lambda _: "V кешируется так же, как K.")
     assert cache.seq_len == 4, f"seq_len = {cache.seq_len}, а в кеше 4 токена."
 
 

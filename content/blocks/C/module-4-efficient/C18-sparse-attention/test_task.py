@@ -102,7 +102,7 @@ def test_indexer_is_causal(impl):
         "Оценки будущих ключей (s > t) должны быть −inf: иначе top-k может выбрать токен из будущего, "
         "и запрос «подсмотрит» ответ. Замаскируй верхний треугольник после суммы по головам.")
     assert torch.isfinite(out[:, ~future]).all(), "Оценки допустимых ключей (s ≤ t) должны быть конечными."
-    assert_close(out[:, :7, :7], out2[:, :7, :7], msg=lambda _: (
+    assert_close(out[:, :7, :7], out2[:, :7, :7], atol=1e-6, rtol=1e-5, msg=lambda _: (
         "Оценки строк t < 7 изменились после замены токенов 7…: индексатор утекает в будущее."))
 
 
@@ -187,7 +187,7 @@ def test_sparse_attention_ignores_unselected(impl):
     k2, v2 = k.clone(), v.clone()
     k2[:, :, 3:] += 10 * torch.randn_like(k2[:, :, 3:])
     v2[:, :, 3:] += 10 * torch.randn_like(v2[:, :, 3:])
-    assert_close(impl.sparse_attention(q, k2, v2, keep), out, msg=lambda _: (
+    assert_close(impl.sparse_attention(q, k2, v2, keep), out, atol=1e-6, rtol=1e-5, msg=lambda _: (
         "Выход изменился после замены НЕвыбранных ключей/значений → маска не применяется (или применяется "
         "после softmax). Невыбранным позициям ставь −inf ДО softmax."))
 
@@ -246,5 +246,5 @@ def test_dsa_causal(impl):
         x2 = x.clone()
         x2[:, 8:] = torch.randn(B, T - 8, C)
         out2 = m(x2)
-    assert_close(out[:, :8], out2[:, :8], msg=lambda _: (
+    assert_close(out[:, :8], out2[:, :8], atol=1e-6, rtol=1e-5, msg=lambda _: (
         "Выход позиций < 8 изменился после замены токенов 8… → утечка будущего (в индексаторе или в маске)."))

@@ -37,7 +37,7 @@ def test_expert_load(impl):
         f"expert_load вернула форму {tuple(load.shape)}, ожидалось (5,): по доле на КАЖДОГО эксперта, включая "
         "тех, кого никто не выбрал (bincount(..., minlength=n_experts)).")
     assert_close(load, torch.tensor([3, 2, 1, 0, 0]) / 6.0,
-                 msg=lambda _: "Доли: эксперт 0 выбран 3 раза из 6 назначений, 1 — 2 раза, 2 — 1 раз.")
+                 atol=1e-6, rtol=1e-5, msg=lambda _: "Доли: эксперт 0 выбран 3 раза из 6 назначений, 1 — 2 раза, 2 — 1 раз.")
 
 
 # ---------------------------------------------------------------------------
@@ -163,7 +163,7 @@ def test_update_bias_rule(impl):
     load = torch.tensor([0.55, 0.25, 0.2, 0.0])          # среднее 0.25
     new = impl.update_bias(bias, load, 0.1)
     assert_close(new, torch.tensor([-0.1, 0.0, 0.1, 0.1]),
-                 msg=lambda _: f"update_bias дал {[round(v, 3) for v in new.tolist()]}, ожидалось [−0.1, 0, +0.1, +0.1]: эксперт 0 "
+                 atol=1e-6, rtol=1e-5, msg=lambda _: f"update_bias дал {[round(v, 3) for v in new.tolist()]}, ожидалось [−0.1, 0, +0.1, +0.1]: эксперт 0 "
                                "перегружен (bias уменьшается на γ), 1 ровно средний, 2 и 3 недогружены (+γ) — "
                                "на одинаковый шаг γ, независимо от того, насколько.")
 

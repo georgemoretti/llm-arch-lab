@@ -139,12 +139,12 @@ def test_loss(impl):
                     f"[B, T − k, V], цели — tokens[:, k + 1:] длины T − k − 1, значит, последняя позиция логитов "
                     "отбрасывается (её цель за пределами последовательности).", pytrace=False)
     e_total, e_main, e_ls = _manual_loss(main, mtp, tokens, 0.3)
-    assert_close(l_main, e_main, msg=lambda _: "L_main: логиты позиции i предсказывают tokens[:, i + 1].")
+    assert_close(l_main, e_main, atol=1e-6, rtol=1e-5, msg=lambda _: "L_main: логиты позиции i предсказывают tokens[:, i + 1].")
     assert len(ls) == 2, "Вторым элементом — список L_k по глубинам."
     for k, (a, b) in enumerate(zip(ls, e_ls), 1):
-        assert_close(a, b, msg=lambda _: f"L_{k}: позиция i глубины {k} предсказывает tokens[:, i + {k} + 1]; "
+        assert_close(a, b, atol=1e-6, rtol=1e-5, msg=lambda _: f"L_{k}: позиция i глубины {k} предсказывает tokens[:, i + {k} + 1]; "
                                          f"логиты [:, :-1], цели tokens[:, {k + 1}:].")
-    assert_close(total, e_total, msg=lambda _: "total = L_main + λ/D · Σ L_k (усреднение по глубинам, затем λ).")
+    assert_close(total, e_total, atol=1e-6, rtol=1e-5, msg=lambda _: "total = L_main + λ/D · Σ L_k (усреднение по глубинам, затем λ).")
 
 
 def test_mtp_gradient_reaches_main(impl):

@@ -77,7 +77,7 @@ def test_ring_slots(impl):
     assert stored == [8.0, 9.0, 6.0, 7.0], (
         f"В ячейках буфера лежат ключи токенов {stored}, а cache.pos говорит {expected_pos}: содержимое и "
         "позиции разъехались.")
-    assert_close(cache.v, -cache.k, msg=lambda _: "V хранится в тех же ячейках, что и K.")
+    assert_close(cache.v, -cache.k, atol=0, rtol=0, msg=lambda _: "V хранится в тех же ячейках, что и K.")
 
 
 def test_long_chunk_keeps_last_window(impl):

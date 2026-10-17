@@ -170,7 +170,7 @@ def test_chunks_and_causality(impl):
     assert_close(S, S_full, atol=1e-5, rtol=1e-4)
     v2 = v.clone()
     v2[:, :, 7:] += 5
-    assert_close(_run(impl, q, k, v2, beta, g)[0][:, :, :7], full[:, :, :7], msg=lambda _: (
+    assert_close(_run(impl, q, k, v2, beta, g)[0][:, :, :7], full[:, :, :7], atol=1e-6, rtol=1e-5, msg=lambda _: (
         "Выход позиций < 7 изменился после изменения значений 7… → будущее протекает."))
 
 
@@ -193,9 +193,9 @@ def test_layer_gates(impl):
         exp_g = (-m.A_log.exp() * F.softplus(m.a_proj(x) + m.dt_bias)).transpose(1, 2)
     assert tuple(beta.shape) == (B, H, T) and tuple(g.shape) == (B, H, T), (
         f"Формы β {tuple(beta.shape)}, g {tuple(g.shape)}; ожидалось {(B, H, T)} — головы на оси 1, как у q/k/v.")
-    assert_close(beta, exp_beta, msg=lambda _: "β = σ(b_proj(x)) — сила записи в (0, 1).")
+    assert_close(beta, exp_beta, atol=1e-6, rtol=1e-5, msg=lambda _: "β = σ(b_proj(x)) — сила записи в (0, 1).")
     assert (g <= 0).all(), "g — логарифм коэффициента забывания α = exp(g) ≤ 1, поэтому g ≤ 0."
-    assert_close(g, exp_g, msg=lambda _: (
+    assert_close(g, exp_g, atol=1e-6, rtol=1e-5, msg=lambda _: (
         "g = −exp(A_log) · softplus(a_proj(x) + dt_bias) — как Δ·A в Mamba-2: A < 0 по голове, Δ > 0 по токену."))
 
 

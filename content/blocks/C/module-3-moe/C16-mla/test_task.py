@@ -77,7 +77,7 @@ def test_latent_cache_update(impl):
     assert tuple(c2.shape) == (B, 4, R), (
         f"После 3 + 1 токенов кеш формы {tuple(c2.shape)}, ожидалось {(B, 4, R)}: латенты лежат как [B, S, r], "
         "время — ось 1 (не 2, как у K/V в C05).")
-    assert_close(c2, torch.cat((a, b), 1), msg=lambda _: "Порядок: сначала старые токены, потом новые.")
+    assert_close(c2, torch.cat((a, b), 1), atol=0, rtol=0, msg=lambda _: "Порядок: сначала старые токены, потом новые.")
     assert kr is None and cache.seq_len == 4, "Без k_rope второе значение — None; seq_len = 4."
     other = impl.LatentCache()
     assert other.seq_len == 0, "Два кеша не должны делить состояние (храни данные в атрибутах экземпляра)."

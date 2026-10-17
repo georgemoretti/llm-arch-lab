@@ -41,7 +41,7 @@ def test_partial_rope_passthrough(impl):
     out = impl.apply_partial_rope(x, cos, sin)
     assert tuple(out.shape) == (B, H, T, D), (
         f"Форма {tuple(out.shape)}, ожидалось {(B, H, T, D)}: невращаемые каналы надо приклеить обратно (torch.cat).")
-    assert_close(out[..., R:], x[..., R:], msg=lambda _: (
+    assert_close(out[..., R:], x[..., R:], atol=0, rtol=0, msg=lambda _: (
         f"Каналы {R}…{D - 1} изменились. Partial RoPE вращает только ПЕРВЫЕ R = {R} каналов головы "
         "(как в HF: q[..., :rotary_dim]), остальные несут чистое содержание без позиции."))
 
@@ -59,7 +59,7 @@ def test_partial_rope_matches_rope(impl):
         pytest.fail("Первые R каналов не совпадают с apply_rope(x[..., :R], cos, sin). Вращаемая часть — это "
                     "отдельный вектор размера R со своими R/2 частотами (rotate_half внутри него).", pytrace=False)
     cos_d, sin_d = rope_cos_sin(torch.arange(T), D)
-    assert_close(impl.apply_partial_rope(x, cos_d, sin_d), apply_rope(x, cos_d, sin_d), msg=lambda _: (
+    assert_close(impl.apply_partial_rope(x, cos_d, sin_d), apply_rope(x, cos_d, sin_d), atol=1e-6, rtol=1e-5, msg=lambda _: (
         "При cos/sin размера D (factor = 1) partial RoPE должен совпасть с обычным RoPE. Бери R из cos.shape[-1]."))
 
 
@@ -73,7 +73,7 @@ def test_partial_rope_relative(impl):
     def at(v, p):
         return impl.apply_partial_rope(v, cos[p:p + 1], sin[p:p + 1])
 
-    assert_close(at(q, 17).norm(), q.norm(), msg=lambda _: "Поворот должен сохранять норму вектора.")
+    assert_close(at(q, 17).norm(), q.norm(), atol=1e-6, rtol=1e-5, msg=lambda _: "Поворот должен сохранять норму вектора.")
     s1 = (at(q, 9) * at(k, 4)).sum()
     s2 = (at(q, 30) * at(k, 25)).sum()
     assert_close(s1, s2, atol=1e-4, rtol=1e-4, msg=lambda _: (
@@ -198,5 +198,5 @@ def test_gated_attention_causal(impl):
         x2 = x.clone()
         x2[:, 6:] = torch.randn(B, T - 6, C)
         out2 = m(x2)
-    assert_close(out[:, :6], out2[:, :6], msg=lambda _: (
+    assert_close(out[:, :6], out2[:, :6], atol=1e-6, rtol=1e-5, msg=lambda _: (
         "Выход позиций < 6 изменился после замены токенов 6… → утечка будущего: нужна causal-маска."))

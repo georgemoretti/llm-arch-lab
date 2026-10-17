@@ -146,7 +146,7 @@ def test_quadratic_causal(impl):
     x2[:, 8:] += 3
     B2[:, 8:] += 3
     y2 = impl.ssd_quadratic(x2, dt, A, B2, C, D)
-    assert_close(y[:, :8], y2[:, :8], msg=lambda _: (
+    assert_close(y[:, :8], y2[:, :8], atol=1e-6, rtol=1e-5, msg=lambda _: (
         "Выход позиций < 8 изменился после изменения токенов 8… → маска L пропускает будущее (exp(−inf) = 0 над "
         "диагональю)."))
 
