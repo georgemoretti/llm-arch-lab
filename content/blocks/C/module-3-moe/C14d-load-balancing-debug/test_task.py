@@ -137,22 +137,24 @@ def test_aux_loss_rebalances_router(impl):
 
 def test_route_with_bias(impl):
     """Bias меняет только выбор экспертов; веса — исходные scores выбранных (перенормированные)"""
-    scores = torch.tensor([[0.9, 0.8, 0.3, 0.2]])
+    scores = torch.tensor([[0.9, 0.6, 0.3, 0.2]])
     bias = torch.tensor([-1.0, 0.0, 0.0, 0.5])
     w, idx = impl.route_with_bias(scores, bias, 2)
     assert sorted(idx[0].tolist()) == [1, 3], (
         f"Выбраны эксперты {sorted(idx[0].tolist())}, ожидалось [1, 3]: top-2 по scores + bias = "
-        "[−0.1, 0.8, 0.3, 0.7].")
+        "[−0.1, 0.6, 0.3, 0.7].")
     got = dict(zip(idx[0].tolist(), w[0].tolist()))
-    expected = {1: 0.8 / 1.0, 3: 0.2 / 1.0}
+    expected = {1: 0.6 / 0.8, 3: 0.2 / 0.8}                       # сумма выбранных scores = 0.8 ≠ 1
     if not all(abs(got[e] - v) < 1e-6 for e, v in expected.items()):
         hint = ""
-        if abs(got[1] - 0.8 / 1.5) < 1e-6:
+        if abs(got[1] - 0.6 / 1.3) < 1e-6:
             hint = " Похоже, веса взяты из scores + bias. Bias нужен только для выбора — веса из исходных scores."
-        pytest.fail(f"Веса выбранных экспертов {got}, ожидалось {expected} (0.8 и 0.2, нормированные к сумме 1).{hint}",
+        elif abs(got[1] - 0.6) < 1e-6:
+            hint = " Похоже, веса не перенормированы: при norm_topk_prob = True их делят на сумму выбранных (0.8)."
+        pytest.fail(f"Веса выбранных экспертов {got}, ожидалось {expected} (0.6 и 0.2, нормированные к сумме 1).{hint}",
                     pytrace=False)
     w2, _ = impl.route_with_bias(scores, bias, 2, norm_topk_prob=False)
-    assert sorted(w2[0].tolist()) == pytest.approx([0.2, 0.8]), "Без перенормировки веса — сами scores выбранных."
+    assert sorted(w2[0].tolist()) == pytest.approx([0.2, 0.6]), "Без перенормировки веса — сами scores выбранных."
 
 
 def test_update_bias_rule(impl):
