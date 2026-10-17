@@ -54,6 +54,22 @@ GPT-2 (`model_type: gpt2`): `n_embd`, `n_layer`, `n_head`, `n_positions` (→ о
 bias в Llama/Qwen, другая активация), — **ValueError**. Молча проигнорированная опция = модель с правильными
 весами и неправильной математикой.
 
+## Формула
+
+Конвертация весов — это переименование плюс две операции над тензорами. Для Qwen3 / Llama — только имена:
+$\theta_{\text{наш}} = W_{\text{HF}}$. GPT-2 хранит линейные слои как `Conv1D` с весом $[C_{\text{in}}, C_{\text{out}}]$
+($y = xW + b$), а `nn.Linear` — как $[C_{\text{out}}, C_{\text{in}}]$ ($y = xW^\top + b$), поэтому вес
+транспонируется; общая проекция `c_attn` режется на три:
+
+$$
+W_{\text{Linear}} = W_{\text{Conv1D}}^{\top},\qquad
+\begin{bmatrix} W_Q \\ W_K \\ W_V \end{bmatrix} = W_{\text{c\_attn}}^{\top} \in \mathbb{R}^{3C \times C},\qquad
+b_Q, b_K, b_V = \operatorname{split}(b_{\text{c\_attn}}, C)
+$$
+
+Для `head_dim` из конфига: $d_h = \texttt{head\_dim}$, если он задан, иначе $C / H$ — у Qwen3-0.6B
+$d_h = 128 \ne 1024 / 16$, и `q_proj` имеет форму $[H d_h, C] = [2048, 1024]$.
+
 ## Формы тензоров
 
 Qwen3-0.6B, один слой (имена в файле → наши):
