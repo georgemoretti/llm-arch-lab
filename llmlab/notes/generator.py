@@ -314,9 +314,11 @@ def render_note(course: Course, task: Task, *, insight: str, code: str, attempts
     if links:
         parts.append(" · ".join(links))
 
-    # Авторские разделы из summary.md — в фиксированном порядке, заголовки как у автора.
+    # Авторские разделы из summary.md: четыре обязательных в фиксированном порядке, заголовки как у автора;
+    # дополнительные (например, карта «деталь → задача» у C25) — следом, в порядке автора.
     changed_key = next((k for k in summary if k.startswith("Что поменялось")), None)
-    for key in ("TL;DR", "Формула", "Формы тензоров", changed_key):
+    standard = ("TL;DR", "Формула", "Формы тензоров", changed_key)
+    for key in [*standard, *(k for k in summary if k not in standard)]:
         if key and summary.get(key, "").strip():
             parts.append(f"## {key}\n\n{summary[key].strip()}")
 

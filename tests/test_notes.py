@@ -54,8 +54,8 @@ def _solve(root: Path, task_id: str = "Z01-add", *, failures: int = 1) -> None:
 @pytest.fixture
 def course_root(toy_root: Path) -> Path:
     write_task(toy_root, "Z01-add", files={
-        "summary.md": "## TL;DR\n\nСложение.\n\n## Формула\n\n$a+b$\n\n## Формы тензоров\n\nскаляры\n\n"
-                      "## Что поменялось относительно базы\n\nничего\n",
+        "summary.md": "## TL;DR\n\nСложение.\n\n## Формула\n\n$a+b$\n\n## Карта\n\nZ01 → сложение\n\n"
+                      "## Формы тензоров\n\nскаляры\n\n## Что поменялось относительно базы\n\nничего\n",
     }, meta={"diff_from": "toy-baseline", "tags": ["toy", "math"],
              "reading": [{"title": "Ссылка", "url": "https://example.com"}], "questions": ["toy-*"]})
     write_task(toy_root, "Z02-more", depends_on=["Z01-add"], meta={"diff_from": "Z01-add"})
@@ -76,7 +76,8 @@ def test_note_has_all_sections_and_obsidian_frontmatter(course_root):
     assert meta["id"] == "Z01-add" and meta["attempts"] == 3 and meta["solved_at"] == "2026-10-16"
     assert meta["tags"] == ["toy", "math"] and meta["parent"] == "toy-baseline"
     headings = [ln[3:] for ln in body.splitlines() if ln.startswith("## ")]
-    assert headings == ["TL;DR", "Формула", "Формы тензоров", "Что поменялось относительно базы", "Мой код",
+    # дополнительный раздел автора («Карта») — после четырёх обязательных
+    assert headings == ["TL;DR", "Формула", "Формы тензоров", "Что поменялось относительно базы", "Карта", "Мой код",
                         "Отличия от эталона", "Мои ошибки по пути", "Главное, что я понял",
                         "Вопросы для повторения", "Читать"]
     assert "```python\n" + GOOD.rstrip() in body
