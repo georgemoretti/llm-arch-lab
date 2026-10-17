@@ -83,6 +83,23 @@ def test_latent_cache_update(impl):
     assert other.seq_len == 0, "Два кеша не должны делить состояние (храни данные в атрибутах экземпляра)."
 
 
+def test_latent_cache_k_rope(impl):
+    """LatentCache.update(c, k_rope): общий RoPE-ключ [B, S, d_r] копится так же, по оси времени (нужен в C16b)"""
+    cache = impl.LatentCache()
+    a, b = torch.randn(B, 3, R), torch.randn(B, 2, R)
+    ka, kb = torch.randn(B, 3, 4), torch.randn(B, 2, 4)
+    _, kr1 = cache.update(a, ka)
+    assert kr1 is not None, "С k_rope второе значение — накопленный k_rope, а не None."
+    assert_close(kr1, ka, atol=0, rtol=0, msg=lambda _: "После первого update k_rope совпадает с переданным.")
+    c2, kr2 = cache.update(b, kb)
+    assert tuple(kr2.shape) == (B, 5, 4), (
+        f"После 3 + 2 токенов k_rope формы {tuple(kr2.shape)}, ожидалось {(B, 5, 4)}: как и латенты, "
+        "k_rope лежит как [B, S, d_r] и дописывается по оси 1.")
+    assert_close(kr2, torch.cat((ka, kb), 1), atol=0, rtol=0,
+                 msg=lambda _: "Порядок k_rope: сначала старые токены, потом новые.")
+    assert_close(c2, torch.cat((a, b), 1), atol=0, rtol=0, msg=lambda _: "Латенты копятся независимо от k_rope.")
+
+
 # ---------------------------------------------------------------------------
 # forward
 # ---------------------------------------------------------------------------
