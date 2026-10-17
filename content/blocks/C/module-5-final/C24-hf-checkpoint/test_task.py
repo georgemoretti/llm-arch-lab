@@ -1,4 +1,4 @@
-"""Тесты C24: config.json и веса чекпойнта Hugging Face → своя модель.
+"""Тесты «Чекпойнт Hugging Face»: config.json и веса чекпойнта Hugging Face → своя модель.
 
 Фикстуры (из llmlab.pytest_plugin):
   impl — проверяемая реализация (workspace / reference / starter);

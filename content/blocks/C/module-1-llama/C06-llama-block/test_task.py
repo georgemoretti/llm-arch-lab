@@ -1,4 +1,4 @@
-"""Тесты C06: блок и модель Llama.
+"""Тесты «Блок и модель Llama»: блок и модель Llama.
 
 Фикстуры (из llmlab.pytest_plugin):
   impl — проверяемая реализация (workspace / reference / starter);

@@ -1,4 +1,4 @@
-"""Эталон C00: causal multi-head self-attention, как в GPT-2."""
+"""Эталон: causal multi-head self-attention, как в GPT-2."""
 
 import math
 

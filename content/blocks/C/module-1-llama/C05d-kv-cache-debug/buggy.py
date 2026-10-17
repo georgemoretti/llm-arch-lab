@@ -1,4 +1,4 @@
-"""C05d: KV-cache для attention Llama (GQA + RoPE)."""
+"""KV-cache для attention Llama (GQA + RoPE)."""
 
 import math
 
@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from llmlab.core.llama import apply_rope, repeat_kv, rope_cos_sin   # эталоны C03 и C04
+from llmlab.core.llama import apply_rope, repeat_kv, rope_cos_sin   # эталоны «RoPE» и «GQA и MQA»
 
 
 class KVCache:

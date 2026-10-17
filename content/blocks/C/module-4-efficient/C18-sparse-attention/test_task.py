@@ -1,4 +1,4 @@
-"""Тесты C18: sparse attention в стиле DSA (DeepSeek-V3.2).
+"""Тесты «Sparse attention (DSA)»: sparse attention в стиле DSA (DeepSeek-V3.2).
 
 Фикстуры (из llmlab.pytest_plugin):
   impl — проверяемая реализация (workspace / reference / starter);

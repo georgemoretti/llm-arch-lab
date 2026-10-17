@@ -1,4 +1,4 @@
-"""C10: NoPE — слои без позиционного кодирования через каждый N-й слой (как в SmolLM3).
+"""NoPE — слои без позиционного кодирования через каждый N-й слой (как в SmolLM3).
 
 Реализуй:
 1. rope_layers — расписание: в каких слоях RoPE есть, в каких нет;
@@ -12,12 +12,12 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from llmlab.core.llama import apply_rope, repeat_kv, rope_cos_sin   # эталоны C03 и C04
+from llmlab.core.llama import apply_rope, repeat_kv, rope_cos_sin   # эталоны «RoPE» и «GQA и MQA»
 
 
 def rope_layers(n_layers: int, no_rope_layer_interval: int) -> list[bool]:
     """SmolLM3: каждый interval-й слой (считая с 1) — без RoPE. True = в слое есть RoPE."""
-    # TODO: список длины n_layers. Как в Gemma (C07): особый слой — последний в каждой группе
+    # TODO: список длины n_layers. Как в Gemma («Sliding window attention»): особый слой — последний в каждой группе
     #       из interval слоёв, индексы с 0. Здесь «особый» = без RoPE, а True = RoPE есть.
     raise NotImplementedError("rope_layers")
 

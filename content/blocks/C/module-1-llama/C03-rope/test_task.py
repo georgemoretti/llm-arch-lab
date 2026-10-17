@@ -1,4 +1,4 @@
-"""Тесты C03: Rotary Position Embeddings.
+"""Тесты «RoPE»: Rotary Position Embeddings.
 
 Фикстуры (из llmlab.pytest_plugin):
   impl — проверяемая реализация (workspace / reference / starter);

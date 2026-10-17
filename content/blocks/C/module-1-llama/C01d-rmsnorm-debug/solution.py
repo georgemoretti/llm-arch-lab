@@ -1,4 +1,4 @@
-"""Эталон C01d (исправленная версия): RMSNorm, как в Llama."""
+"""Эталон «Найди баг: RMSNorm» (исправленная версия): RMSNorm, как в Llama."""
 
 import torch
 import torch.nn as nn

@@ -1,11 +1,11 @@
-"""C25 (проект): настоящие веса Qwen3-0.6B в своей модели — загрузка и генерация.
+"""«Проект: Qwen3-0.6B» (проект): настоящие веса Qwen3-0.6B в своей модели — загрузка и генерация.
 
 Реализуй:
 1. load_safetensors(model_dir) — все тензоры чекпойнта (один файл или шарды по index.json);
 2. load_pretrained(model_dir, dtype) — config.json + веса → готовая Model в режиме eval;
 3. generate(model, idx, max_new_tokens, ...) — генерация с KV-cache и остановкой на eos.
 
-config_from_hf, convert_state_dict, check_state_dict — эталоны C24; sample_next — эталон C25a;
+config_from_hf, convert_state_dict, check_state_dict — эталоны «Чекпойнт Hugging Face»; sample_next — эталон «Сэмплирование»;
 Model — модель из конфига (llmlab/core/model.py).
 """
 
@@ -14,8 +14,8 @@ from pathlib import Path
 
 import torch
 
-from llmlab.core.hf import check_state_dict, config_from_hf, convert_state_dict   # эталоны C24
-from llmlab.core.hf import sample_next                                            # эталон C25a
+from llmlab.core.hf import check_state_dict, config_from_hf, convert_state_dict   # эталоны «Чекпойнт Hugging Face»
+from llmlab.core.hf import sample_next                                            # эталон «Сэмплирование»
 from llmlab.core.model import Model                                              # модель из конфига (Фаза 8)
 
 

@@ -1,4 +1,4 @@
-"""C01: RMSNorm, как в Llama.
+"""RMSNorm, как в Llama.
 
 Реализуй:
 1. функцию rms_norm(x, weight, eps) — нормировка каждого вектора по его RMS;

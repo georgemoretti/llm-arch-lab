@@ -1,8 +1,8 @@
-"""C15: DeepSeekMoE — shared experts + routed experts, первые слои dense.
+"""DeepSeekMoE — shared experts + routed experts, первые слои dense.
 
 Реализуй:
 1. mlp_layer_types — какие слои dense, какие MoE;
-2. DeepSeekMoE.forward — routed (MoE из C13) + shared experts;
+2. DeepSeekMoE.forward — routed (MoE из «MoE-слой») + shared experts;
 3. build_ffn_layers — FFN-часть модели по расписанию;
 4. moe_param_counts — сколько параметров FFN всего и сколько активно на токен.
 """
@@ -10,8 +10,8 @@
 import torch
 import torch.nn as nn
 
-from llmlab.core.llama import SwiGLUFFN       # эксперт и dense-FFN — SwiGLU из C02
-from llmlab.core.moe import MoELayer          # routed experts — эталон C13
+from llmlab.core.llama import SwiGLUFFN       # эксперт и dense-FFN — SwiGLU из «SwiGLU FFN»
+from llmlab.core.moe import MoELayer          # routed experts — эталон «MoE-слой»
 
 
 def mlp_layer_types(n_layers: int, first_k_dense_replace: int, moe_layer_freq: int = 1) -> list[str]:

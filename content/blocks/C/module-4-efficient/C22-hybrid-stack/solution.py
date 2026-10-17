@@ -1,10 +1,10 @@
-"""Эталон C22: гибридный стек 3 : 1 (Gated DeltaNet : gated attention), как в Qwen3-Next, и память кеша."""
+"""Эталон: гибридный стек 3 : 1 (Gated DeltaNet : gated attention), как в Qwen3-Next, и память кеша."""
 
 import torch
 import torch.nn as nn
 
-from llmlab.core.efficient import GatedAttention, GatedDeltaNet   # эталоны C19, C21
-from llmlab.core.llama import RMSNorm, SwiGLUFFN                   # эталоны C01, C02
+from llmlab.core.efficient import GatedAttention, GatedDeltaNet   # эталоны «Gated attention», «Gated DeltaNet»
+from llmlab.core.llama import RMSNorm, SwiGLUFFN                   # эталоны «RMSNorm», «SwiGLU FFN»
 
 
 def hybrid_layer_types(n_layers: int, full_attention_interval: int) -> list[str]:
@@ -32,7 +32,7 @@ class HybridBlock(nn.Module):
 
 
 class HybridStack(nn.Module):
-    """Стек из n_layers блоков: каждый interval-й — gated attention (C19), остальные — Gated DeltaNet (C21)."""
+    """Стек из n_layers блоков: каждый interval-й — gated attention («Gated attention»), остальные — Gated DeltaNet («Gated DeltaNet»)."""
 
     def __init__(self, d_model: int, n_layers: int, full_attention_interval: int, d_ff: int,
                  n_heads: int, n_kv_heads: int, head_dim: int,

@@ -1,4 +1,4 @@
-"""Эталон C01: RMSNorm, как в Llama."""
+"""Эталон: RMSNorm, как в Llama."""
 
 import torch
 import torch.nn as nn

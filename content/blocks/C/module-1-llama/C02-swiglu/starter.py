@@ -1,4 +1,4 @@
-"""C02: SwiGLU FFN, как в Llama.
+"""SwiGLU FFN, как в Llama.
 
 Реализуй:
 1. silu(x) — активация SiLU (Swish с β = 1);

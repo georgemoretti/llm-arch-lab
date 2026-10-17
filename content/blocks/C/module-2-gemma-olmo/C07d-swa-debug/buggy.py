@@ -1,4 +1,4 @@
-"""C07d: sliding window attention — код из C07 с одной ошибкой. Найди и исправь её."""
+"""sliding window attention — код из «Sliding window attention» с одной ошибкой. Найди и исправь её."""
 
 import math
 
@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from llmlab.core.llama import apply_rope, repeat_kv, rope_cos_sin   # эталоны C03 и C04
+from llmlab.core.llama import apply_rope, repeat_kv, rope_cos_sin   # эталоны «RoPE» и «GQA и MQA»
 
 
 def sliding_window_mask(T: int, S: int | None = None, window: int | None = None,

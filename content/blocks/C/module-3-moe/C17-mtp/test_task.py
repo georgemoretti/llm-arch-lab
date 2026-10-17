@@ -1,4 +1,4 @@
-"""Тесты C17: Multi-Token Prediction.
+"""Тесты «Multi-Token Prediction»: Multi-Token Prediction.
 
 Фикстуры (из llmlab.pytest_plugin):
   impl — проверяемая реализация (workspace / reference / starter);

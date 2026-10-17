@@ -1,11 +1,11 @@
-"""Тесты C05: KV-cache.
+"""Тесты «KV-cache»: KV-cache.
 
 Фикстуры (из llmlab.pytest_plugin):
   impl — проверяемая реализация (workspace / reference / starter);
   ref  — эталон solution.py.
 
 Главное свойство: генерация по кускам с кешем даёт ровно то же, что полный прогон всей
-последовательности без кеша. Оракул собран из эталонов C03/C04 (llmlab.core.llama) и
+последовательности без кеша. Оракул собран из эталонов «RoPE»/C04 (llmlab.core.llama) и
 F.scaled_dot_product_attention.
 """
 
@@ -145,14 +145,14 @@ def test_no_cache_matches_oracle(impl):
         hint = ""
         if out.shape == expected.shape:
             with torch.no_grad():
-                # без RoPE: GQA из C04
+                # без RoPE: GQA из «GQA и MQA»
                 q = m.q_proj(x).view(B, T, H, D).transpose(1, 2)
                 k = m.k_proj(x).view(B, T, H_KV, D).transpose(1, 2).repeat_interleave(2, 1)
                 v = m.v_proj(x).view(B, T, H_KV, D).transpose(1, 2).repeat_interleave(2, 1)
                 no_rope = m.o_proj(_SDPA(q, k, v, is_causal=True).transpose(1, 2).reshape(B, T, C))
             if torch.allclose(out, no_rope, atol=1e-4):
                 hint = " Похоже, RoPE не применён к q и k."
-        pytest.fail(f"Прогон без кеша не совпадает с оракулом (GQA из C04 + RoPE из C03 на q и k)."
+        pytest.fail(f"Прогон без кеша не совпадает с оракулом (GQA из «GQA и MQA» + RoPE из «RoPE» на q и k)."
                     f"{hint}", pytrace=False)
 
 

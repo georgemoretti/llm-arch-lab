@@ -1,4 +1,4 @@
-"""Эталон C19: gated attention (Qwen3-Next) — сигмоидный гейт на выходе attention и partial RoPE."""
+"""Эталон: gated attention (Qwen3-Next) — сигмоидный гейт на выходе attention и partial RoPE."""
 
 import math
 
@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from llmlab.core.llama import RMSNorm, apply_rope, repeat_kv, rope_cos_sin   # эталоны C01, C03, C04
+from llmlab.core.llama import RMSNorm, apply_rope, repeat_kv, rope_cos_sin   # эталоны «RMSNorm», «RoPE», «GQA и MQA»
 
 
 def apply_partial_rope(x: torch.Tensor, cos: torch.Tensor, sin: torch.Tensor) -> torch.Tensor:

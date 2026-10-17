@@ -1,4 +1,4 @@
-"""Тесты C02: SwiGLU FFN.
+"""Тесты «SwiGLU FFN»: SwiGLU FFN.
 
 Фикстуры (из llmlab.pytest_plugin):
   impl — проверяемая реализация (workspace / reference / starter);

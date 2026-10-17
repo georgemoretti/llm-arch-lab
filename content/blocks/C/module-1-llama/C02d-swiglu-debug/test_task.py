@@ -1,4 +1,4 @@
-"""Тесты C02d: те же проверки, что в C02 (SwiGLU FFN), но диагност не называет баг.
+"""Тесты «Найди баг: SwiGLU FFN»: те же проверки, что в «SwiGLU FFN» (SwiGLU FFN), но диагност не называет баг.
 
 Фикстуры (из llmlab.pytest_plugin):
   impl — проверяемая реализация (workspace / reference / starter);
@@ -132,7 +132,7 @@ def _make_pair(impl, ref):
 
 def _diagnose(out, x, m) -> str:
     """В debug-задаче диагност не называет причину — только куда смотреть."""
-    return "Сравни forward с формулой down(SiLU(gate(x)) ⊙ up(x)) из README C02 — по каждой ветке."
+    return "Сравни forward с формулой down(SiLU(gate(x)) ⊙ up(x)) из README «SwiGLU FFN» — по каждой ветке."
 
 
 def test_ffn_shape(impl, ref):

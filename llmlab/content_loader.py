@@ -45,6 +45,55 @@ CODE_TASK_TYPES = frozenset({"implement", "debug", "project"})
 # Директива вставки визуализации в README: строка ``:::viz rope-rotation:::``.
 VIZ_DIRECTIVE_RE = re.compile(r"^:::viz\s+([a-z0-9][a-z0-9-]*)\s*:::\s*$", re.MULTILINE)
 
+# Схема форм тензоров в README: блок ```shapes, рисует web/src/components/ShapeFlow.tsx.
+SHAPES_BLOCK_RE = re.compile(r"^```shapes[ \t]*\n(.*?)^```", re.MULTILINE | re.DOTALL)
+AXIS_KINDS = {"batch", "seq", "model", "heads", "hdim", "wide", "other", "num"}
+
+
+def check_shapes(text: str) -> list[str]:
+    """Ошибки синтаксиса блоков ```shapes (грамматика — в шапке ShapeFlow.tsx и в TASK_FORMAT.md)."""
+    errors: list[str] = []
+    for block_no, m in enumerate(SHAPES_BLOCK_RE.finditer(text), 1):
+        in_fork = False
+        tensors = 0
+        for line_no, raw in enumerate(m.group(1).splitlines(), 1):
+            line = raw.strip()
+            at = f"shapes #{block_no}, строка {line_no} «{line[:40]}»"
+            if not line or line.startswith("//"):
+                continue
+            if line.startswith("axis") and not line.startswith("axis "):
+                errors.append(f"{at}: после axis нужен пробел")
+            elif line.startswith("axis "):
+                am = re.fullmatch(r"axis\s+([^\s:=]+)(?::(\w+))?\s*=\s*(.+)", line)
+                if not am:
+                    errors.append(f"{at}: ожидается «axis ИМЯ = смысл» или «axis ИМЯ:вид = смысл»")
+                elif am.group(2) and am.group(2) not in AXIS_KINDS:
+                    errors.append(f"{at}: неизвестный вид оси '{am.group(2)}' (есть: {', '.join(sorted(AXIS_KINDS))})")
+            elif line == "fork":
+                if in_fork:
+                    errors.append(f"{at}: fork внутри fork — сначала закрой предыдущий через join")
+                in_fork = True
+            elif line == "branch" or line == "join" or line.startswith("join "):
+                if not in_fork:
+                    errors.append(f"{at}: {line.split()[0]} без fork")
+                if line != "branch":
+                    in_fork = False
+            elif line.startswith(("#", ">", "-")) and not line.startswith(("## ", "> ", "- ")):
+                errors.append(f"{at}: после «{line[0] * (2 if line.startswith('##') else 1)}» нужен пробел")
+            elif not line.startswith(("## ", "> ", "- ")):
+                tensors += 1
+                body = line.split(" — ", 1)[0]
+                if body.count("[") != body.count("]"):
+                    errors.append(f"{at}: несбалансированные квадратные скобки")
+                elif not re.search(r"(^|\s)\[", body):
+                    errors.append(f"{at}: тензор без формы [..] — если это операция, начни строку с «> », "
+                                  "если пояснение — с «- »")
+        if in_fork:
+            errors.append(f"shapes #{block_no}: fork не закрыт строкой join")
+        if tensors == 0:
+            errors.append(f"shapes #{block_no}: в схеме нет ни одного тензора")
+    return errors
+
 TASK_ID_RE = re.compile(r"^[A-Z]\d{2}[a-z]?(-[a-z0-9]+)+$|^[A-Z]-[A-Z]\d+[a-z]?(-[a-z0-9]+)*$")
 
 
@@ -431,7 +480,10 @@ def _check_references(course: Course) -> None:
             if pid not in course.papers:
                 course.issues.append(Issue("error", where, f"papers: нет content/papers/{pid}.yaml"))
         readme = task.dir / "README.md"
-        directives = VIZ_DIRECTIVE_RE.findall(readme.read_text(encoding="utf-8")) if readme.exists() else []
+        readme_text = readme.read_text(encoding="utf-8") if readme.exists() else ""
+        directives = VIZ_DIRECTIVE_RE.findall(readme_text)
+        for err in check_shapes(readme_text):
+            course.issues.append(Issue("error", _rel(readme, course.root), err))
         for vid in [*task.viz, *directives]:
             if vid not in course.viz:
                 course.issues.append(Issue("error", where, f"viz: нет content/viz/{vid}.yaml"))

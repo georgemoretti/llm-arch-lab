@@ -1,6 +1,6 @@
-"""C25a: выбор следующего токена — жадно, temperature, top-k, top-p (nucleus).
+"""выбор следующего токена — жадно, temperature, top-k, top-p (nucleus).
 
-Реализуй sample_next(logits, temperature, top_k, top_p, generator). Её использует generate в C25.
+Реализуй sample_next(logits, temperature, top_k, top_p, generator). Её использует generate в «Проект: Qwen3-0.6B».
 """
 
 import torch

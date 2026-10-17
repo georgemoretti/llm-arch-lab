@@ -1,7 +1,7 @@
-"""C06: блок и модель Llama из готовых деталей C01–C05.
+"""блок и модель Llama из готовых деталей «RMSNorm»–«KV-cache».
 
 Детали импортируются готовыми (эталоны прошлых задач):
-  RMSNorm (C01), SwiGLUFFN (C02), LlamaAttention с RoPE и GQA (C03–C05), KVCache (C05).
+  RMSNorm («RMSNorm»), SwiGLUFFN («SwiGLU FFN»), LlamaAttention с RoPE и GQA («RoPE»–«KV-cache»), KVCache («KV-cache»).
 
 Реализуй:
 1. LlamaBlock: __init__ (имена подмодулей — как в HF, см. README) и forward (Pre-Norm);
@@ -15,7 +15,7 @@ from dataclasses import dataclass
 import torch
 import torch.nn as nn
 
-from llmlab.core.llama import KVCache, LlamaAttention, RMSNorm, SwiGLUFFN   # эталоны C01–C05
+from llmlab.core.llama import KVCache, LlamaAttention, RMSNorm, SwiGLUFFN   # эталоны «RMSNorm»–«KV-cache»
 
 
 @dataclass

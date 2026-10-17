@@ -1,10 +1,10 @@
-"""C13d: MoE-слой — код из C13 с одной ошибкой. Найди и исправь её."""
+"""MoE-слой — код из «MoE-слой» с одной ошибкой. Найди и исправь её."""
 
 import torch
 import torch.nn as nn
 
-from llmlab.core.llama import SwiGLUFFN       # эксперт — SwiGLU из C02
-from llmlab.core.moe import TopKRouter        # роутер — эталон C12
+from llmlab.core.llama import SwiGLUFFN       # эксперт — SwiGLU из «SwiGLU FFN»
+from llmlab.core.moe import TopKRouter        # роутер — эталон «Роутер MoE»
 
 
 class MoELayer(nn.Module):

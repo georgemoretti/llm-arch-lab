@@ -1,4 +1,4 @@
-"""Эталон C16b: MLA с decoupled RoPE (DeepSeek-V2/V3) и память его KV-cache."""
+"""Эталон: MLA с decoupled RoPE (DeepSeek-V2/V3) и память его KV-cache."""
 
 import math
 
@@ -6,8 +6,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from llmlab.core.llama import RMSNorm, apply_rope, rope_cos_sin   # эталоны C01 и C03
-from llmlab.core.mla import LatentCache, causal_mask             # эталон C16
+from llmlab.core.llama import RMSNorm, apply_rope, rope_cos_sin   # эталоны «RMSNorm» и «RoPE»
+from llmlab.core.mla import LatentCache, causal_mask             # эталон «MLA»
 
 
 class MLARopeAttention(nn.Module):

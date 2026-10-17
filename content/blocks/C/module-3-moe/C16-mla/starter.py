@@ -1,4 +1,4 @@
-"""C16: Multi-head Latent Attention (MLA) — K и V из общего латента, в кеше только латент.
+"""Multi-head Latent Attention (MLA) — K и V из общего латента, в кеше только латент.
 
 Реализуй:
 1. LatentCache.update — дописать латенты новых токенов и вернуть все;
@@ -6,7 +6,7 @@
 3. MLAttention.forward_absorbed — тот же результат БЕЗ восстановления K и V: W_UK «поглощается» в
    запрос, W_UV — в выход, attention считается прямо по латентам.
 
-Позиционного кодирования в этой задаче нет (как NoPE-слой из C10) — RoPE добавим в C16b.
+Позиционного кодирования в этой задаче нет (как NoPE-слой из «NoPE») — RoPE добавим в «MLA + decoupled RoPE».
 """
 
 import math
@@ -15,11 +15,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from llmlab.core.llama import RMSNorm   # эталон C01
+from llmlab.core.llama import RMSNorm   # эталон «RMSNorm»
 
 
 class LatentCache:
-    """KV-cache MLA: латенты c [B, S, r] (и, в C16b, общие RoPE-ключи [B, S, d_r]) вместо K и V."""
+    """KV-cache MLA: латенты c [B, S, r] (и, в «MLA + decoupled RoPE», общие RoPE-ключи [B, S, d_r]) вместо K и V."""
 
     def __init__(self):
         self.c: torch.Tensor | None = None
@@ -31,8 +31,8 @@ class LatentCache:
 
     def update(self, c: torch.Tensor, k_rope: torch.Tensor | None = None):
         """Дописывает новые токены по оси времени (dim=1) → (весь c, весь k_rope или None)."""
-        # TODO: как KVCache в C05, но латенты лежат как [B, S, r] — склеивать по оси времени dim=1.
-        #       k_rope понадобится только в C16b: если он не None — хранить так же.
+        # TODO: как KVCache в «KV-cache», но латенты лежат как [B, S, r] — склеивать по оси времени dim=1.
+        #       k_rope понадобится только в «MLA + decoupled RoPE»: если он не None — хранить так же.
         raise NotImplementedError("LatentCache.update")
 
 
@@ -61,7 +61,7 @@ class MLAttention(nn.Module):
         # TODO 2: если есть кеш — дописать в него c и дальше работать со всеми латентами [B, S, r].
         #         Что дешевле хранить: c или уже восстановленные K, V?
         # TODO 3: kv_b_proj(c) → [B, S, H, d + dv] → по головам → split на k [B, H, S, d] и v [B, H, S, dv].
-        # TODO 4: scores = q·kᵀ/√d, маска [T, S] со сдвигом (как в C05), softmax, @ v, o_proj.
+        # TODO 4: scores = q·kᵀ/√d, маска [T, S] со сдвигом (как в «KV-cache»), softmax, @ v, o_proj.
         raise NotImplementedError("MLAttention.forward")
 
     def forward_absorbed(self, x: torch.Tensor, cache: LatentCache | None = None) -> torch.Tensor:

@@ -1,4 +1,4 @@
-"""Тесты C09: QK-Norm.
+"""Тесты «QK-Norm»: QK-Norm.
 
 Фикстуры (из llmlab.pytest_plugin):
   impl — проверяемая реализация (workspace / reference / starter);

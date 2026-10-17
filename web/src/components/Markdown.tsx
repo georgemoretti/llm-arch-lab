@@ -136,11 +136,11 @@ export function NoteMarkdown({ text }: { text: string }) {
     <div className="note-md">
       {splitCallouts(text).map((seg, i) =>
         seg.kind === "md" ? (
-          <Markdown key={i} text={wikiToLinks(seg.text)} />
+          <Markdown key={i} text={wikiToLinks(seg.text)} linkTasks />
         ) : (
           <details key={i} className={`callout callout-${seg.type}`} open={!seg.folded}>
             <summary>{seg.title || seg.type}</summary>
-            <Markdown text={wikiToLinks(seg.body)} />
+            <Markdown text={wikiToLinks(seg.body)} linkTasks />
           </details>
         ),
       )}

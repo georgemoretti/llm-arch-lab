@@ -1,4 +1,4 @@
-"""C02d: SwiGLU FFN из нашего порта Llama."""
+"""SwiGLU FFN из нашего порта Llama."""
 
 import torch
 import torch.nn as nn

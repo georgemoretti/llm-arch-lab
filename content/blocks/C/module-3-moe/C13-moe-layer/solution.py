@@ -1,10 +1,10 @@
-"""Эталон C13: MoE-слой — наивная диспетчеризация и через сортировку токенов по экспертам."""
+"""Эталон: MoE-слой — наивная диспетчеризация и через сортировку токенов по экспертам."""
 
 import torch
 import torch.nn as nn
 
-from llmlab.core.llama import SwiGLUFFN       # эксперт — SwiGLU из C02
-from llmlab.core.moe import TopKRouter        # роутер — эталон C12
+from llmlab.core.llama import SwiGLUFFN       # эксперт — SwiGLU из «SwiGLU FFN»
+from llmlab.core.moe import TopKRouter        # роутер — эталон «Роутер MoE»
 
 
 class MoELayer(nn.Module):

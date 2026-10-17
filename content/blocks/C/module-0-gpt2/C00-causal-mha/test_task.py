@@ -1,4 +1,4 @@
-"""Тесты C00: causal multi-head self-attention.
+"""Тесты «Causal Multi-Head Attention»: causal multi-head self-attention.
 
 Фикстуры (из llmlab.pytest_plugin):
   impl — проверяемая реализация (workspace / reference / starter);

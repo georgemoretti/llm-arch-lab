@@ -1,4 +1,4 @@
-"""C17: Multi-Token Prediction (DeepSeek-V3) — модули предсказания t+2, …, t+D+1 и их loss.
+"""Multi-Token Prediction (DeepSeek-V3) — модули предсказания t+2, …, t+D+1 и их loss.
 
 Реализуй:
 1. MTPModule.forward — смешать скрытое состояние предыдущей глубины с эмбеддингом следующего
@@ -11,8 +11,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from llmlab.core.gemma_olmo import PreNormBlock   # блок трансформера (Pre-Norm, как Llama), эталон C08
-from llmlab.core.llama import RMSNorm             # эталон C01
+from llmlab.core.gemma_olmo import PreNormBlock   # блок трансформера (Pre-Norm, как Llama), эталон «Место нормализации»
+from llmlab.core.llama import RMSNorm             # эталон «RMSNorm»
 
 
 class MTPModule(nn.Module):

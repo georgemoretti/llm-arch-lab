@@ -1,4 +1,4 @@
-"""C21: DeltaNet → Gated DeltaNet (Qwen3-Next) — рекуррентная форма правила дельты с гейтом забывания.
+"""DeltaNet → Gated DeltaNet (Qwen3-Next) — рекуррентная форма правила дельты с гейтом забывания.
 
 Реализуй:
 1. l2norm — нормировка векторов на единичную длину;
@@ -29,7 +29,7 @@ def gated_delta_rule(q: torch.Tensor, k: torch.Tensor, v: torch.Tensor, beta: to
     # TODO 2: цикл по t:
     #   - если g есть: S ← exp(g_t)·S (до записи!);
     #   - v_old = Sᵀk_t  [B, H, dv] — что память сейчас «помнит» по ключу k_t;
-    #   - S ← S + k_t ⊗ β_t(v_t − v_old)   (в C20 было бы S + k_t ⊗ v_t — чем это хуже?);
+    #   - S ← S + k_t ⊗ β_t(v_t − v_old)   (в «Линейное внимание» было бы S + k_t ⊗ v_t — чем это хуже?);
     #   - o_t = S_tᵀ q_t  [B, H, dv].
     # TODO 3: вернуть (выходы по оси 2, итоговое S).
     raise NotImplementedError("gated_delta_rule")

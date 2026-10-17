@@ -1,4 +1,4 @@
-"""C09: QK-Norm — RMSNorm на запросах и ключах перед скалярным произведением.
+"""QK-Norm — RMSNorm на запросах и ключах перед скалярным произведением.
 
 Реализуй:
 1. QKNormAttention.scores — q, k, v, QK-Norm, RoPE, repeat_kv и scores = q·kᵀ/√D (до маски);
@@ -15,7 +15,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from llmlab.core.llama import RMSNorm, apply_rope, repeat_kv, rope_cos_sin   # эталоны C01, C03, C04
+from llmlab.core.llama import RMSNorm, apply_rope, repeat_kv, rope_cos_sin   # эталоны «RMSNorm», «RoPE», «GQA и MQA»
 
 
 

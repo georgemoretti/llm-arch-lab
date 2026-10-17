@@ -190,7 +190,7 @@ function Hints({ task }: { task: TaskDetail }) {
       {task.hints.slice(0, shown).map((h, i) => (
         <div key={i} className="hint">
           <div className="hint-title">{h.title}</div>
-          <Markdown text={h.body} />
+          <Markdown text={h.body} linkTasks />
         </div>
       ))}
       {shown < task.hints.length ? (

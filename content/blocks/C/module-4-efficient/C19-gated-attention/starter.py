@@ -1,8 +1,8 @@
-"""C19: gated attention (Qwen3-Next) — сигмоидный гейт на выходе attention и partial RoPE.
+"""gated attention (Qwen3-Next) — сигмоидный гейт на выходе attention и partial RoPE.
 
 Реализуй:
 1. apply_partial_rope — RoPE только на первых R каналах головы, остальные пропустить как есть;
-2. GatedAttention.forward — attention как в C09 (GQA + QK-Norm), но с partial RoPE и выходным гейтом
+2. GatedAttention.forward — attention как в «QK-Norm» (GQA + QK-Norm), но с partial RoPE и выходным гейтом
    out = o_proj(attn ⊙ σ(gate)), где гейт — вторая половина q_proj каждой головы.
 """
 
@@ -12,13 +12,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from llmlab.core.llama import RMSNorm, apply_rope, repeat_kv, rope_cos_sin   # эталоны C01, C03, C04
+from llmlab.core.llama import RMSNorm, apply_rope, repeat_kv, rope_cos_sin   # эталоны «RMSNorm», «RoPE», «GQA и MQA»
 
 
 def apply_partial_rope(x: torch.Tensor, cos: torch.Tensor, sin: torch.Tensor) -> torch.Tensor:
     """x [B, H, T, D], cos/sin [T, R] (R ≤ D, чётное) → RoPE на первых R каналах, остальные D − R без изменений."""
     # TODO 1: R берётся из cos.shape[-1]; раздели x на вращаемую часть [..., :R] и остальное.
-    # TODO 2: к вращаемой части — apply_rope из C03 (готов в llmlab.core.llama), остальное не трогать.
+    # TODO 2: к вращаемой части — apply_rope из «RoPE» (готов в llmlab.core.llama), остальное не трогать.
     # TODO 3: склеить обратно по последней оси.
     raise NotImplementedError("apply_partial_rope")
 
@@ -47,7 +47,7 @@ class GatedAttention(nn.Module):
         """x [B, T, C] → [B, T, C]."""
         # TODO 1: q_proj(x) → [B, T, H, 2·D] → по последней оси пополам: запрос [B, T, H, D] и гейт.
         #         Почему не q_proj(x).chunk(2) по всей проекции? Посмотри, как устроены веса в HF Qwen3-Next.
-        # TODO 2: QK-Norm по голове (q_norm, k_norm — как в C09), затем головы на ось 1: [B, H, T, D].
+        # TODO 2: QK-Norm по голове (q_norm, k_norm — как в «QK-Norm»), затем головы на ось 1: [B, H, T, D].
         # TODO 3: cos, sin = rope_cos_sin(arange(T), self.rotary_dim, θ) → apply_partial_rope к q и k.
         # TODO 4: GQA (repeat_kv), scores/√D, causal-маска, softmax, @ v → [B, T, H·D].
         # TODO 5: умножить на σ(гейт) поэлементно и только потом o_proj.

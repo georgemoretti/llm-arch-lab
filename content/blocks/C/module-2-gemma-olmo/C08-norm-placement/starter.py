@@ -1,10 +1,10 @@
-"""C08: четыре способа поставить нормализацию в блок трансформера.
+"""четыре способа поставить нормализацию в блок трансформера.
 
 Реализуй forward у четырёх блоков. Attention и FFN (из модуля 1) и все нормы уже созданы в
 конструкторах — нужно только решить, ЧТО нормировать и куда прибавлять остаток:
 
   PostNormBlock      — оригинальный Transformer (2017);
-  PreNormBlock       — GPT-2, Llama (это блок из C06);
+  PreNormBlock       — GPT-2, Llama (это блок из «Блок и модель Llama»);
   OlmoPostNormBlock  — OLMo 2;
   SandwichNormBlock  — Gemma 2 / Gemma 3.
 
@@ -49,7 +49,7 @@ class PreNormBlock(Sublayers):
                          ["input_layernorm", "post_attention_layernorm"], **kw)
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
-        # TODO: как в C06: подслой получает нормированный вход, к остатку прибавляется его выход.
+        # TODO: как в «Блок и модель Llama»: подслой получает нормированный вход, к остатку прибавляется его выход.
         #       Внимание: у HF Llama норма перед FFN называется post_attention_layernorm.
         raise NotImplementedError("PreNormBlock.forward")
 

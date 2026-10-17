@@ -1,11 +1,11 @@
-"""Эталон C06d (исправленная версия): блок и модель Llama."""
+"""Эталон «Найди баг: Блок и модель Llama» (исправленная версия): блок и модель Llama."""
 
 from dataclasses import dataclass
 
 import torch
 import torch.nn as nn
 
-from llmlab.core.llama import KVCache, LlamaAttention, RMSNorm, SwiGLUFFN   # эталоны C01–C05
+from llmlab.core.llama import KVCache, LlamaAttention, RMSNorm, SwiGLUFFN   # эталоны «RMSNorm»–«KV-cache»
 
 
 @dataclass

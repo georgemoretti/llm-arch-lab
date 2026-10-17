@@ -1,11 +1,11 @@
-"""Тесты C07d (= тесты C07, но без подсказок, называющих баг).
+"""Тесты «Найди баг: Sliding window attention» (= тесты «Sliding window attention», но без подсказок, называющих баг).
 
 Фикстуры (из llmlab.pytest_plugin):
   impl — проверяемая реализация (workspace / reference / starter);
   ref  — эталон solution.py.
 
 Свойства: окно из W позиций (включая свою), causal сохраняется; при W ≥ T и W=None — обычный
-causal attention (как LlamaAttention из C05); выход в позиции t не зависит от токенов старше t−W+1;
+causal attention (как LlamaAttention из «KV-cache»); выход в позиции t не зависит от токенов старше t−W+1;
 L слоёв SWA видят на L·(W−1) позиций назад; расписание слоёв Gemma 3 (5 local : 1 global).
 """
 
@@ -53,7 +53,7 @@ def _diagnose_mask(m, T, S, W) -> str:
         "окна нет — это обычная causal-маска (window проигнорирован)": k <= q,
         "окно считается от начала последовательности, а не от запроса (j < W)": (k <= q) & (k < W),
         "запросы считаются стоящими на позициях 0..T−1, а не на последних T из S "
-        "(при S > T маску надо сдвигать, как в C05)": (k <= q - (S - T)) & (q - (S - T) - k < W),
+        "(при S > T маску надо сдвигать, как в «KV-cache»)": (k <= q - (S - T)) & (q - (S - T) - k < W),
     }
     for hint, cand in variants.items():
         if cand.shape == m.shape and torch.equal(cand, m):
@@ -106,7 +106,7 @@ def test_mask_degenerate_windows(impl):
 
 
 def test_mask_with_offset(impl):
-    """Запросы — последние T из S позиций (пригодится для KV-cache в C11): маска сдвинута"""
+    """Запросы — последние T из S позиций (пригодится для KV-cache в «KV-cache для окна»): маска сдвинута"""
     _check_mask(impl, 3, 10, 4)
     _check_mask(impl, 1, 10, 4)
 
@@ -190,7 +190,7 @@ def test_attention_matches_oracle(impl):
 
 
 def test_full_window_is_llama_attention(impl):
-    """window=None и window ≥ T — ровно LlamaAttention из C05 (без кеша): SWA — это только маска"""
+    """window=None и window ≥ T — ровно LlamaAttention из «KV-cache» (без кеша): SWA — это только маска"""
     for W in (None, T):
         m = _make(impl, W)
         llama = LlamaAttention(C, H, H_KV, rope_theta=THETA).eval()

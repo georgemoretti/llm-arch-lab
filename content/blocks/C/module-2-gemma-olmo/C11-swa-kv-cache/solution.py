@@ -1,4 +1,4 @@
-"""Эталон C11: KV-cache для sliding window attention — кольцевой буфер на W токенов."""
+"""Эталон: KV-cache для sliding window attention — кольцевой буфер на W токенов."""
 
 import math
 
@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from llmlab.core.llama import apply_rope, repeat_kv, rope_cos_sin   # эталоны C03 и C04
+from llmlab.core.llama import apply_rope, repeat_kv, rope_cos_sin   # эталоны «RoPE» и «GQA и MQA»
 
 
 class RingKVCache:
@@ -50,7 +50,7 @@ class RingKVCache:
 
 
 class SlidingWindowCachedAttention(nn.Module):
-    """SWA из C07 + RingKVCache. x [B, T, C] — новые токены, cache — прошлые (или None)."""
+    """SWA из «Sliding window attention» + RingKVCache. x [B, T, C] — новые токены, cache — прошлые (или None)."""
 
     def __init__(self, d_model: int, n_heads: int, n_kv_heads: int, window: int,
                  rope_theta: float = 10000.0):

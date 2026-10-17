@@ -1,4 +1,4 @@
-"""Эталон C16: Multi-head Latent Attention — K и V из общего латента, в кеше только латент."""
+"""Эталон: Multi-head Latent Attention — K и V из общего латента, в кеше только латент."""
 
 import math
 
@@ -6,11 +6,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from llmlab.core.llama import RMSNorm   # эталон C01
+from llmlab.core.llama import RMSNorm   # эталон «RMSNorm»
 
 
 class LatentCache:
-    """KV-cache MLA: латенты c [B, S, r] (и, в C16b, общие RoPE-ключи [B, S, d_r]) вместо K и V."""
+    """KV-cache MLA: латенты c [B, S, r] (и, в «MLA + decoupled RoPE», общие RoPE-ключи [B, S, d_r]) вместо K и V."""
 
     def __init__(self):
         self.c: torch.Tensor | None = None

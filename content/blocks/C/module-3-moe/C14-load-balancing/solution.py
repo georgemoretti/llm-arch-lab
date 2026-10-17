@@ -1,4 +1,4 @@
-"""Эталон C14: балансировка нагрузки экспертов — aux loss (Switch) и bias без градиента (DeepSeek-V3)."""
+"""Эталон: балансировка нагрузки экспертов — aux loss (Switch) и bias без градиента (DeepSeek-V3)."""
 
 import torch
 

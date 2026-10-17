@@ -1,4 +1,4 @@
-"""Эталон C25a: выбор следующего токена — жадно, temperature, top-k, top-p (nucleus)."""
+"""Эталон: выбор следующего токена — жадно, temperature, top-k, top-p (nucleus)."""
 
 import torch
 import torch.nn.functional as F

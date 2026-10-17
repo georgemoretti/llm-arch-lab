@@ -74,7 +74,7 @@ export function ReviewCard({ q, n, card, mode, onGraded, showMeta = true }: Prop
           </a>
         )}
       </div>
-      <Markdown text={q.question} />
+      <Markdown text={q.question} linkTasks />
       {mcq ? (
         <ol className="q-options">
           {q.options.map((opt, i) => {
@@ -104,7 +104,7 @@ export function ReviewCard({ q, n, card, mode, onGraded, showMeta = true }: Prop
               {picked === q.correct ? "Верно." : "Неверно."}
             </div>
           )}
-          <Markdown text={q.answer} />
+          <Markdown text={q.answer} linkTasks />
           {showMeta && q.tasks && q.tasks.length > 0 && (
             <div className="muted q-tasks">
               Задачи:{" "}

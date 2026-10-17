@@ -1,4 +1,4 @@
-"""C03: Rotary Position Embeddings (RoPE), раскладка «половинами», как в HF Llama.
+"""Rotary Position Embeddings (RoPE), раскладка «половинами», как в HF Llama.
 
 Реализуй четыре маленькие функции:
 1. rope_inv_freq — частоты пар координат;

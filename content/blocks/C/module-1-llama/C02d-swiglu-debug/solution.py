@@ -1,4 +1,4 @@
-"""Эталон C02d (исправленная версия): SwiGLU FFN, как в Llama."""
+"""Эталон «Найди баг: SwiGLU FFN» (исправленная версия): SwiGLU FFN, как в Llama."""
 
 import torch
 import torch.nn as nn

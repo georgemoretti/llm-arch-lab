@@ -1,4 +1,4 @@
-"""Тесты C16: Multi-head Latent Attention.
+"""Тесты «MLA»: Multi-head Latent Attention.
 
 Фикстуры (из llmlab.pytest_plugin):
   impl — проверяемая реализация (workspace / reference / starter);
@@ -76,7 +76,7 @@ def test_latent_cache_update(impl):
     c2, kr = cache.update(b)
     assert tuple(c2.shape) == (B, 4, R), (
         f"После 3 + 1 токенов кеш формы {tuple(c2.shape)}, ожидалось {(B, 4, R)}: латенты лежат как [B, S, r], "
-        "время — ось 1 (не 2, как у K/V в C05).")
+        "время — ось 1 (не 2, как у K/V в «KV-cache»).")
     assert_close(c2, torch.cat((a, b), 1), atol=0, rtol=0, msg=lambda _: "Порядок: сначала старые токены, потом новые.")
     assert kr is None and cache.seq_len == 4, "Без k_rope второе значение — None; seq_len = 4."
     other = impl.LatentCache()
@@ -84,7 +84,7 @@ def test_latent_cache_update(impl):
 
 
 def test_latent_cache_k_rope(impl):
-    """LatentCache.update(c, k_rope): общий RoPE-ключ [B, S, d_r] копится так же, по оси времени (нужен в C16b)"""
+    """LatentCache.update(c, k_rope): общий RoPE-ключ [B, S, d_r] копится так же, по оси времени (нужен в «MLA + decoupled RoPE»)"""
     cache = impl.LatentCache()
     a, b = torch.randn(B, 3, R), torch.randn(B, 2, R)
     ka, kb = torch.randn(B, 3, 4), torch.randn(B, 2, 4)
@@ -151,7 +151,7 @@ def _check_chunks(impl, chunks, method="forward"):
     if not torch.allclose(out, expected, atol=1e-4, rtol=1e-4):
         pytest.fail(f"{method} с кешем, куски {chunks}: расхождение с полным прогоном с позиции "
                     f"{_first_bad(out, expected)}. Проверь, что новые k, v восстанавливаются из ВСЕХ латентов кеша "
-                    "и маска [T, S] сдвинута на S − T (как в C05).", pytrace=False)
+                    "и маска [T, S] сдвинута на S − T (как в «KV-cache»).", pytrace=False)
 
 
 def test_token_by_token(impl):

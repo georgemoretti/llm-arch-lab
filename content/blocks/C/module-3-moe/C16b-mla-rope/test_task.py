@@ -1,4 +1,4 @@
-"""Тесты C16b: MLA с decoupled RoPE.
+"""Тесты «MLA + decoupled RoPE»: MLA с decoupled RoPE.
 
 Фикстуры (из llmlab.pytest_plugin):
   impl — проверяемая реализация (workspace / reference / starter);
@@ -116,7 +116,7 @@ def test_cache_contents(impl):
         cos, sin = rope_cos_sin(torch.arange(T), DR, THETA)
         kr = apply_rope(m.kv_a_proj_with_mqa(x)[..., R:].unsqueeze(1), cos, sin).squeeze(1)
     if not torch.allclose(cache.k_rope, kr, atol=1e-5):
-        pytest.fail("В кеше лежит не повёрнутый RoPE-ключ. Как и в C05, ключ кешируют ПОСЛЕ RoPE: позиция токена не "
+        pytest.fail("В кеше лежит не повёрнутый RoPE-ключ. Как и в «KV-cache», ключ кешируют ПОСЛЕ RoPE: позиция токена не "
                     "меняется, и поворачивать весь кеш на каждом шаге незачем.", pytrace=False)
 
 
@@ -166,4 +166,4 @@ def test_kv_cache_bytes(impl):
     mha = 61 * 128 * (192 + 128) * 2                     # тот же MHA: ключ 128 + 64, значение 128 на голову
     assert round(mha / got) == 71, "внутренняя ошибка теста"
     assert impl.mla_kv_cache_bytes(61, 512, 64, 131072, batch=2, bytes_per_elem=1) == 61 * 576 * 131072 * 2, (
-        "seq_len, batch и bytes_per_elem — множители, как в kv_cache_bytes из C04.")
+        "seq_len, batch и bytes_per_elem — множители, как в kv_cache_bytes из «GQA и MQA».")

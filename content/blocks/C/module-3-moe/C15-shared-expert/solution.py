@@ -1,10 +1,10 @@
-"""Эталон C15: DeepSeekMoE — shared experts + routed experts, первые слои dense."""
+"""Эталон: DeepSeekMoE — shared experts + routed experts, первые слои dense."""
 
 import torch
 import torch.nn as nn
 
-from llmlab.core.llama import SwiGLUFFN       # эксперт и dense-FFN — SwiGLU из C02
-from llmlab.core.moe import MoELayer          # routed experts — эталон C13
+from llmlab.core.llama import SwiGLUFFN       # эксперт и dense-FFN — SwiGLU из «SwiGLU FFN»
+from llmlab.core.moe import MoELayer          # routed experts — эталон «MoE-слой»
 
 
 def mlp_layer_types(n_layers: int, first_k_dense_replace: int, moe_layer_freq: int = 1) -> list[str]:

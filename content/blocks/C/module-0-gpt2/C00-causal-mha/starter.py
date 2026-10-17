@@ -1,4 +1,4 @@
-"""C00: causal multi-head self-attention, как в GPT-2.
+"""causal multi-head self-attention, как в GPT-2.
 
 Реализуй две вещи:
 1. функцию causal_attention(q, k, v) — scaled dot-product attention с causal-маской;

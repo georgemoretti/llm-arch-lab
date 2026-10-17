@@ -1,4 +1,4 @@
-"""Эталон C09: attention с QK-Norm (до RoPE) — по голове (Gemma 3) или по всей проекции (OLMo 2)."""
+"""Эталон: attention с QK-Norm (до RoPE) — по голове (Gemma 3) или по всей проекции (OLMo 2)."""
 
 import math
 
@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from llmlab.core.llama import RMSNorm, apply_rope, repeat_kv, rope_cos_sin   # эталоны C01, C03, C04
+from llmlab.core.llama import RMSNorm, apply_rope, repeat_kv, rope_cos_sin   # эталоны «RMSNorm», «RoPE», «GQA и MQA»
 
 
 

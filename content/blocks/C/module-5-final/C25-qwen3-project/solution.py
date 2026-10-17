@@ -1,12 +1,12 @@
-"""Эталон C25: настоящие веса Qwen3-0.6B в своей модели — загрузка safetensors и генерация."""
+"""Эталон: настоящие веса Qwen3-0.6B в своей модели — загрузка safetensors и генерация."""
 
 import json
 from pathlib import Path
 
 import torch
 
-from llmlab.core.hf import check_state_dict, config_from_hf, convert_state_dict   # эталоны C24
-from llmlab.core.hf import sample_next                                            # эталон C25a
+from llmlab.core.hf import check_state_dict, config_from_hf, convert_state_dict   # эталоны «Чекпойнт Hugging Face»
+from llmlab.core.hf import sample_next                                            # эталон «Сэмплирование»
 from llmlab.core.model import Model                                              # модель из конфига (Фаза 8)
 
 

@@ -1,4 +1,4 @@
-"""C04d: Grouped-Query Attention (GQA), как в Llama 2 70B / Llama 3."""
+"""Grouped-Query Attention (GQA), как в Llama 2 70B / Llama 3."""
 
 import math
 

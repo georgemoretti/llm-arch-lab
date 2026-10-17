@@ -1,4 +1,4 @@
-"""C20d: линейное внимание (Katharopoulos et al., 2020) — kernel trick, параллельная и рекуррентная формы."""
+"""линейное внимание (Katharopoulos et al., 2020) — kernel trick, параллельная и рекуррентная формы."""
 
 import torch
 import torch.nn.functional as F

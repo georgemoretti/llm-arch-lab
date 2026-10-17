@@ -1,11 +1,11 @@
-"""C05: KV-cache для attention Llama (GQA + RoPE).
+"""KV-cache для attention Llama (GQA + RoPE).
 
 Реализуй:
 1. KVCache.update — дописать k, v новых токенов к кешу и вернуть весь кеш;
-2. LlamaAttention.forward — attention из C04 + RoPE из C03, который умеет работать с кешем:
+2. LlamaAttention.forward — attention из «GQA и MQA» + RoPE из «RoPE», который умеет работать с кешем:
    на вход приходят только НОВЫЕ токены, а смотреть они должны на все прошлые.
 
-RoPE и repeat_kv даны готовыми (эталоны C03 и C04).
+RoPE и repeat_kv даны готовыми (эталоны «RoPE» и «GQA и MQA»).
 """
 
 import math
@@ -14,7 +14,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from llmlab.core.llama import apply_rope, repeat_kv, rope_cos_sin   # эталоны C03 и C04
+from llmlab.core.llama import apply_rope, repeat_kv, rope_cos_sin   # эталоны «RoPE» и «GQA и MQA»
 
 
 class KVCache:

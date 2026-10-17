@@ -1,4 +1,4 @@
-"""Эталон C03: Rotary Position Embeddings (RoPE), раскладка «половинами», как в HF Llama."""
+"""Эталон: Rotary Position Embeddings (RoPE), раскладка «половинами», как в HF Llama."""
 
 import torch
 

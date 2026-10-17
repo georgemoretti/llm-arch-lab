@@ -1,4 +1,4 @@
-"""C24: config.json и веса чекпойнта Hugging Face → конфиг и state_dict своей модели.
+"""config.json и веса чекпойнта Hugging Face → конфиг и state_dict своей модели.
 
 Реализуй:
 1. config_from_hf(hf) — dict из config.json → ModelConfig (llmlab/core/model.py) для model_type

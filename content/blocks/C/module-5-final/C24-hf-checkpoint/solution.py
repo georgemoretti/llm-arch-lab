@@ -1,4 +1,4 @@
-"""Эталон C24: config.json и веса чекпойнта Hugging Face → ModelConfig и state_dict своей модели."""
+"""Эталон: config.json и веса чекпойнта Hugging Face → ModelConfig и state_dict своей модели."""
 
 import torch
 

@@ -1,4 +1,4 @@
-"""Тесты C12: роутер MoE.
+"""Тесты «Роутер MoE»: роутер MoE.
 
 Фикстуры (из llmlab.pytest_plugin):
   impl — проверяемая реализация (workspace / reference / starter);

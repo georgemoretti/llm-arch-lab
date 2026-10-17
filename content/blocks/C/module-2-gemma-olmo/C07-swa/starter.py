@@ -1,11 +1,11 @@
-"""C07: sliding window attention (SWA) и паттерн local:global по слоям.
+"""sliding window attention (SWA) и паттерн local:global по слоям.
 
 Реализуй:
 1. sliding_window_mask — маску, где запрос видит только последние `window` позиций (включая свою);
 2. layer_types — расписание слоёв Gemma: какие слои sliding, какие full;
 3. SlidingWindowAttention.forward — attention из модуля 1 (GQA + RoPE) с этой маской.
 
-RoPE и repeat_kv даны готовыми (эталоны C03 и C04).
+RoPE и repeat_kv даны готовыми (эталоны «RoPE» и «GQA и MQA»).
 """
 
 import math
@@ -14,7 +14,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from llmlab.core.llama import apply_rope, repeat_kv, rope_cos_sin   # эталоны C03 и C04
+from llmlab.core.llama import apply_rope, repeat_kv, rope_cos_sin   # эталоны «RoPE» и «GQA и MQA»
 
 
 def sliding_window_mask(T: int, S: int | None = None, window: int | None = None,
@@ -22,7 +22,7 @@ def sliding_window_mask(T: int, S: int | None = None, window: int | None = None,
     """Разрешённые пары (запрос, ключ) → bool [T, S] (True = можно смотреть).
 
     S — сколько всего ключей (по умолчанию S = T); запросы — последние T из S позиций, то есть
-    запрос i стоит на позиции S − T + i (как в C05 с кешем). window=None — обычная causal-маска.
+    запрос i стоит на позиции S − T + i (как в «KV-cache» с кешем). window=None — обычная causal-маска.
     """
     # TODO 1: абсолютные позиции запросов [T, 1] и ключей [1, S] — через torch.arange и broadcasting.
     # TODO 2: causal-часть: ключ не позже запроса.

@@ -1,4 +1,4 @@
-"""Эталон C21: DeltaNet → Gated DeltaNet (Qwen3-Next) — рекуррентная форма правила дельты с гейтом забывания."""
+"""Эталон: DeltaNet → Gated DeltaNet (Qwen3-Next) — рекуррентная форма правила дельты с гейтом забывания."""
 
 import torch
 import torch.nn as nn

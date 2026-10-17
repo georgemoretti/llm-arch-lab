@@ -1,4 +1,4 @@
-"""C18: упрощённое sparse attention в стиле DSA (DeepSeek-V3.2) — индексатор + top-k ключей.
+"""упрощённое sparse attention в стиле DSA (DeepSeek-V3.2) — индексатор + top-k ключей.
 
 Реализуй:
 1. LightningIndexer.forward — дешёвые оценки «насколько ключ s нужен запросу t» для всех пар;
@@ -69,7 +69,7 @@ class DSAttention(nn.Module):
 
     def forward(self, x: torch.Tensor, return_mask: bool = False):
         """x [B, T, C] → [B, T, C] (и маска выбранных ключей [B, T, T], если return_mask)."""
-        # TODO 1: q, k, v → [B, H, T, d] (как в C00).
+        # TODO 1: q, k, v → [B, H, T, d] (как в «Causal Multi-Head Attention»).
         # TODO 2: оценки индексатора по x → topk_mask(…, self.top_k).
         # TODO 3: sparse_attention → [B, T, C] → o_proj. Вернуть (out, keep), если return_mask.
         raise NotImplementedError("DSAttention.forward")

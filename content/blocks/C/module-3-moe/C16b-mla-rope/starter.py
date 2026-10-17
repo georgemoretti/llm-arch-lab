@@ -1,11 +1,11 @@
-"""C16b: MLA с decoupled RoPE (DeepSeek-V2/V3) и память его KV-cache.
+"""MLA с decoupled RoPE (DeepSeek-V2/V3) и память его KV-cache.
 
 Реализуй:
-1. MLARopeAttention.forward — у каждой головы две части: «без позиций» (из латента, как в C16) и
+1. MLARopeAttention.forward — у каждой головы две части: «без позиций» (из латента, как в «MLA») и
    «с RoPE» (ключ один на все головы, приходит из kv_a_proj_with_mqa вместе с латентом);
 2. mla_kv_cache_bytes — сколько памяти занимает такой кеш.
 
-LatentCache (C16) хранит латенты c и повёрнутые RoPE-ключи; causal_mask(T, S) — маска со сдвигом.
+LatentCache («MLA») хранит латенты c и повёрнутые RoPE-ключи; causal_mask(T, S) — маска со сдвигом.
 """
 
 import math
@@ -14,8 +14,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from llmlab.core.llama import RMSNorm, apply_rope, rope_cos_sin   # эталоны C01 и C03
-from llmlab.core.mla import LatentCache, causal_mask             # эталон C16
+from llmlab.core.llama import RMSNorm, apply_rope, rope_cos_sin   # эталоны «RMSNorm» и «RoPE»
+from llmlab.core.mla import LatentCache, causal_mask             # эталон «MLA»
 
 
 class MLARopeAttention(nn.Module):
@@ -43,7 +43,7 @@ class MLARopeAttention(nn.Module):
         # TODO 3: kv_a_proj_with_mqa(x) → split на латент c [B, T, r] и k_rope [B, T, dr]; c нормировать;
         #         RoPE на k_rope (у него нет оси голов: apply_rope ждёт [.., T, dr] — добавь ось и убери).
         # TODO 4: кеш: c, k_rope = cache.update(c, k_rope) — хранятся повёрнутые ключи.
-        # TODO 5: kv_b_proj(c) → k_nope [B, H, S, dn], v [B, H, S, dv] (как в C16).
+        # TODO 5: kv_b_proj(c) → k_nope [B, H, S, dn], v [B, H, S, dv] (как в «MLA»).
         # TODO 6: k = [k_nope ; k_rope, размноженный на все H голов], q = [q_nope ; q_rope];
         #         scores = q·kᵀ / √(dn + dr), маска causal_mask(T, S), softmax, @ v, o_proj.
         raise NotImplementedError("MLARopeAttention.forward")

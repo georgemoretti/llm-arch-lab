@@ -1,4 +1,4 @@
-"""C04: Grouped-Query Attention (GQA).
+"""Grouped-Query Attention (GQA).
 
 Реализуй:
 1. repeat_kv — размножить KV-головы, чтобы каждой голове запроса досталась своя (общая для группы);
@@ -6,7 +6,7 @@
 3. GroupedQueryAttention.forward — causal attention, где n_heads голов запросов делят
    n_kv_heads голов ключей/значений.
 
-Готовый F.scaled_dot_product_attention в этой задаче запрещён — attention пишется вручную, как в C00.
+Готовый F.scaled_dot_product_attention в этой задаче запрещён — attention пишется вручную, как в «Causal Multi-Head Attention».
 """
 
 import math
@@ -47,7 +47,7 @@ class GroupedQueryAttention(nn.Module):
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         """x [B, T, C] → [B, T, C]."""
-        # TODO 1: q → [B, H, T, D]; k и v → [B, H_kv, T, D] (view + transpose, как в C00).
+        # TODO 1: q → [B, H, T, D]; k и v → [B, H_kv, T, D] (view + transpose, как в «Causal Multi-Head Attention»).
         # TODO 2: размножь k и v до H голов через repeat_kv.
         # TODO 3: scores = q·kᵀ / √D, causal-маска, softmax по ключам, @ v.
         # TODO 4: склей головы обратно в [B, T, H·D] и примени o_proj.

@@ -1,4 +1,4 @@
-"""Тесты C01: RMSNorm.
+"""Тесты «RMSNorm»: RMSNorm.
 
 Фикстуры (из llmlab.pytest_plugin):
   impl — проверяемая реализация (workspace / reference / starter);

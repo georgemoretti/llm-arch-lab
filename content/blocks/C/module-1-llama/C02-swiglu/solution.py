@@ -1,4 +1,4 @@
-"""Эталон C02: SwiGLU FFN, как в Llama."""
+"""Эталон: SwiGLU FFN, как в Llama."""
 
 import torch
 import torch.nn as nn

@@ -1,4 +1,4 @@
-"""C01d: RMSNorm из нашего порта Llama."""
+"""RMSNorm из нашего порта Llama."""
 
 import torch
 import torch.nn as nn

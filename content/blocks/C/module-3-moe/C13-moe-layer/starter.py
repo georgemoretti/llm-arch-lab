@@ -1,4 +1,4 @@
-"""C13: MoE-слой — наивная диспетчеризация и через сортировку токенов по экспертам.
+"""MoE-слой — наивная диспетчеризация и через сортировку токенов по экспертам.
 
 Реализуй:
 1. forward_naive — каждый эксперт считает ВСЕ токены, выходы смешиваются весами роутера
@@ -6,14 +6,14 @@
 2. forward — каждый эксперт получает ТОЛЬКО свои токены: сгруппировать пары (токен, эксперт)
    по эксперту, прогнать группы, сложить вклады обратно на места токенов.
 
-Роутер (C12) и эксперты (SwiGLU из C02) уже созданы в конструкторе.
+Роутер («Роутер MoE») и эксперты (SwiGLU из «SwiGLU FFN») уже созданы в конструкторе.
 """
 
 import torch
 import torch.nn as nn
 
-from llmlab.core.llama import SwiGLUFFN       # эксперт — SwiGLU из C02
-from llmlab.core.moe import TopKRouter        # роутер — эталон C12
+from llmlab.core.llama import SwiGLUFFN       # эксперт — SwiGLU из «SwiGLU FFN»
+from llmlab.core.moe import TopKRouter        # роутер — эталон «Роутер MoE»
 
 
 class MoELayer(nn.Module):

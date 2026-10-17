@@ -1,12 +1,12 @@
-"""Тесты C11: KV-cache для SWA с кольцевым буфером.
+"""Тесты «KV-cache для окна»: KV-cache для SWA с кольцевым буфером.
 
 Фикстуры (из llmlab.pytest_plugin):
   impl — проверяемая реализация (workspace / reference / starter);
   ref  — эталон solution.py.
 
 Главное свойство: генерация с кольцевым кешем (по одному токену, prefill + decode, кусками) даёт
-ровно то же, что полный прогон SWA из C07 без кеша, — а буфер при этом никогда не больше W токенов.
-Оракул — SlidingWindowAttention из llmlab.core.gemma_olmo (эталон C07).
+ровно то же, что полный прогон SWA из «Sliding window attention» без кеша, — а буфер при этом никогда не больше W токенов.
+Оракул — SlidingWindowAttention из llmlab.core.gemma_olmo (эталон «Sliding window attention»).
 """
 
 import pytest
@@ -120,12 +120,12 @@ def test_update_returns_needed_keys(impl):
 # ---------------------------------------------------------------------------
 
 def test_no_cache_is_swa(impl):
-    """Без кеша — ровно SlidingWindowAttention из C07"""
+    """Без кеша — ровно SlidingWindowAttention из «Sliding window attention»"""
     m, full = _make(impl)
     x = _x()
     with torch.no_grad():
         assert_close(m(x), full(x), atol=1e-5, rtol=1e-4,
-                     msg=lambda _: "cache=None: выход должен совпасть с SWA из C07 (те же веса, окно W). Проверь "
+                     msg=lambda _: "cache=None: выход должен совпасть с SWA из «Sliding window attention» (те же веса, окно W). Проверь "
                                    "маску: ключ в окне, если 0 ≤ q_pos − k_pos < W.")
 
 
@@ -167,7 +167,7 @@ def _sim(m, x, chunks, window, empty_mask=True, pos_offset=True, by_index=False)
 def _diagnose(m, x, chunks, window, out) -> str:
     variants = {
         "позиции RoPE на каждом шаге начинаются с 0. Новые токены стоят после всех, что прошли через кеш: "
-        "start = cache.seq_len ДО update (как в C05)": dict(pos_offset=False),
+        "start = cache.seq_len ДО update (как в «KV-cache»)": dict(pos_offset=False),
         "пустые ячейки буфера (позиция −1) не исключены из маски — запросы смотрят на нулевые ключи. "
         "Добавь в маску условие k_pos ≥ 0": dict(empty_mask=False),
         "маска строится по индексам ключей в тензоре, а не по их абсолютным позициям. После того как буфер "
@@ -248,7 +248,7 @@ def test_swa_kv_cache_bytes(impl):
         "10 full-слоёв хранят все 131 072 токена, 52 sliding — только 1024.")
     all_full = kv_cache_bytes(62, 16, 128, 131072)
     assert impl.swa_kv_cache_bytes(["full_attention"] * 62, 1024, 16, 128, 131072) == all_full, (
-        "Если все слои full, результат должен совпасть с kv_cache_bytes из C04 (62 ГиБ для этой конфигурации).")
+        "Если все слои full, результат должен совпасть с kv_cache_bytes из «GQA и MQA» (62 ГиБ для этой конфигурации).")
     # Источник: mistralai/Mistral-7B-v0.1 config.json: 32 слоя, sliding_window = 4096, 8 KV-голов, head_dim 128.
     mistral = ["sliding_attention"] * 32
     a = impl.swa_kv_cache_bytes(mistral, 4096, 8, 128, 4096)

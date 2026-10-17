@@ -1,4 +1,4 @@
-"""Тесты C13: MoE-слой.
+"""Тесты «MoE-слой»: MoE-слой.
 
 Фикстуры (из llmlab.pytest_plugin):
   impl — проверяемая реализация (workspace / reference / starter);
@@ -69,7 +69,7 @@ def _check(impl, method):
     out, logits = res
     assert tuple(out.shape) == (B, T, C), f"{method}: out формы {tuple(out.shape)}, ожидалось {(B, T, C)}."
     assert tuple(logits.shape) == (B * T, E), (
-        f"{method}: router_logits формы {tuple(logits.shape)}, ожидалось {(B * T, E)} — они понадобятся для aux loss (C14).")
+        f"{method}: router_logits формы {tuple(logits.shape)}, ожидалось {(B * T, E)} — они понадобятся для aux loss («Балансировка экспертов»).")
     expected = _oracle(m, x)
     if not torch.allclose(out, expected, atol=1e-5, rtol=1e-4):
         pytest.fail(f"{method}: выход не совпадает с взвешенной суммой top-{K} экспертов.{_diagnose(m, x, out)}",

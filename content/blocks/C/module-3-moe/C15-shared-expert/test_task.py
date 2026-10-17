@@ -1,4 +1,4 @@
-"""Тесты C15: DeepSeekMoE — shared expert и первые dense-слои.
+"""Тесты «Shared expert»: DeepSeekMoE — shared expert и первые dense-слои.
 
 Фикстуры (из llmlab.pytest_plugin):
   impl — проверяемая реализация (workspace / reference / starter);
@@ -6,7 +6,7 @@
 
 Свойства: расписание dense/MoE совпадает с config.json DeepSeek-V3 и V2-Lite; shared expert видит
 каждый токен без роутера (обнулённые routed-эксперты → выход = shared(x)); без shared experts слой —
-это MoE из C13; число параметров «всего / активно» для DeepSeek-V3 и Qwen3-30B-A3B.
+это MoE из «MoE-слой»; число параметров «всего / активно» для DeepSeek-V3 и Qwen3-30B-A3B.
 """
 
 import pytest
@@ -54,14 +54,14 @@ def _make(impl, n_shared=1, seed=0, **kw):
 
 
 def test_forward_is_routed_plus_shared(impl):
-    """forward = routed MoE (C13) + shared expert; возвращает (out, router_logits)"""
+    """forward = routed MoE («MoE-слой») + shared expert; возвращает (out, router_logits)"""
     m = _make(impl, n_shared=2)
     assert isinstance(m.shared_experts, SwiGLUFFN) and m.shared_experts.up_proj.out_features == 2 * F_EXP, (
         "Конструктор дан: 2 shared-эксперта слиты в один SwiGLU шириной 2·d_expert.")
     x = _x()
     with torch.no_grad():
         res = m(x)
-        assert isinstance(res, tuple) and len(res) == 2, "forward должен вернуть (out, router_logits), как MoE из C13."
+        assert isinstance(res, tuple) and len(res) == 2, "forward должен вернуть (out, router_logits), как MoE из «MoE-слой»."
         out, logits = res
         routed, logits_ref = m.routed(x)
         shared = m.shared_experts(x)
@@ -91,7 +91,7 @@ def test_shared_expert_sees_every_token(impl):
 
 
 def test_no_shared_is_plain_moe(impl):
-    """n_shared = 0: DeepSeekMoE — это просто MoE из C13"""
+    """n_shared = 0: DeepSeekMoE — это просто MoE из «MoE-слой»"""
     m = _make(impl, n_shared=0)
     assert m.shared_experts is None, "Конструктор дан: при n_shared = 0 shared_experts = None."
     plain = MoELayer(C, F_EXP, E, K).eval()

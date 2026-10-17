@@ -1,9 +1,9 @@
-"""C11: KV-cache для sliding window attention — кольцевой буфер на W токенов.
+"""KV-cache для sliding window attention — кольцевой буфер на W токенов.
 
 Реализуй:
 1. RingKVCache.update — вернуть ключи/значения (и их позиции), нужные новым запросам, и записать
    новые токены в кольцевой буфер: токен на позиции p — в ячейку p % W;
-2. SlidingWindowCachedAttention.forward — SWA из C07, работающий с этим кешем: маска строится по
+2. SlidingWindowCachedAttention.forward — SWA из «Sliding window attention», работающий с этим кешем: маска строится по
    АБСОЛЮТНЫМ ПОЗИЦИЯМ ключей, а не по их индексам в тензоре;
 3. swa_kv_cache_bytes — память KV-cache модели со смесью sliding/full слоёв.
 """
@@ -14,7 +14,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from llmlab.core.llama import apply_rope, repeat_kv, rope_cos_sin   # эталоны C03 и C04
+from llmlab.core.llama import apply_rope, repeat_kv, rope_cos_sin   # эталоны «RoPE» и «GQA и MQA»
 
 
 class RingKVCache:
@@ -50,7 +50,7 @@ class RingKVCache:
 
 
 class SlidingWindowCachedAttention(nn.Module):
-    """SWA из C07 + RingKVCache. x [B, T, C] — новые токены, cache — прошлые (или None)."""
+    """SWA из «Sliding window attention» + RingKVCache. x [B, T, C] — новые токены, cache — прошлые (или None)."""
 
     def __init__(self, d_model: int, n_heads: int, n_kv_heads: int, window: int,
                  rope_theta: float = 10000.0):
@@ -69,11 +69,11 @@ class SlidingWindowCachedAttention(nn.Module):
 
     def forward(self, x: torch.Tensor, cache: RingKVCache | None = None) -> torch.Tensor:
         # TODO 1: позиции запросов q_pos = start … start + T − 1, где start = cache.seq_len ДО update.
-        # TODO 2: q, k, v; RoPE на q и k с позициями q_pos (как в C05).
+        # TODO 2: q, k, v; RoPE на q и k с позициями q_pos (как в «KV-cache»).
         # TODO 3: с кешем — k, v, k_pos = cache.update(k, v); без кеша — k_pos = q_pos.
         # TODO 4: repeat_kv, scores [B, H, T, S].
         # TODO 5: маска [T, S] по позициям: ключ существует (k_pos ≥ 0), не из будущего и в окне.
-        #         Почему здесь не подойдёт sliding_window_mask(T, S, W) из C07?
+        #         Почему здесь не подойдёт sliding_window_mask(T, S, W) из «Sliding window attention»?
         # TODO 6: softmax → @ v → o_proj.
         raise NotImplementedError("SlidingWindowCachedAttention.forward")
 
@@ -82,5 +82,5 @@ def swa_kv_cache_bytes(layer_types: list[str], window: int, n_kv_heads: int, hea
                        seq_len: int, batch: int = 1, bytes_per_elem: int = 2) -> int:
     """KV-cache модели со смесью sliding/full слоёв: sliding хранит min(seq_len, window) токенов."""
     # TODO: sliding-слой хранит min(seq_len, window) токенов, full — seq_len. Дальше как kv_cache_bytes
-    #       из C04: 2 (K и V) × токены × n_kv_heads × head_dim × batch × байт на число.
+    #       из «GQA и MQA»: 2 (K и V) × токены × n_kv_heads × head_dim × batch × байт на число.
     raise NotImplementedError("swa_kv_cache_bytes")

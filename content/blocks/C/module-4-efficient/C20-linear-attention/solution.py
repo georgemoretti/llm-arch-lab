@@ -1,4 +1,4 @@
-"""Эталон C20: линейное внимание (Katharopoulos et al., 2020) — kernel trick, параллельная и рекуррентная формы."""
+"""Эталон: линейное внимание (Katharopoulos et al., 2020) — kernel trick, параллельная и рекуррентная формы."""
 
 import torch
 import torch.nn.functional as F

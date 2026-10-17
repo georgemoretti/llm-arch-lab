@@ -1,4 +1,4 @@
-"""Тесты C04d (= тесты C04, но без подсказок, называющих баг).
+"""Тесты «Найди баг: GQA и MQA» (= тесты «GQA и MQA», но без подсказок, называющих баг).
 
 Фикстуры (из llmlab.pytest_plugin):
   impl — проверяемая реализация (workspace / reference / starter);
@@ -26,7 +26,7 @@ def _forbid_sdpa(monkeypatch):
 
     def forbidden(*args, **kwargs):
         raise AssertionError("Использован F.scaled_dot_product_attention. В этой задаче attention "
-                             "пишется вручную (как в C00): scores → маска → softmax → @ v.")
+                             "пишется вручную (как в «Causal Multi-Head Attention»): scores → маска → softmax → @ v.")
 
     monkeypatch.setattr(F, "scaled_dot_product_attention", forbidden)
 
@@ -214,7 +214,7 @@ def test_causal_no_future_leak(impl):
     delta = (a[:, : t + 1] - b[:, : t + 1]).abs().max().item()
     assert delta < 1e-5, (
         f"Выход в позициях ≤ {t} изменился (max |Δ| = {delta:.3g}), когда поменяли только токены после "
-        f"{t} — утечка будущего. Нужна causal-маска (как в C00).")
+        f"{t} — утечка будущего. Нужна causal-маска (как в «Causal Multi-Head Attention»).")
 
 
 def test_batch_independence(impl):

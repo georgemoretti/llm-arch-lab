@@ -1,4 +1,4 @@
-"""Эталон C18: упрощённое sparse attention в стиле DSA (DeepSeek-V3.2) — индексатор + top-k ключей."""
+"""Эталон: упрощённое sparse attention в стиле DSA (DeepSeek-V3.2) — индексатор + top-k ключей."""
 
 import math
 

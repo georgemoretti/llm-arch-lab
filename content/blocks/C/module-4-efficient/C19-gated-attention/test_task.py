@@ -1,4 +1,4 @@
-"""Тесты C19: gated attention и partial RoPE (Qwen3-Next).
+"""Тесты «Gated attention»: gated attention и partial RoPE (Qwen3-Next).
 
 Фикстуры (из llmlab.pytest_plugin):
   impl — проверяемая реализация (workspace / reference / starter);

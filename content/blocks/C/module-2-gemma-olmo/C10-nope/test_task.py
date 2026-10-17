@@ -1,10 +1,10 @@
-"""Тесты C10: NoPE.
+"""Тесты «NoPE»: NoPE.
 
 Фикстуры (из llmlab.pytest_plugin):
   impl — проверяемая реализация (workspace / reference / starter);
   ref  — эталон solution.py.
 
-Свойства: расписание совпадает с config.json SmolLM3; RoPE-слой — это LlamaAttention из C05;
+Свойства: расписание совпадает с config.json SmolLM3; RoPE-слой — это LlamaAttention из «KV-cache»;
 NoPE-слой для последнего токена — «мешок слов» (перестановка предыдущих токенов ничего не меняет),
 но благодаря causal-маске всё равно различает позиции одинаковых токенов.
 """
@@ -69,7 +69,7 @@ def test_schedule_edge_cases(impl):
 
 
 def test_rope_layer_is_llama_attention(impl):
-    """use_rope=True — ровно LlamaAttention из C05 (без кеша) с теми же весами"""
+    """use_rope=True — ровно LlamaAttention из «KV-cache» (без кеша) с теми же весами"""
     m = _make(impl, True)
     llama = LlamaAttention(C, H, H_KV, rope_theta=THETA).eval()
     llama.load_state_dict(m.state_dict())

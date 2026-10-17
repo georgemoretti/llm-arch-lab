@@ -1,4 +1,4 @@
-"""Тесты C20: линейное внимание (Transformers are RNNs).
+"""Тесты «Линейное внимание»: линейное внимание (Transformers are RNNs).
 
 Фикстуры (из llmlab.pytest_plugin):
   impl — проверяемая реализация (workspace / reference / starter);

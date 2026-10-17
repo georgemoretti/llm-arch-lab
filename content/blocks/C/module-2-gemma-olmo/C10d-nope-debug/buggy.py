@@ -1,4 +1,4 @@
-"""C10d: NoPE по расписанию SmolLM3 — код из C10 с одной ошибкой. Найди и исправь её."""
+"""NoPE по расписанию SmolLM3 — код из «NoPE» с одной ошибкой. Найди и исправь её."""
 
 import math
 
@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from llmlab.core.llama import apply_rope, repeat_kv, rope_cos_sin   # эталоны C03 и C04
+from llmlab.core.llama import apply_rope, repeat_kv, rope_cos_sin   # эталоны «RoPE» и «GQA и MQA»
 
 
 def rope_layers(n_layers: int, no_rope_layer_interval: int) -> list[bool]:

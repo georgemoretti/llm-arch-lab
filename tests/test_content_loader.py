@@ -3,7 +3,7 @@ from pathlib import Path
 import yaml
 
 from toycourse import write_task
-from llmlab.content_loader import find_cycles, load_course
+from llmlab.content_loader import check_shapes, find_cycles, load_course
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -108,3 +108,40 @@ def test_find_cycles_unit():
     assert find_cycles({"a": ["a"]}) == [["a", "a"]]
     cycles = find_cycles({"a": ["b"], "b": ["c"], "c": ["a"]})
     assert len(cycles) == 1 and set(cycles[0]) == {"a", "b", "c"}
+
+
+GOOD_SHAPES = """
+x [B, T, C] — вход
+fork
+> gate_proj
+g [B, T, F]
+branch
+> up_proj
+u [B, T, F]
+join ⊙
+h [B, T, F]
+## дальше
+- пояснение
+axis r:other = ранг
+scalar []
+"""
+
+
+def test_check_shapes_accepts_valid_block():
+    assert check_shapes(f"текст\n```shapes\n{GOOD_SHAPES}```\n") == []
+    assert check_shapes("```\nx [B] без языка — не схема\n```") == []
+
+
+def test_check_shapes_catches_typos():
+    bad = "```shapes\nx [B, T, C\n>c_attn\nq_proj(x)\n##секция\naxis N:huge = ?\nbranch\nfork\n```\n"
+    errors = "\n".join(check_shapes(bad))
+    for expected in ["несбалансированные", "после «>» нужен пробел", "тензор без формы", "после «##» нужен пробел",
+                     "неизвестный вид оси 'huge'", "branch без fork", "fork не закрыт"]:
+        assert expected in errors, expected
+
+
+def test_shapes_error_is_attached_to_task(toy_root):
+    write_task(toy_root, "Z01-add", files={"README.md": "# Задача\n\n```shapes\nx [B, T\n```\n"})
+    course = load_course(toy_root)
+    (issue,) = [i for i in course.errors if "shapes" in i.message]
+    assert "Z01-add" in Path(issue.where).parts and "README.md" in issue.where

@@ -1,4 +1,4 @@
-"""Тесты C01d: те же проверки, что в C01 (RMSNorm), но диагност не называет баг.
+"""Тесты «Найди баг: RMSNorm»: те же проверки, что в «RMSNorm» (RMSNorm), но диагност не называет баг.
 
 Фикстуры (из llmlab.pytest_plugin):
   impl — проверяемая реализация (workspace / reference / starter);
@@ -49,7 +49,7 @@ def _diagnose(out: torch.Tensor, x: torch.Tensor, w: torch.Tensor, eps=EPS) -> s
     if not torch.isfinite(out).all():
         return ("В выходе есть NaN/inf. Если вход нулевой — значит eps не добавлен под корень "
                 "(0 / sqrt(0) = NaN). Если вход в fp16 — x² переполнился: считай в float32.")
-    return ("Сравни код с формулой из README C01 построчно: x², mean по C, где eps, корень, ·weight. "
+    return ("Сравни код с формулой из README «RMSNorm» построчно: x², mean по C, где eps, корень, ·weight. "
             "Посмотри, на каком масштабе входа расхождение максимально.")
 
 

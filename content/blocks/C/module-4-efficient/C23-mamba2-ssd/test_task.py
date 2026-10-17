@@ -1,4 +1,4 @@
-"""Тесты C23: упрощённый Mamba-2 (SSD — state space duality).
+"""Тесты «Mamba-2 (SSD)»: упрощённый Mamba-2 (SSD — state space duality).
 
 Фикстуры (из llmlab.pytest_plugin):
   impl — проверяемая реализация (workspace / reference / starter);
@@ -160,6 +160,6 @@ def test_zero_decay_is_linear_attention(impl):
     expected = torch.einsum("bts,bshp->bthp", scores, dt[..., None] * x)
     assert_close(y, expected, atol=1e-4, rtol=1e-4, msg=lambda _: (
         "При A = 0 затухания нет (L — просто causal-маска из единиц), и SSD превращается в Σ_{s≤t} (C_t·B_s) Δ_s x_s — "
-        "линейное внимание из C20 без φ и без знаменателя."))
+        "линейное внимание из «Линейное внимание» без φ и без знаменателя."))
     y_rec, _ = impl.ssd_recurrent(x, dt, A0, B, C, D0)
     assert_close(y_rec, expected, atol=1e-4, rtol=1e-4)

@@ -1,4 +1,4 @@
-"""C09d: attention с QK-Norm — код из C09 с одной ошибкой. Найди и исправь её."""
+"""attention с QK-Norm — код из «QK-Norm» с одной ошибкой. Найди и исправь её."""
 
 import math
 
@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from llmlab.core.llama import RMSNorm, apply_rope, repeat_kv, rope_cos_sin   # эталоны C01, C03, C04
+from llmlab.core.llama import RMSNorm, apply_rope, repeat_kv, rope_cos_sin   # эталоны «RMSNorm», «RoPE», «GQA и MQA»
 
 
 

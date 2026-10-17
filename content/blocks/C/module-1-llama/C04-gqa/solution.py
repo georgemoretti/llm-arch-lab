@@ -1,4 +1,4 @@
-"""Эталон C04: Grouped-Query Attention (GQA), как в Llama 2 70B / Llama 3."""
+"""Эталон: Grouped-Query Attention (GQA), как в Llama 2 70B / Llama 3."""
 
 import math
 
