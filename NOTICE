@@ -1,10 +1,40 @@
 LLM Arch Lab
 Copyright (c) 2026 LLM Arch Lab contributors
+Лицензия: MIT (см. LICENSE)
 
-Сторонний код и материалы
--------------------------
-Сюда записываются атрибуции для любого переиспользованного кода (например, из
-rasbt/LLMs-from-scratch — только после проверки его LICENSE).
+Тексты, задачи и схемы
+----------------------
+Тексты задач, подсказки, конспекты, вопросы, визуализации и скриншоты (docs/img/) созданы для этого
+курса. На статьи, блоги и документацию даются только ссылки (поле reading в task.yaml, content/papers/);
+их текст, рисунки и таблицы в репозиторий не копировались. Гиперпараметры реальных моделей взяты из
+официальных config.json на Hugging Face и из статей — источник указан рядом с каждым числом.
 
-На данный момент сторонний код в репозитории не используется. Тексты задач написаны
-авторами курса; на внешние статьи и блоги даются только ссылки.
+Код из сторонних обучающих репозиториев (в т. ч. rasbt/LLMs-from-scratch) не используется.
+
+Веса моделей
+------------
+Репозиторий не содержит весов моделей. `llmlab generate` и тесты с --weights скачивают их с Hugging Face
+в локальный кеш пользователя; на них распространяются лицензии правообладателей:
+  - Qwen/Qwen3-0.6B ............... Apache-2.0 (Qwen Team, Alibaba Cloud)
+  - HuggingFaceTB/SmolLM2-135M .... Apache-2.0 (Hugging Face)
+  - openai-community/gpt2 ......... MIT (OpenAI)
+
+Собранный веб-интерфейс (llmlab/static/)
+----------------------------------------
+Бандл включает сторонние библиотеки (production-зависимости web/package.json и их транзитивные
+зависимости, 131 пакет): 128 под MIT, 2 под ISC (@ungap/structured-clone, hast-util-from-dom),
+1 под BSD-2-Clause (entities). Основные:
+  - React, React DOM 18.3.1 ............ MIT, Meta Platforms, Inc. and affiliates
+  - Monaco Editor 0.52.2 ................ MIT, Microsoft Corporation
+      (включает шрифт иконок codicon из microsoft/vscode-codicons; сторонние уведомления Monaco —
+      web/node_modules/monaco-editor/ThirdPartyNotices.txt после `npm ci`)
+  - KaTeX 0.16.11 (вместе со шрифтами) .. MIT, Khan Academy and other contributors
+  - react-markdown, remark-gfm, remark-math, rehype-katex и экосистема unified .. MIT, Titus Wormer и др.
+  - entities ............................ BSD-2-Clause, Felix Böhm
+  - @ungap/structured-clone ............. ISC, Andrea Giammarchi
+  - hast-util-from-dom .................. ISC, Keith McKnight
+
+Тексты лицензий распространяются вместе с пакетами в web/node_modules/<пакет>/LICENSE.
+
+Python-зависимости (PyTorch, FastAPI, pytest и др.) в репозиторий не входят и устанавливаются
+пакетным менеджером пользователя.
