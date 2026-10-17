@@ -24,7 +24,7 @@ questions: [shared-expert-*, moe-params-*]
 # HuggingFaceTB/SmolLM3-3B (11008).
 arch:
   deepseek-v3:
-    moe: "256 routed (top-8, sigmoid + bias без aux loss, ×2.5) + 1 shared expert; первые 3 из 61 слоя — dense"
+    moe: "256 routed (top-8, sigmoid; баланс — bias вместо основного aux loss, ×2.5) + 1 shared expert; первые 3 из 61 слоя — dense"
   gemma-3:
     moe: "нет — dense FFN (27B: ширина 21 504)"
   olmo-2:

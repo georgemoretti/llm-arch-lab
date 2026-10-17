@@ -36,9 +36,9 @@ Llama взяла SwiGLU, и это стало стандартом.
 
 Источники: `intermediate_size` — config.json `meta-llama/Llama-2-7b-hf` и
 `meta-llama/Meta-Llama-3-8B` (сверено по открытым зеркалам NousResearch). Значения
-`multiple_of = 1024` и `ffn_dim_multiplier = 1.3` для Llama 3 8B взяты из `params.json`
-оригинального чекпойнта Meta — **TODO-verify** (сам файл не проверен, но арифметика даёт ровно
-14 336 из config.json). Правило — функция `FeedForward.__init__` в `model.py` репозитория
+`multiple_of = 1024` и `ffn_dim_multiplier = 1.3` для Llama 3 8B взяты из `original/params.json`
+оригинального чекпойнта Meta (репозиторий закрыт; сверено по копиям файла в открытых зеркалах, например
+`gradientai/Meta-Llama-3-8B-bf16`), и арифметика даёт ровно 14 336 из config.json. Правило — функция `FeedForward.__init__` в `model.py` репозитория
 `meta-llama/llama3`.
 
 ## Формула
