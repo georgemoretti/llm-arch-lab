@@ -1,5 +1,6 @@
 id: C22-hybrid-stack
 title: "Гибридный стек 3 : 1: Gated DeltaNet + gated attention, память кеша"
+short_title: "Гибридный стек"
 block: C
 module: module-4-efficient
 type: implement

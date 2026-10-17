@@ -1,5 +1,6 @@
 id: C21d-gated-deltanet-debug
 title: "Отладка: Gated DeltaNet генерирует верно, а при prefill подглядывает в будущее"
+short_title: "Найди баг: Gated DeltaNet"
 block: C
 module: module-4-efficient
 type: debug
@@ -14,3 +15,4 @@ reading:
   - title: "Hugging Face transformers: torch_recurrent_gated_delta_rule (где читается выход)"
     url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/qwen3_next/modeling_qwen3_next.py
 questions: [deltanet-leak-*]
+viz: [state-memory]

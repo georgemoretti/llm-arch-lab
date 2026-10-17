@@ -1,5 +1,6 @@
 id: C-Q2-gemma-olmo-quiz
 title: "Квиз модуля: Gemma 3 / OLMo 2 / SmolLM3"
+short_title: "Квиз: Gemma / OLMo"
 block: C
 module: module-2-gemma-olmo
 type: quiz

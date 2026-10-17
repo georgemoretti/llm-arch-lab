@@ -1,4 +1,4 @@
-# C10. NoPE: слои без позиционного кодирования
+# NoPE: слои без позиционного кодирования
 
 ## Зачем это нужно
 
@@ -56,17 +56,27 @@ $$
 
 ## Формы тензоров
 
-```
-x                       [B, T, C]
-q                       [B, H, T, D]     ── RoPE, только если use_rope
-k, v                    [B, H_kv, T, D]  ── RoPE на k, только если use_rope
-repeat_kv               [B, H, T, D]
-scores                  [B, H, T, T]     + causal-маска (всегда)
-out                     [B, T, C]
+```shapes
+x [B, T, C]
+fork
+> q_proj → RoPE, только если use_rope
+q [B, H, T, D]
+branch
+> k_proj, v_proj → RoPE на k, только если use_rope
+k, v [B, H_kv, T, D]
+> repeat_kv
+k, v [B, H, T, D]
+join q·kᵀ/√D + causal-маска (всегда)
+scores [B, H, T, T]
+> softmax, @ v, o_proj
+out [B, T, C]
 
-rope_layers(36, 4) = [T, T, T, F, T, T, T, F, …]     (True = RoPE)
-build_attention_layers(…) → nn.ModuleList[NoPEAttention] с use_rope по расписанию
+## расписание слоёв
+- rope_layers(36, 4) → RoPE, RoPE, RoPE, NoPE, RoPE, RoPE, RoPE, NoPE, … (True = RoPE)
+- build_attention_layers(…) → nn.ModuleList из NoPEAttention с use_rope по расписанию
 ```
+
+:::viz nope:::
 
 ## Задание
 

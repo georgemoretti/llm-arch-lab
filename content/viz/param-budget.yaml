@@ -1,0 +1,4 @@
+id: param-budget
+title: "Бюджет параметров Qwen3-0.6B"
+description: >
+  Доли эмбеддингов, attention, MLP и норм, посчитанные из config.json, с переключателем tie_word_embeddings и размером в fp32 / bf16.

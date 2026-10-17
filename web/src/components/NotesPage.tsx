@@ -13,6 +13,7 @@ import {
 } from "../api";
 import { NOTES_ARCH_HREF, NOTES_GRAPH_HREF, noteHref, taskHref, type NotesView } from "../router";
 import { usePersistent } from "../theme";
+import { labelById, useCourseIndex } from "../courseIndex";
 import { DepGraph } from "./DepGraph";
 import { InsightModal } from "./InsightModal";
 import { Highlighted, NoteMarkdown } from "./Markdown";
@@ -130,14 +131,14 @@ function NotesTree(props: { course: CourseData; list: NotesList; activeId: strin
       {shown.map(({ block, modules }) => (
         <div key={block.id}>
           <div className="tree-block">
-            <span className="block-id">{block.id}</span> {block.title}
+            {block.title}
           </div>
           {modules.map(({ module, tasks }) => (
             <div key={module.id} className="tree-module">
               <div className="tree-module-title muted">{module.title}</div>
               {tasks.map((t) => (
                 <a key={t.id} href={noteHref(t.id)} className={`tree-note ${props.activeId === t.id ? "active" : ""}`}>
-                  <span className="mono">{t.id.split("-")[0]}</span> {t.title}
+                  <span className="mono">{t.number ?? ""}</span> {t.short_title}
                 </a>
               ))}
             </div>
@@ -155,7 +156,7 @@ function SearchResults({ hits, activeId }: { hits: SearchHit[]; activeId: string
       {hits.map((h) => (
         <a key={h.path} href={noteHref(h.task_id)} className={`hit ${activeId === h.task_id ? "active" : ""}`}>
           <div className="hit-title">
-            <span className="mono muted">{h.task_id}</span> {h.title}
+            {h.title}
           </div>
           <div className="hit-snippet">
             <Highlighted text={h.snippet} />
@@ -211,7 +212,6 @@ function NotesHome({ list, course }: { list: NotesList; course: CourseData }) {
           <div className="note-cards">
             {recent.map((n) => (
               <a key={n.task_id} href={noteHref(n.task_id)} className="note-card">
-                <div className="mono muted">{n.task_id}</div>
                 <div className="note-card-title">{n.title}</div>
                 <div className="muted small-text">
                   {n.solved_at && `решено ${n.solved_at}`}
@@ -245,7 +245,7 @@ function NoteView({ id, onChanged }: { id: string; onChanged(): Promise<unknown>
   if (error)
     return (
       <div className="page-msg">
-        {error}. <a href={taskHref(id)}>Открыть задачу {id}</a>
+        {error}. <a href={taskHref(id)}>Открыть задачу</a>
       </div>
     );
   if (!note) return <div className="page-msg">Загрузка…</div>;
@@ -263,7 +263,6 @@ function NoteView({ id, onChanged }: { id: string; onChanged(): Promise<unknown>
   return (
     <article className="note-view">
       <div className="note-toolbar">
-        <span className="mono muted">{note.task_id}</span>
         {note.tags.map((t) => (
           <span key={t} className="chip">
             #{t}
@@ -329,6 +328,7 @@ function NotesGraph({ course, noteIds }: { course: CourseData; noteIds: Set<stri
 }
 
 function ArchView() {
+  const index = useCourseIndex();
   const [table, setTable] = useState<ArchTable | null>(null);
   const [error, setError] = useState<string | null>(null);
   useEffect(() => {
@@ -377,7 +377,7 @@ function ArchView() {
                       <td key={c.id} className="open">
                         {cell.value}
                         <a className="cell-src mono" href={noteHref(cell.task_id)} title={cell.task_title}>
-                          {cell.task_id.split("-")[0]}
+                          {index?.get(cell.task_id)?.number ?? "↗"}
                         </a>
                       </td>
                     );
@@ -385,7 +385,7 @@ function ArchView() {
                     return (
                       <td key={c.id} className="locked">
                         <a href={taskHref(cell.task_id)} title={`Откроется после задачи «${cell.task_title}»`}>
-                          🔒 {cell.task_id}
+                          🔒 {labelById(index, cell.task_id)}
                         </a>
                       </td>
                     );

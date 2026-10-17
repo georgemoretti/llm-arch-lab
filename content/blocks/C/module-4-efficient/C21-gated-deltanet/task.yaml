@@ -1,5 +1,6 @@
 id: C21-gated-deltanet
 title: "DeltaNet → Gated DeltaNet: правило дельты и гейт забывания"
+short_title: "Gated DeltaNet"
 block: C
 module: module-4-efficient
 type: implement
@@ -18,3 +19,4 @@ reading:
 questions: [deltanet-*]
 # Источник: Qwen/Qwen3-Next-80B-A3B-Instruct config.json: linear_num_key_heads 16, linear_num_value_heads 32,
 # linear_key_head_dim 128, linear_value_head_dim 128, linear_conv_kernel_dim 4; формулы β, g и шага — modeling_qwen3_next.py.
+viz: [state-memory]

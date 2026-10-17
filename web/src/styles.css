@@ -24,6 +24,14 @@
   --series-1: #2a78d6;
   --series-2: #eb6834;
   --series-3: #1baf7a;
+  /* оси тензоров в схемах форм (ShapeFlow) */
+  --ax-batch: #6b7280;
+  --ax-seq: #2a78d6;
+  --ax-model: #7c4dcc;
+  --ax-heads: #d9601f;
+  --ax-hdim: #16956a;
+  --ax-wide: #c2307a;
+  --ax-other: #0e8a9a;
   color-scheme: light;
 }
 
@@ -48,6 +56,13 @@
   --series-1: #3987e5;
   --series-2: #d95926;
   --series-3: #199e70;
+  --ax-batch: #9aa1ab;
+  --ax-seq: #5b9cf0;
+  --ax-model: #a684f0;
+  --ax-heads: #f08a4b;
+  --ax-hdim: #3cc48f;
+  --ax-wide: #ec6aa9;
+  --ax-other: #3fbccb;
   color-scheme: dark;
 }
 
@@ -457,6 +472,38 @@ main {
   font: 12.5px var(--mono);
   color: var(--muted);
   min-width: 120px;
+}
+.task-num {
+  flex: none;
+  min-width: 30px;
+  font: 600 12px var(--mono);
+  color: var(--muted);
+  text-align: right;
+}
+.task-num.icon {
+  font-size: 13px;
+}
+.task-row.sub {
+  padding-left: 44px;
+  background: color-mix(in srgb, var(--panel-2) 45%, transparent);
+}
+.task-row.sub .task-title {
+  color: var(--muted);
+}
+.task-row.sub:hover .task-title {
+  color: var(--text);
+}
+.module-num {
+  display: inline-grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  border-radius: 50%;
+  background: var(--text);
+  color: var(--bg);
+  font: 700 11px var(--mono);
+  vertical-align: 1px;
 }
 .task-title {
   flex: 1;
@@ -1985,4 +2032,446 @@ mark {
 }
 .moe-axis {
   stroke: var(--border-strong);
+}
+
+/* ---------- схема форм тензоров (```shapes) ---------- */
+
+.sf {
+  margin: 12px 0 16px;
+  padding: 14px 16px 12px;
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  overflow-x: auto;
+}
+.sf-flow {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+.sf-node {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  max-width: 100%;
+  padding: 6px 10px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+}
+.sf-name {
+  font: 600 13px var(--mono);
+  color: var(--text);
+}
+.sf-shapes {
+  display: inline-flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 4px 6px;
+  font: 12.5px var(--mono);
+  color: var(--muted);
+}
+.sf-note {
+  font-size: 12.5px;
+  color: var(--muted);
+}
+.sf-op .sf-note::before {
+  content: "· ";
+}
+.sf-op {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 2px 8px;
+  margin-left: 18px;
+  padding: 7px 0 11px 16px;
+  border-left: 2px solid var(--border-strong);
+}
+.sf-op::after {
+  content: "";
+  position: absolute;
+  left: -6px;
+  bottom: 0;
+  border: 5px solid transparent;
+  border-top: 6px solid var(--border-strong);
+  border-bottom: 0;
+}
+.sf-op-text {
+  font: 12.5px/1.5 var(--mono);
+  color: var(--text);
+}
+.sf-text {
+  margin: 4px 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+.sf-section {
+  margin: 16px 0 6px;
+  font: 600 12.5px var(--sans);
+  color: var(--muted);
+}
+.sf-section:first-child {
+  margin-top: 0;
+}
+.sf-gap {
+  height: 10px;
+}
+.sf-flow > .sf-node + .sf-node {
+  margin-top: 6px;
+}
+.sf-fork-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+/* Ветки: горизонтальная шина от линии родителя (x = 18px) до линии последней ветки;
+   внутри ветки та же геометрия, что в основном потоке: узел с x = 0, линия на x = 18px. */
+.sf-fork {
+  display: flex;
+  align-items: stretch;
+}
+.sf-branch {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  padding-right: 30px;
+}
+.sf-branch:last-child {
+  padding-right: 0;
+}
+.sf-branch::before,
+.sf-fork.joined .sf-branch::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  border-top: 2px solid var(--border-strong);
+}
+.sf-branch::before {
+  top: 0;
+}
+.sf-fork.joined .sf-branch::after {
+  bottom: 0;
+}
+.sf-branch:first-child::before,
+.sf-fork.joined .sf-branch:first-child::after {
+  left: 18px;
+}
+.sf-branch:last-child::before,
+.sf-fork.joined .sf-branch:last-child::after {
+  right: auto;
+  width: 20px;
+}
+.sf-branch:first-child:last-child::before,
+.sf-fork.joined .sf-branch:first-child:last-child::after {
+  width: 2px;
+}
+.sf-branch > .sf-flow > .sf-node:first-child {
+  margin-top: 14px;
+}
+.sf-branch:has(> .sf-flow > .sf-node:first-child) > .sf-flow::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 18px;
+  height: 14px;
+  border-left: 2px solid var(--border-strong);
+}
+.sf-tail {
+  flex: 1;
+  min-height: 14px;
+  margin-left: 18px;
+  border-left: 2px solid var(--border-strong);
+}
+.sf-join {
+  margin-top: 0;
+}
+.sf-shape {
+  display: inline-flex;
+  gap: 3px;
+  vertical-align: 1px;
+}
+.sf-shape::before,
+.sf-shape::after {
+  color: var(--muted);
+  font: 12px var(--mono);
+}
+.sf-shape::before {
+  content: "[";
+}
+.sf-shape::after {
+  content: "]";
+}
+.sf-dim {
+  --ax: var(--ax-other);
+  display: inline-block;
+  padding: 0 5px;
+  border-radius: 4px;
+  font: 600 12px/18px var(--mono);
+  color: color-mix(in srgb, var(--ax) 78%, var(--text));
+  background: color-mix(in srgb, var(--ax) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ax) 32%, transparent);
+  cursor: default;
+  transition: opacity 0.12s, box-shadow 0.12s;
+}
+.sf-dim.ax-batch { --ax: var(--ax-batch); }
+.sf-dim.ax-seq { --ax: var(--ax-seq); }
+.sf-dim.ax-model { --ax: var(--ax-model); }
+.sf-dim.ax-heads { --ax: var(--ax-heads); }
+.sf-dim.ax-hdim { --ax: var(--ax-hdim); }
+.sf-dim.ax-wide { --ax: var(--ax-wide); }
+.sf-dim.ax-num { --ax: var(--ax-batch); font-weight: 500; }
+.sf-dim.hl {
+  box-shadow: 0 0 0 2px var(--ax);
+}
+.sf-dim.fade {
+  opacity: 0.35;
+}
+.sf-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px 14px;
+  margin-top: 12px;
+  padding-top: 10px;
+  border-top: 1px dashed var(--border);
+  font-size: 12px;
+  color: var(--muted);
+}
+.sf-legend-item {
+  cursor: default;
+}
+
+/* упоминание другой задачи в тексте теории */
+a.task-ref {
+  padding: 0 5px;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  white-space: nowrap;
+}
+a.task-ref:hover {
+  text-decoration: none;
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+}
+
+.task-num-badge {
+  padding: 1px 7px;
+  border-radius: 5px;
+  background: var(--panel-2);
+  border: 1px solid var(--border);
+  font: 600 12.5px var(--mono);
+  color: var(--muted);
+}
+.crumb-task {
+  max-width: 320px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* ---------- общие детали визуализаций (viz/common.tsx) ---------- */
+
+.viz-bars-zero {
+  stroke: var(--border-strong);
+  stroke-width: 1;
+}
+.viz-bars-label,
+.viz-svg-label {
+  fill: var(--muted);
+  font: 10px var(--mono);
+}
+.viz-barrow {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  grid-template-areas: "title stat" "bars bars";
+  align-items: baseline;
+  gap: 2px 12px;
+  padding: 6px 0;
+  border-top: 1px dashed var(--border);
+}
+.viz-barrow:first-of-type {
+  border-top: none;
+}
+.viz-barrow-title {
+  grid-area: title;
+  font: 600 12px var(--mono);
+  color: var(--text);
+}
+.viz-barrow-stat {
+  grid-area: stat;
+  font: 11.5px var(--mono);
+  color: var(--muted);
+}
+.viz-barrow-bars {
+  grid-area: bars;
+  overflow-x: auto;
+}
+.viz-seg {
+  display: inline-flex;
+  border: 1px solid var(--border-strong);
+  border-radius: 6px;
+  overflow: hidden;
+  vertical-align: middle;
+}
+.viz-seg button {
+  padding: 3px 9px;
+  border: none;
+  border-left: 1px solid var(--border-strong);
+  background: var(--panel);
+  color: var(--text);
+  font: 12px var(--sans);
+  cursor: pointer;
+}
+.viz-seg button:first-child {
+  border-left: none;
+}
+.viz-seg button.active {
+  background: var(--accent);
+  color: var(--accent-text);
+}
+
+/* --- V-norm-placement --- */
+.norm-block {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin: 0 0 10px;
+  padding: 8px 12px;
+  background: var(--panel-2);
+  border-radius: 6px;
+}
+.norm-block-who {
+  font-size: 12px;
+}
+.norm-line {
+  font: 13px var(--mono);
+  background: none;
+  padding: 0;
+}
+.norm-line mark {
+  padding: 0 3px;
+  border-radius: 3px;
+  background: color-mix(in srgb, var(--series-1) 22%, transparent);
+  color: var(--text);
+  font-weight: 700;
+}
+
+/* --- V-nope --- */
+.nope-seq {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+}
+.nope-tok {
+  padding: 2px 8px;
+  border: 2px solid;
+  border-radius: 5px;
+  font: 12px var(--mono);
+}
+.nope-tok.last {
+  background: var(--panel-2);
+  font-weight: 700;
+}
+
+/* --- V-mtp --- */
+.mtp-grid {
+  display: grid;
+  gap: 3px;
+  align-items: center;
+  font: 11.5px var(--mono);
+  overflow-x: auto;
+}
+.mtp-tok {
+  text-align: center;
+  padding: 3px 0;
+  border-radius: 4px;
+  background: var(--panel-2);
+}
+.mtp-tok.input {
+  box-shadow: inset 0 0 0 2px var(--series-1);
+}
+.mtp-tok.target {
+  background: color-mix(in srgb, var(--series-2) 30%, transparent);
+  font-weight: 700;
+}
+.mtp-rowlabel {
+  font: 12px var(--sans);
+  color: var(--muted);
+}
+.mtp-cell {
+  text-align: center;
+  padding: 5px 0;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  cursor: default;
+}
+.mtp-cell.empty {
+  border-style: dashed;
+  opacity: 0.4;
+}
+.mtp-cell.chain {
+  border-color: var(--series-1);
+  background: color-mix(in srgb, var(--series-1) 10%, transparent);
+}
+.mtp-cell.active {
+  border-color: var(--series-2);
+  background: color-mix(in srgb, var(--series-2) 18%, transparent);
+  font-weight: 700;
+}
+
+/* --- V-ssd-decay --- */
+button.ssd-pos {
+  border: none;
+  background: none;
+  font: inherit;
+  color: var(--muted);
+  cursor: pointer;
+  border-radius: 4px;
+}
+button.ssd-pos:hover {
+  color: var(--accent);
+}
+button.ssd-pos.spike {
+  background: color-mix(in srgb, var(--series-2) 30%, transparent);
+  color: var(--text);
+  font-weight: 700;
+}
+
+/* --- V-param-budget --- */
+.budget-bar {
+  display: flex;
+  height: 22px;
+  border-radius: 5px;
+  overflow: hidden;
+  gap: 2px;
+}
+.budget-bar > div {
+  flex-basis: 0;
+  min-width: 3px;
+}
+.budget-table {
+  margin-top: 10px;
+  border-collapse: collapse;
+  font-size: 12.5px;
+}
+.budget-table td {
+  padding: 3px 14px 3px 0;
+  border: none;
+  background: none;
+}
+.budget-total td {
+  border-top: 1px solid var(--border);
+  font-weight: 600;
+}
+.budget-dot {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  vertical-align: 0;
+}
+.sampling-bars {
+  overflow-x: auto;
 }

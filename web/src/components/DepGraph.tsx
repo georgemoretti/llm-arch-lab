@@ -1,6 +1,7 @@
 // Граф зависимостей задач блока: слои по длине самой длинной цепочки depends_on.
 import type { TaskSummary } from "../api";
 import { taskHref } from "../router";
+import { TYPE_ICON } from "../courseIndex";
 
 const NODE_W = 168;
 const NODE_H = 30;
@@ -71,11 +72,11 @@ export function DepGraph({
           return (
             <a key={t.id} href={hrefFor(t.id)}>
               <g className={`node ${t.progress.status} type-${t.type} ${classFor(t)}`} transform={`translate(${p.x},${p.y})`}>
-                <title>{`${t.id}: ${t.title}`}</title>
+                <title>{t.title}</title>
                 <rect width={NODE_W} height={NODE_H} rx={5} />
                 <text x={10} y={NODE_H / 2 + 4}>
                   {t.progress.status === "solved" ? "✓ " : ""}
-                  {t.id.length > 22 ? t.id.slice(0, 21) + "…" : t.id}
+                  {nodeLabel(t)}
                 </text>
               </g>
             </a>
@@ -84,4 +85,10 @@ export function DepGraph({
       </svg>
     </div>
   );
+}
+
+// Узел узкий: номер + короткое имя, у отладки — 🐞 и номер (имя совпало бы с родителем).
+function nodeLabel(t: TaskSummary): string {
+  const text = t.parent ? `${TYPE_ICON.debug} ${t.number ?? ""} баг` : t.number ? `${t.number} ${t.short_title}` : `${TYPE_ICON[t.type]} ${t.short_title.replace(/^(Статьи?|Квиз):\s*/, "")}`;
+  return text.length > 23 ? text.slice(0, 22) + "…" : text;
 }

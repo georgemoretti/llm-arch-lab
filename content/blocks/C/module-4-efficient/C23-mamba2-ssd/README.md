@@ -1,4 +1,4 @@
-# C23. Mamba-2 (SSD): скан состояния == attention с затухающей маской
+# Mamba-2 (SSD): скан состояния == attention с затухающей маской
 
 *Задача повышенной сложности, необязательная.*
 
@@ -55,21 +55,41 @@ $\exp$ дал 0. Здесь он считается как $\text{cumsum}_t - \t
 
 ## Формы тензоров
 
-```
-x [b, T, H, P]    dt [b, T, H] (Δ > 0)    A [H] (< 0)    B, C [b, T, N]    D [H]
+```shapes
+x [b, T, H, P]
+dt [b, T, H] — Δ > 0
+A [H] — < 0
+B, C [b, T, N] — общие для всех голов
+D [H]
 
-ssd_recurrent, шаг t:
-  decay = exp(dt[:, t] · A)                     [b, H]
-  write = dt[:, t] · (B[:, t] ⊗ x[:, t])        [b, H, N, P]      (B общий для голов)
-  h = decay · h + write                         [b, H, N, P]
-  y_t = Σ_N C[:, t] · h + D · x[:, t]           [b, H, P]
+## ssd_recurrent, шаг t
+> decay = exp(dt[:, t] · A)
+decay [b, H]
+> write = dt[:, t] · (B[:, t] ⊗ x[:, t])
+write [b, H, N, P]
+> h = decay · h + write
+h [b, H, N, P]
+> y_t = Σ_N C[:, t] · h + D · x[:, t]
+y_t [b, H, P]
 
-ssd_quadratic:
-  L = exp(segsum((dt · A) → [b, H, T]))         [b, H, T, T]
-  scores = C · Bᵀ                               [b, T, T]
-  M = L ⊙ scores                                [b, H, T, T]
-  y = einsum("bhts,bshp->bthp", M, dt · x) + D·x   [b, T, H, P]
+## ssd_quadratic: то же самое как attention
+fork
+> exp(segsum(dt · A)) — dt · A → [b, H, T]
+L [b, H, T, T] — затухающая causal-маска
+branch
+> C · Bᵀ
+scores [b, T, T]
+join L ⊙ scores
+M [b, H, T, T]
+> einsum("bhts,bshp->bthp", M, dt · x) + D·x
+y [b, T, H, P]
+axis N:hdim = размер состояния
+axis P = размер канала головы
+axis H = головы
+axis T = время
 ```
+
+:::viz ssd-decay:::
 
 ## Задание
 

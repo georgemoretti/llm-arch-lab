@@ -1,5 +1,6 @@
 id: C23-mamba2-ssd
 title: "Mamba-2 (SSD): скан состояния == attention с затухающей маской"
+short_title: "Mamba-2 (SSD)"
 block: C
 module: module-4-efficient
 type: implement
@@ -18,3 +19,4 @@ reading:
 questions: [ssm-*]
 # Источник: state-spaces/mamba2-2.7b config.json: d_model 2560, n_layer 64, ssm_cfg.layer Mamba2; остальное — значения
 # по умолчанию класса Mamba2 (mamba_ssm/modules/mamba2.py): d_state 128, headdim 64, expand 2, ngroups 1, d_conv 4.
+viz: [ssd-decay]

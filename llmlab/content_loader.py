@@ -60,6 +60,8 @@ class ReadingLink(_Strict):
 class Task(_Strict):
     id: str
     title: str
+    # Короткое имя для навигации (граф, хлебные крошки, «после: …»); по умолчанию — из title.
+    short_title: str | None = None
     block: str
     module: str
     type: TaskType
@@ -88,6 +90,13 @@ class Task(_Strict):
     @property
     def has_code(self) -> bool:
         return self.type in CODE_TASK_TYPES
+
+    @property
+    def nav_title(self) -> str:
+        """short_title или title без служебного префикса «Отладка: » / «Проект: »."""
+        if self.short_title:
+            return self.short_title
+        return re.sub(r"^(Отладка|Проект|Статьи?|Квиз модуля):\s*", "", self.title)
 
     @property
     def starter_file(self) -> Path:
@@ -226,6 +235,32 @@ class Course:
         for q in self.questions.values():
             if task.id in q.tasks or any(fnmatch.fnmatchcase(q.id, pat) for pat in task.questions):
                 out.append(q)
+        return out
+
+    def labels(self) -> dict[str, dict]:
+        """Номера для навигации вместо id: «1.3» = модуль 1, шаг 3.
+
+        Нумеруются implement/project в порядке topo_order внутри модуля (номер модуля — его
+        позиция в block.yaml). debug получает номер и ссылку `parent` на задачу, которую чинит
+        (первая implement-зависимость); paper/quiz — без номера.
+        """
+        module_no = {(b.id, m.id): i for b in self.blocks.values() for i, m in enumerate(b.modules)}
+        counters: dict[tuple[str, str], int] = {}
+        out: dict[str, dict] = {}
+        order = self.topo_order()
+        for tid in order:
+            t = self.tasks[tid]
+            key = (t.block, t.module)
+            if t.type in ("implement", "project") and key in module_no:
+                counters[key] = counters.get(key, 0) + 1
+                out[tid] = {"number": f"{module_no[key]}.{counters[key]}", "parent": None}
+            else:
+                out[tid] = {"number": None, "parent": None}
+        for tid in order:
+            t = self.tasks[tid]
+            if t.type == "debug":
+                parent = next((d for d in t.depends_on if d in self.tasks and self.tasks[d].type == "implement"), None)
+                out[tid] = {"number": out[parent]["number"] if parent else None, "parent": parent}
         return out
 
     def topo_order(self) -> list[str]:

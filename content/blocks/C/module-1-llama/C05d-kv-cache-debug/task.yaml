@@ -1,5 +1,6 @@
 id: C05d-kv-cache-debug
 title: "Отладка: с KV-cache генерация расходится с полным прогоном после промпта"
+short_title: "Найди баг: KV-cache"
 block: C
 module: module-1-llama
 type: debug
@@ -14,3 +15,4 @@ reading:
   - title: "Hugging Face transformers: modeling_llama.py (LlamaAttention.forward)"
     url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/llama/modeling_llama.py
 questions: [kvcache-positions-*]
+viz: [kv-cache]

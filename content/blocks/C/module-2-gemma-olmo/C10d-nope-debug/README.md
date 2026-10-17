@@ -1,4 +1,4 @@
-# C10d. Отладка: веса SmolLM3 загрузились, а модель генерирует мусор
+# Отладка: веса SmolLM3 загрузились, а модель генерирует мусор
 
 ## Зачем это нужно
 
@@ -19,8 +19,15 @@ $$\text{score}_{ij} = \begin{cases}(R_i q_i)\cdot(R_j k_j)/\sqrt{D}, & \text{с�
 
 ## Формы тензоров
 
-```
-x [B,T,C] → q [B,H,T,D], k, v [B,H_kv,T,D] → scores [B,H,T,T] + causal → out [B,T,C]
+```shapes
+x [B, T, C]
+> проекции
+q [B, H, T, D]
+k, v [B, H_kv, T, D]
+> q·kᵀ/√D + causal
+scores [B, H, T, T]
+> softmax, @ v, o_proj
+out [B, T, C]
 ```
 
 ## Симптом

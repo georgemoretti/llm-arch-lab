@@ -26,6 +26,22 @@ def test_course_map_has_modules_tasks_and_statuses(client):
     assert m1["tasks"][0]["progress"]["status"] == "new"
 
 
+def test_course_map_gives_human_labels_instead_of_ids(client, toy_root):
+    write_task(toy_root, "Z01d-add-debug", type_="debug", depends_on=["Z01-add"], meta={"title": "Отладка: сложение врёт"})
+    write_task(toy_root, "Z-P1-paper", type_="paper", meta={"short_title": "Статья про сложение"})
+    write_task(toy_root, "Z03-next", module="module-2")
+    tasks = {t["id"]: t for b in client.get("/api/course").json()["blocks"] for m in b["modules"] for t in m["tasks"]}
+    # «модуль.шаг»: номер модуля — позиция в block.yaml, шаги — implement/project по порядку
+    assert (tasks["Z01-add"]["number"], tasks["Z02-more"]["number"], tasks["Z03-next"]["number"]) == ("0.1", "0.2", "1.1")
+    # debug получает номер задачи, которую чинит, и ссылку на неё; paper — без номера
+    assert (tasks["Z01d-add-debug"]["number"], tasks["Z01d-add-debug"]["parent"]) == ("0.1", "Z01-add")
+    assert tasks["Z-P1-paper"]["number"] is None
+    # short_title: явный из task.yaml или title без служебного префикса
+    assert tasks["Z-P1-paper"]["short_title"] == "Статья про сложение"
+    assert tasks["Z01d-add-debug"]["short_title"] == "сложение врёт"
+    assert client.get("/api/tasks/Z01d-add-debug").json()["parent"] == "Z01-add"
+
+
 def test_task_detail(client):
     d = client.get("/api/tasks/Z02-more").json()
     assert d["diff_from_info"] == {"id": "Z01-add", "title": "Задача Z01-add", "kind": "task"}

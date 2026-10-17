@@ -1,5 +1,6 @@
 id: C-P3b-deepseek-v2-v3
 title: "Статьи: DeepSeek-V2 (MLA) и DeepSeek-V3 (балансировка, MTP)"
+short_title: "Статьи: DeepSeek-V2/V3"
 block: C
 module: module-3-moe
 type: paper
@@ -13,3 +14,4 @@ reading:
   - title: "The Big LLM Architecture Comparison (Sebastian Raschka) — DeepSeek-V3, Qwen3, gpt-oss"
     url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
 questions: [paper-dsv2-*, paper-dsv3-*]
+viz: [kv-cache, mtp]

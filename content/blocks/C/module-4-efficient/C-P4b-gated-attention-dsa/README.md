@@ -1,4 +1,4 @@
-# C-P4b. Статьи: Gated Attention и DeepSeek Sparse Attention
+# Статьи: Gated Attention и DeepSeek Sparse Attention
 
 ## Зачем читать
 

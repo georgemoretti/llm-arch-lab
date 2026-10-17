@@ -1,4 +1,4 @@
-# C07. Sliding window attention и паттерн local:global
+# Sliding window attention и паттерн local:global
 
 ## Зачем это нужно
 
@@ -67,16 +67,28 @@ q5     ·  ·  ·  1  1  1
 
 ## Формы тензоров
 
-```
-x                      [B, T, C]
-q                      [B, H, T, D]      → RoPE (позиции 0..T−1)
-k, v                   [B, H_kv, T, D]   → RoPE на k → repeat_kv → [B, H, T, D]
-scores = q·kᵀ/√D       [B, H, T, T]
-mask = sliding_window_mask(T, window=W)   [T, T]   (bool, True = можно)
-out = softmax(scores + mask) · v          [B, H, T, D] → [B, T, H·D] → o_proj → [B, T, C]
+```shapes
+x [B, T, C]
+fork
+> q_proj → RoPE (позиции 0..T−1)
+q [B, H, T, D]
+branch
+> k_proj, v_proj → RoPE на k → repeat_kv
+k, v [B, H, T, D] — до repeat_kv было [B, H_kv, T, D]
+join q·kᵀ/√D
+scores [B, H, T, T]
+> + sliding_window_mask(T, window=W) — mask [T, T], bool, True = можно смотреть
+> softmax, @ v
+out [B, H, T, D]
+> → [B, T, H·D] → o_proj
+y [B, T, C]
 
-sliding_window_mask(T, S, W): запросы — последние T из S позиций → [T, S]
-  q_pos = arange(S − T, S)[:, None]    k_pos = arange(S)[None, :]
+## sliding_window_mask(T, S, W): запросы — последние T из S позиций
+q_pos [T, 1] — arange(S − T, S)[:, None]
+k_pos [1, S] — arange(S)[None, :]
+> сравнение позиций: окно W + causal
+mask [T, S]
+axis S = все позиции ключей
 ```
 
 ## Реальные модели
@@ -94,6 +106,8 @@ full-слои ещё и используют разное основание RoP
 `rope_theta = 1 000 000` — далёкие позиции нужны только глобальным слоям. У Gemma 3 4B / 12B / 27B
 глобальные слои ещё и растягивают позиции линейно в 8 раз (`rope_scaling: {rope_type: linear, factor: 8}`) —
 так модель, обученная на 32K, работает на 128K; у 1B масштабирования нет. В этой задаче θ один.
+
+:::viz kv-cache:::
 
 ## Задание
 

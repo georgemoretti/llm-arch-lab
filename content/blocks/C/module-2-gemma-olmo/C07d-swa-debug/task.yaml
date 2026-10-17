@@ -1,5 +1,6 @@
 id: C07d-swa-debug
 title: "Отладка: sliding window пропускает лишний токен"
+short_title: "Найди баг: Sliding window attention"
 block: C
 module: module-2-gemma-olmo
 type: debug

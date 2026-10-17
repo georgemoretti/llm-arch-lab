@@ -1,5 +1,6 @@
 id: C20-linear-attention
 title: "Линейное внимание: kernel trick, параллельная и рекуррентная формы"
+short_title: "Линейное внимание"
 block: C
 module: module-4-efficient
 type: implement
@@ -16,3 +17,4 @@ reading:
   - title: "Songlin Yang — DeltaNet Explained (часть 1: от линейного внимания к DeltaNet)"
     url: https://sustcsonglin.github.io/blog/2024/deltanet-1/
 questions: [linear-attn-*]
+viz: [state-memory]

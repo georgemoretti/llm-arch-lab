@@ -1,0 +1,4 @@
+id: gqa-groups
+title: "Группы голов: MHA → GQA → MQA"
+description: >
+  Какие головы запросов читают какую KV-голову при разном H_kv, пресеты из config.json (Llama 2 7B, Llama 3 8B, Qwen3-0.6B) и во сколько раз уменьшается KV-cache.

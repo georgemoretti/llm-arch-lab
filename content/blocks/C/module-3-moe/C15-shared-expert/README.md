@@ -1,4 +1,4 @@
-# C15. DeepSeekMoE: shared expert и первые dense-слои
+# DeepSeekMoE: shared expert и первые dense-слои
 
 ## Зачем это нужно
 
@@ -54,15 +54,26 @@ $$
 
 ## Формы тензоров
 
-```
-x                         [B, T, C]
-self.routed(x)            → out_r [B, T, C], logits [N, E]       (MoE из C13)
-self.shared_experts(x)    → [B, T, C]                            (SwiGLU шириной S·F_e)
-out = out_r + shared      [B, T, C]
+```shapes
+x [B, T, C]
+fork
+> self.routed(x) — MoE-слой
+out_r [B, T, C]
+logits [N, E]
+branch
+> self.shared_experts(x) — SwiGLU шириной S·F_e
+shared [B, T, C]
+join out_r + shared
+out [B, T, C]
 
-mlp_layer_types(61, 3)    → ["dense"]×3 + ["moe"]×58
-build_ffn_layers(...)     → nn.ModuleList[SwiGLUFFN | DeepSeekMoE]
+## расписание слоёв
+- mlp_layer_types(61, 3) → "dense" × 3 + "moe" × 58
+- build_ffn_layers(…) → nn.ModuleList из SwiGLUFFN | DeepSeekMoE
 ```
+
+:::viz moe-routing:::
+
+:::viz activations:::
 
 ## Задание
 

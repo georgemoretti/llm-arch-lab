@@ -1,4 +1,4 @@
-# C09. QK-Norm: нормировать запросы и ключи до RoPE
+# QK-Norm: нормировать запросы и ключи до RoPE
 
 ## Зачем это нужно
 
@@ -55,17 +55,27 @@ $|\text{score}| \le D / \sqrt{D} = \sqrt{D}$.
 
 ## Формы тензоров
 
+```shapes
+x [B, T, C]
+fork
+> q_proj
+[B, T, H·D] — режим "full": q_norm (вес [H·D]) здесь
+> view + transpose
+q [B, H, T, D] — режим "head": q_norm (вес [D]) здесь, по последней оси
+branch
+> k_proj
+[B, T, H_kv·D] — то же с k_norm: вес [H_kv·D] или [D]
+> view + transpose
+k [B, H_kv, T, D]
+join apply_rope(q), apply_rope(k) — уже после нормы
+> repeat_kv(k), repeat_kv(v) → [B, H, T, D]
+> q·kᵀ/√D
+scores [B, H, T, T] — это возвращает scores()
+> causal-маска, softmax, @ v, o_proj
+y [B, T, C]
 ```
-x                         [B, T, C]
-q_proj(x)                 [B, T, H·D]      ── "full": q_norm (вес [H·D]) здесь
-  view + transpose        [B, H, T, D]     ── "head": q_norm (вес [D]) здесь, по последней оси
-k_proj(x)                 [B, T, H_kv·D]   ── то же с k_norm ([H_kv·D] или [D])
-  view + transpose        [B, H_kv, T, D]
-apply_rope(q), apply_rope(k)               ── после нормы
-repeat_kv(k), repeat_kv(v) [B, H, T, D]
-scores = q·kᵀ/√D          [B, H, T, T]     ← возвращает scores()
-causal-маска, softmax, @ v, o_proj → [B, T, C]
-```
+
+:::viz qk-norm:::
 
 ## Задание
 

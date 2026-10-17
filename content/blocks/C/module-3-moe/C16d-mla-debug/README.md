@@ -1,4 +1,4 @@
-# C16d. Отладка: MLA генерирует правильно, но памяти ест как MHA
+# Отладка: MLA генерирует правильно, но памяти ест как MHA
 
 ## Зачем это нужно
 
@@ -17,8 +17,15 @@ $$c = \operatorname{norm}(W_{DKV} x),\qquad k_h = W_{UK}^{(h)} c,\qquad v_h = W_
 
 ## Формы тензоров
 
-```
-x [B,T,C] → c [B,T,r] → … → K, V [B,H,S,·] → out [B,T,C]
+```shapes
+x [B, T, C]
+> kv_a_proj → norm
+c [B, T, r]
+> …
+K, V [B, H, S, ·]
+> …
+out [B, T, C]
+axis r:other = размер латента KV
 ```
 
 ## Симптом

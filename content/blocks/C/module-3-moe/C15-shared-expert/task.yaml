@@ -1,5 +1,6 @@
 id: C15-shared-expert
 title: "DeepSeekMoE: shared expert и первые dense-слои"
+short_title: "Shared expert"
 block: C
 module: module-3-moe
 type: implement
@@ -22,6 +23,7 @@ questions: [shared-expert-*, moe-params-*]
 # topk_method noaux_tc. Gemma 3, OLMo 2, SmolLM3: в config.json нет полей экспертов (num_experts и т. п.),
 # FFN dense: google/gemma-3-27b-pt (intermediate_size 21504), allenai/OLMo-2-1124-7B (11008),
 # HuggingFaceTB/SmolLM3-3B (11008).
+viz: [moe-routing, activations]
 arch:
   deepseek-v3:
     moe: "256 routed (top-8, sigmoid; баланс — bias вместо основного aux loss, ×2.5) + 1 shared expert; первые 3 из 61 слоя — dense"

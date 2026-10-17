@@ -1,4 +1,4 @@
-# C09d. Отладка: после загрузки обученных весов QK-Norm даёт не тот выход
+# Отладка: после загрузки обученных весов QK-Norm даёт не тот выход
 
 ## Зачем это нужно
 
@@ -17,8 +17,14 @@ $$\hat q_h = w_q \odot \frac{q_h}{\operatorname{RMS}(q_h)},\qquad \text{score} =
 
 ## Формы тензоров
 
-```
-q_proj(x) [B,T,H·D] → view → [B,H,T,D] → … → scores [B,H,T,T] → out [B,T,C]
+```shapes
+q_proj(x) [B, T, H·D]
+> view + transpose
+q [B, H, T, D]
+> …
+scores [B, H, T, T]
+> …
+out [B, T, C]
 ```
 
 Формы правильные, causal-маска на месте, GQA правильный.

@@ -1,5 +1,6 @@
 id: C10-nope
 title: "NoPE: слои без позиционного кодирования"
+short_title: "NoPE"
 block: C
 module: module-2-gemma-olmo
 type: implement
@@ -21,6 +22,7 @@ questions: [nope-*]
 # Источник: HuggingFaceTB/SmolLM3-3B config.json: num_hidden_layers = 36, no_rope_layer_interval = 4,
 # no_rope_layers = [1, 1, 1, 0] × 9 (1 = RoPE, 0 = NoPE), num_attention_heads = 16,
 # num_key_value_heads = 4, rope_theta = 5 000 000.
+viz: [nope]
 arch:
   smollm3:
     position: "RoPE (θ = 5 000 000) в 3 слоях из 4, каждый 4-й слой — NoPE (без позиционного кодирования)"

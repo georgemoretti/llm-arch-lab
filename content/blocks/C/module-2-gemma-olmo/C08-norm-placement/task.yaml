@@ -1,5 +1,6 @@
 id: C08-norm-placement
 title: "Куда ставить нормализацию: Post-Norm, Pre-Norm, OLMo 2, sandwich"
+short_title: "Место нормализации"
 block: C
 module: module-2-gemma-olmo
 type: implement
@@ -25,6 +26,7 @@ questions: [norm-placement-*]
 # rms_norm_eps = 1e-6; Gemma 3: rms_norm_eps = 1e-6.
 # FFN: config.json OLMo-2-1124-7B — hidden_act silu, 4096 → 11008; Gemma 3 27B (text_config, зеркало
 # unsloth/gemma-3-27b-pt) — hidden_activation gelu_pytorch_tanh, 5376 → 21504; Gemma3MLP = down(act(gate(x)) * up(x)).
+viz: [norm-placement, rmsnorm]
 arch:
   gemma-3:
     norm: "RMSNorm (масштаб 1 + w), sandwich: норма до и после каждого подслоя, остаток не нормируется"

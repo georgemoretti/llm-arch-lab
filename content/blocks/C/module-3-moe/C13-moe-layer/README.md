@@ -1,4 +1,4 @@
-# C13. MoE-слой: отправить каждый токен к его экспертам
+# MoE-слой: отправить каждый токен к его экспертам
 
 ## Зачем это нужно
 
@@ -42,25 +42,37 @@ $$
 
 ## Формы тензоров
 
-```
-x                     [B, T, C] → h [N, C],  N = B·T
-gate(h)               logits [N, E], weights [N, k], indices [N, k]
+```shapes
+x [B, T, C]
+> reshape
+h [N, C] — N = B·T
+> gate(h) — роутер
+logits [N, E]
+weights, indices [N, k]
 
-forward_naive:
-  dense = zeros(N, E).scatter_(1, indices, weights)       [N, E]
-  out = Σ_e dense[:, e:e+1] · expert_e(h)                 [N, C]   (E прогонов по N строк)
+## forward_naive: каждый эксперт на всех токенах
+> dense = zeros(N, E).scatter_(1, indices, weights)
+dense [N, E]
+> out = Σ_e dense[:, e:e+1] · expert_e(h) — E прогонов по N строк
+out [N, C]
 
-forward:
-  flat_expert = indices.reshape(-1)                       [N·k]
-  flat_token  = arange(N).repeat_interleave(k)            [N·k]   (0,0,1,1,2,2,… при k=2)
-  flat_weight = weights.reshape(-1)                       [N·k]
-  order  = flat_expert.argsort()                          слоты, сгруппированные по эксперту
-  counts = bincount(flat_expert, minlength=E)             [E]     (Σ = N·k)
-  для эксперта e: tok = flat_token[order[start:start+counts[e]]]
-                  y = expert_e(h[tok]) · w                [counts[e], C]
-                  out.index_add_(0, tok, y)
-out                   [N, C] → [B, T, C]
+## forward: каждый эксперт только на своих токенах
+flat_expert [N·k] — indices.reshape(-1)
+flat_token [N·k] — arange(N).repeat_interleave(k): 0, 0, 1, 1, 2, 2, … при k = 2
+flat_weight [N·k] — weights.reshape(-1)
+> order = flat_expert.argsort() — слоты, сгруппированные по эксперту
+> counts = bincount(flat_expert, minlength=E) → [E], сумма = N·k
+- для эксперта e: tok = flat_token[order[start:start+counts[e]]]
+> y = expert_e(h[tok]) · w
+y [n_e, C]
+> out.index_add_(0, tok, y)
+out [N, C]
+> reshape
+out [B, T, C]
+axis n_e = сколько слотов досталось эксперту e (counts[e])
 ```
+
+:::viz moe-routing:::
 
 ## Задание
 

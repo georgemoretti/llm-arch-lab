@@ -1,4 +1,4 @@
-# C04. Grouped-Query Attention (GQA и MQA)
+# Grouped-Query Attention (GQA и MQA)
 
 ## Зачем это нужно
 
@@ -55,24 +55,27 @@ KV-головы должны идти подряд — `[k0, k0, k1, k1]`, то�
 
 ## Формы тензоров
 
-```
-x                     [B, T, C]
-  │ q_proj → view(B, T, H, D) → transpose(1, 2)
-  ▼
-q                     [B, H, T, D]
-  │ k_proj / v_proj → view(B, T, H_kv, D) → transpose(1, 2)
-  ▼
-k, v                  [B, H_kv, T, D]      ← именно это попадёт в KV-cache (C05)
-  │ repeat_kv(·, r):  [B, H_kv, T, D] → [B, H_kv, r, T, D] → reshape
-  ▼
-k, v                  [B, H, T, D]         головы 0..r−1 — копии KV-головы 0, и т. д.
-  │ q·kᵀ/√D, маска, softmax, @ v
-  ▼
-out                   [B, H, T, D] → transpose(1, 2) → reshape(B, T, H·D) → o_proj → [B, T, C]
+```shapes
+x [B, T, C]
+fork
+> q_proj → view(B, T, H, D) → transpose(1, 2)
+q [B, H, T, D]
+branch
+> k_proj / v_proj → view(B, T, H_kv, D) → transpose(1, 2)
+k, v [B, H_kv, T, D] — именно это хранит KV-cache
+> repeat_kv(·, r): [B, H_kv, T, D] → [B, H_kv, r, T, D] → reshape
+k, v [B, H, T, D] — головы 0..r−1 — копии KV-головы 0, и т. д.
+join q·kᵀ/√D, маска, softmax, @ v
+out [B, H, T, D]
+> transpose(1, 2) → reshape(B, T, H·D) → o_proj
+y [B, T, C]
+axis r = H / H_kv — сколько голов запросов делят одну KV-голову
 ```
 
 `repeat_kv` здесь — для простоты. Быстрые ядра (FlashAttention и т. п.) не копируют K/V, а
 индексируют общую голову напрямую; результат тот же.
+
+:::viz gqa-groups:::
 
 ## Задание
 

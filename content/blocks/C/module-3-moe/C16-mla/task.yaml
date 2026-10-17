@@ -1,5 +1,6 @@
 id: C16-mla
 title: "MLA: латентный KV-cache и поглощение весов"
+short_title: "MLA"
 block: C
 module: module-3-moe
 type: implement

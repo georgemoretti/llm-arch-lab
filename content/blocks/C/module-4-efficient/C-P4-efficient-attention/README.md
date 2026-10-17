@@ -1,4 +1,4 @@
-# C-P4. Статьи: Transformers are RNNs, DeltaNet / Gated DeltaNet, Mamba-2
+# Статьи: Transformers are RNNs, DeltaNet / Gated DeltaNet, Mamba-2
 
 ## Зачем читать
 

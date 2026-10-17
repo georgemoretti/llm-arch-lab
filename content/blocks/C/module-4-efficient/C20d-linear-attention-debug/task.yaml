@@ -1,5 +1,6 @@
 id: C20d-linear-attention-debug
 title: "Отладка: линейное внимание учится не тому, что генерирует"
+short_title: "Найди баг: Линейное внимание"
 block: C
 module: module-4-efficient
 type: debug
@@ -14,3 +15,4 @@ reading:
   - title: "Katharopoulos et al. — Transformers are RNNs, раздел про causal-маскирование"
     url: https://arxiv.org/abs/2006.16236
 questions: [linear-attn-norm-*]
+viz: [state-memory]

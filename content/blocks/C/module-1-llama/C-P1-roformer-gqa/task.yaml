@@ -1,5 +1,6 @@
 id: C-P1-roformer-gqa
 title: "Статьи: RoFormer (RoPE), MQA и GQA"
+short_title: "Статьи: RoFormer, MQA, GQA"
 block: C
 module: module-1-llama
 type: paper
@@ -15,3 +16,4 @@ reading:
   - title: "EleutherAI blog: Rotary Embeddings — A Relative Revolution"
     url: https://blog.eleuther.ai/rotary-embeddings/
 questions: [paper-roformer-*, paper-mqa-*, paper-gqa-*]
+viz: [rope-rotation, gqa-groups]

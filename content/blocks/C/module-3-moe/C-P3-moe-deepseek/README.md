@@ -1,4 +1,4 @@
-# C-P3. Статьи: Switch Transformer и DeepSeekMoE
+# Статьи: Switch Transformer и DeepSeekMoE
 
 ## Зачем читать
 

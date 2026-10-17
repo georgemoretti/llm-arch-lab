@@ -1,5 +1,6 @@
 id: C10d-nope-debug
 title: "Отладка: веса SmolLM3 загрузились, а модель генерирует мусор"
+short_title: "Найди баг: NoPE"
 block: C
 module: module-2-gemma-olmo
 type: debug
@@ -14,3 +15,4 @@ reading:
   - title: "HuggingFaceTB/SmolLM3-3B: config.json (no_rope_layers)"
     url: https://huggingface.co/HuggingFaceTB/SmolLM3-3B/blob/main/config.json
 questions: [nope-schedule-*]
+viz: [nope]

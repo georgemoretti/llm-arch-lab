@@ -1,4 +1,4 @@
-# C11. KV-cache для sliding window: кольцевой буфер
+# KV-cache для sliding window: кольцевой буфер
 
 ## Зачем это нужно
 
@@ -55,17 +55,26 @@ $$
 
 ## Формы тензоров
 
-```
-x (новые токены)            [B, T, C]
-q_pos = arange(s, s + T)    [T]          s = cache.seq_len ДО update
-q (RoPE по q_pos)           [B, H, T, D]
-k (RoPE по q_pos), v        [B, H_kv, T, D]
-  │ cache.update(k, v)
-  ▼
-K, V                        [B, H_kv, W + T, D]   (буфер до записи + новые)
-k_pos                       [W + T]               (−1 — пустая ячейка)
-буфер после записи          cache.k, cache.v [B, H_kv, W, D], cache.pos [W]
-repeat_kv → [B, H, W + T, D];  scores [B, H, T, W + T] + маска по позициям → out [B, T, C]
+```shapes
+x [B, T, C] — только новые токены
+q_pos [T] — arange(s, s + T), где s = cache.seq_len ДО update
+fork
+> q_proj, RoPE по q_pos
+q [B, H, T, D]
+branch
+> k_proj (RoPE по q_pos), v_proj
+k, v [B, H_kv, T, D]
+> cache.update(k, v)
+K, V [B, H_kv, W + T, D] — буфер до записи + новые
+k_pos [W + T] — −1 = пустая ячейка
+join repeat_kv → [B, H, W + T, D], q·Kᵀ/√D
+scores [B, H, T, W + T] — + маска по позициям
+> softmax, @ V, o_proj
+out [B, T, C]
+
+## буфер после записи
+cache.k, cache.v [B, H_kv, W, D]
+cache.pos [W]
 ```
 
 Пример: $W = 4$, после 10 токенов по одному `cache.pos = [8, 9, 6, 7]` — токен $p$ в ячейке $p \bmod 4$.

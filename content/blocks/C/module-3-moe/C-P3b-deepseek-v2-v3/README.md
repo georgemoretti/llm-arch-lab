@@ -1,4 +1,4 @@
-# C-P3b. Статьи: DeepSeek-V2 (MLA) и DeepSeek-V3
+# Статьи: DeepSeek-V2 (MLA) и DeepSeek-V3
 
 ## Зачем читать
 

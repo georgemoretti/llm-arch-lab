@@ -1,0 +1,4 @@
+id: rmsnorm
+title: "LayerNorm и RMSNorm на одном векторе"
+description: >
+  Сдвиг, масштаб и eps слайдерами: что убирает LayerNorm и не убирает RMSNorm, инвариантность к масштабу и роль eps на маленьких активациях.

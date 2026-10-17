@@ -1,4 +1,4 @@
-# C03d. Отладка: после RoPE «плывёт» норма и score зависит от абсолютной позиции
+# Отладка: после RoPE «плывёт» норма и score зависит от абсолютной позиции
 
 ## Зачем это нужно
 
@@ -21,9 +21,17 @@ $$
 
 ## Формы тензоров
 
-```
-positions [T], inv_freq [D/2] → angles [T, D/2] → cos, sin [T, D]
-q [B,H,T,D] → q·cos + rotate_half(q)·sin → [B,H,T,D]
+```shapes
+positions [T]
+inv_freq [D/2]
+> углы
+angles [T, D/2]
+> cos(·), sin(·)
+cos, sin [T, D]
+
+q [B, H, T, D]
+> q·cos + rotate_half(q)·sin
+q_rot [B, H, T, D]
 ```
 
 Все формы в коде правильные.

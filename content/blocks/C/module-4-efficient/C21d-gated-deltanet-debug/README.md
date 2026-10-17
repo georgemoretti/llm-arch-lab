@@ -1,4 +1,4 @@
-# C21d. Отладка: Gated DeltaNet генерирует верно, а при prefill подглядывает в будущее
+# Отладка: Gated DeltaNet генерирует верно, а при prefill подглядывает в будущее
 
 ## Зачем это нужно
 
@@ -18,8 +18,13 @@ $$S_t = e^{g_t} S_{t-1}(I - \beta_t k_t k_t^\top) + \beta_t k_t v_t^\top,\qquad 
 
 ## Формы тензоров
 
-```
-q,k [B,H,T,dk], v [B,H,T,dv], β,g [B,H,T] → out [B,H,T,dv], state [B,H,dk,dv]
+```shapes
+q, k [B, H, T, dk]
+v [B, H, T, dv]
+β, g [B, H, T]
+> gated delta rule
+out [B, H, T, dv]
+state [B, H, dk, dv]
 ```
 
 ## Симптом

@@ -161,9 +161,11 @@ def create_app(root: Path | None = None) -> FastAPI:
         except notes.NoteError as exc:
             raise HTTPException(NOTE_ERROR_STATUS.get(exc.code, 400), {"message": str(exc), "code": exc.code}) from None
 
-    def task_summary(task: Task, statuses: dict[str, dict]) -> dict:
+    def task_summary(task: Task, statuses: dict[str, dict], labels: dict[str, dict]) -> dict:
+        label = labels.get(task.id, {"number": None, "parent": None})
         return {
-            "id": task.id, "title": task.title, "block": task.block, "module": task.module,
+            "id": task.id, "title": task.title, "short_title": task.nav_title, **label,
+            "block": task.block, "module": task.module,
             "type": task.type, "difficulty": task.difficulty, "depends_on": task.depends_on,
             "diff_from": task.diff_from, "tags": task.tags, "time_estimate_min": task.time_estimate_min,
             "has_code": task.has_code, "progress": task_progress(task.id, statuses),
@@ -181,11 +183,12 @@ def create_app(root: Path | None = None) -> FastAPI:
         c = course()
         statuses = db.task_statuses(dbfile())
         order = c.topo_order()
+        labels = c.labels()
         blocks = []
         for block in c.blocks.values():
             modules = []
             for m in block.modules:
-                tasks = [task_summary(c.tasks[t], statuses) for t in order
+                tasks = [task_summary(c.tasks[t], statuses, labels) for t in order
                          if c.tasks[t].block == block.id and c.tasks[t].module == m.id]
                 modules.append({**m.model_dump(), "tasks": tasks})
             blocks.append({
@@ -199,7 +202,8 @@ def create_app(root: Path | None = None) -> FastAPI:
     def list_tasks() -> list[dict]:
         c = course()
         statuses = db.task_statuses(dbfile())
-        return [task_summary(c.tasks[t], statuses) for t in c.topo_order()]
+        labels = c.labels()
+        return [task_summary(c.tasks[t], statuses, labels) for t in c.topo_order()]
 
     @app.get("/api/tasks/{task_id}")
     def get_task_detail(task_id: str) -> dict:
@@ -216,7 +220,7 @@ def create_app(root: Path | None = None) -> FastAPI:
                 b = baselines[task.diff_from]
                 diff_from = {"id": task.diff_from, "title": b.title, "kind": "baseline", "description": b.description}
         return {
-            **task_summary(task, statuses),
+            **task_summary(task, statuses, c.labels()),
             "entrypoints": task.entrypoints,
             "readme": _read(task.dir / "README.md") or "",
             "hints": _split_hints(_read(task.dir / "hints.md") or ""),

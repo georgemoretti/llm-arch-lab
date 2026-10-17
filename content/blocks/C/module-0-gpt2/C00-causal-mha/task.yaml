@@ -1,5 +1,6 @@
 id: C00-causal-mha
 title: Causal Multi-Head Self-Attention (GPT-2)
+short_title: "Causal Multi-Head Attention"
 block: C
 module: module-0-gpt2
 type: implement

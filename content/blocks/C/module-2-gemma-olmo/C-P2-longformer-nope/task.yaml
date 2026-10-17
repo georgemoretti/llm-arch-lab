@@ -1,5 +1,6 @@
 id: C-P2-longformer-nope
 title: "Статьи: Longformer (SWA) и NoPE"
+short_title: "Статьи: Longformer, NoPE"
 block: C
 module: module-2-gemma-olmo
 type: paper
@@ -15,3 +16,4 @@ reading:
   - title: "Hugging Face blog: SmolLM3 (раздел про NoPE)"
     url: https://huggingface.co/blog/smollm3
 questions: [paper-longformer-*, paper-nope-*]
+viz: [masks, nope]

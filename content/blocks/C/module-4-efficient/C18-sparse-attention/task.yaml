@@ -1,5 +1,6 @@
 id: C18-sparse-attention
 title: "Sparse attention в стиле DSA: индексатор и top-k ключей"
+short_title: "Sparse attention (DSA)"
 block: C
 module: module-4-efficient
 type: implement

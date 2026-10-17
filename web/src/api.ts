@@ -12,6 +12,9 @@ export interface Progress {
 export interface TaskSummary {
   id: string;
   title: string;
+  short_title: string; // для навигации: граф, крошки, «после: …»
+  number: string | null; // «1.3» = модуль 1, шаг 3; у debug — номер задачи, которую чинит
+  parent: string | null; // debug → implement-задача, к которой относится
   block: string;
   module: string;
   type: "implement" | "debug" | "paper" | "quiz" | "project";

@@ -1,0 +1,4 @@
+id: activations
+title: "ReLU, GELU, SiLU и гейт SwiGLU"
+description: >
+  Кривые трёх активаций на одном графике и один токен SwiGLU по каналам: SiLU(gate), up и их произведение. Слайдер масштаба W_gate показывает, как гейт закрывает каналы.

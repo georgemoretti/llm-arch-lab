@@ -1,5 +1,6 @@
 id: C05-kv-cache
 title: KV-cache — генерация без пересчёта прошлого
+short_title: "KV-cache"
 block: C
 module: module-1-llama
 type: implement

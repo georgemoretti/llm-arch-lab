@@ -1,5 +1,6 @@
 id: C06-llama-block
 title: Собрать блок и модель Llama
+short_title: "Блок и модель Llama"
 block: C
 module: module-1-llama
 type: implement
@@ -20,6 +21,7 @@ reading:
 questions: [llama-block-*]
 # Источник: config.json Llama 3 8B (meta-llama/Meta-Llama-3-8B; сверено по открытому зеркалу
 # NousResearch/Meta-Llama-3-8B): num_local_experts отсутствует — dense-модель; tie_word_embeddings = false.
+viz: [norm-placement]
 arch:
   llama-3:
     moe: "нет — dense: каждый токен проходит через один и тот же SwiGLU-FFN"

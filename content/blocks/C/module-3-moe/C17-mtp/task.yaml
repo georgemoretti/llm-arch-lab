@@ -1,5 +1,6 @@
 id: C17-mtp
 title: "Multi-Token Prediction: учим модель смотреть на несколько токенов вперёд"
+short_title: "Multi-Token Prediction"
 block: C
 module: module-3-moe
 type: implement
@@ -19,3 +20,4 @@ questions: [mtp-*]
 # Источник: deepseek-ai/DeepSeek-V3 config.json: num_nextn_predict_layers = 1 (один MTP-модуль, D = 1).
 # Порядок конкатенации [enorm(emb); hnorm(h)] — vllm/model_executor/models/deepseek_mtp.py.
 # λ = 0.3, затем 0.1 — из технического отчёта DeepSeek-V3 (arXiv:2412.19437), раздел про обучение.
+viz: [mtp]

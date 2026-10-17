@@ -1,5 +1,6 @@
 id: C12-router
 title: "Роутер MoE: оценки → top-k → перенормировка"
+short_title: "Роутер MoE"
 block: C
 module: module-3-moe
 type: implement

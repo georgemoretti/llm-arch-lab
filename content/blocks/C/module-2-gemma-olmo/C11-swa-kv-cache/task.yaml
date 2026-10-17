@@ -1,5 +1,6 @@
 id: C11-swa-kv-cache
 title: "KV-cache для sliding window: кольцевой буфер"
+short_title: "KV-cache для окна"
 block: C
 module: module-2-gemma-olmo
 type: implement

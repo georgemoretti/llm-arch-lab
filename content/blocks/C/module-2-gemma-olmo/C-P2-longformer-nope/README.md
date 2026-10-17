@@ -1,4 +1,4 @@
-# C-P2. Статьи: Longformer (SWA) и NoPE
+# Статьи: Longformer (SWA) и NoPE
 
 ## Зачем читать
 

@@ -8,22 +8,40 @@ import rehypeKatex from "rehype-katex";
 import "katex/dist/katex.min.css";
 import { VIZ_REGISTRY } from "../viz/registry";
 import type { VizInfo } from "../api";
-import { noteHref } from "../router";
+import { noteHref, taskHref } from "../router";
+import { codeLookup, labelById, useCourseIndex, type CourseIndex } from "../courseIndex";
+import { ShapeFlow } from "./ShapeFlow";
 
 const VIZ_RE = /^:::viz\s+([a-z0-9][a-z0-9-]*)\s*:::\s*$/gm;
 
-export function Markdown({ text, viz = [] }: { text: string; viz?: VizInfo[] }) {
+export function Markdown({ text, viz = [], linkTasks = false }: { text: string; viz?: VizInfo[]; linkTasks?: boolean }) {
+  const index = useCourseIndex();
   // split с группой захвата: [md, id, md, id, md, ...]
   const parts = text.split(VIZ_RE);
+  const remarkPlugins = linkTasks && index ? [remarkGfm, remarkMath, remarkTaskRefs(index)] : [remarkGfm, remarkMath];
   return (
     <div className="md">
       {parts.map((part, i) =>
         i % 2 === 0 ? (
           <ReactMarkdown
             key={i}
-            remarkPlugins={[remarkGfm, remarkMath]}
+            remarkPlugins={remarkPlugins}
             rehypePlugins={[rehypeKatex]}
             components={{
+              code: ({ node: _node, className, children, ...props }) =>
+                className === "language-shapes" ? (
+                  <ShapeFlow source={String(children)} />
+                ) : (
+                  <code className={className} {...props}>
+                    {children}
+                  </code>
+                ),
+              pre: ({ node, children, ...props }) => {
+                // ```shapes рисуется компонентом, обёртка <pre> ему не нужна
+                const first = node?.children[0];
+                const cls = first && "properties" in first ? first.properties?.className : undefined;
+                return Array.isArray(cls) && cls.includes("language-shapes") ? <>{children}</> : <pre {...props}>{children}</pre>;
+              },
               a: ({ node: _node, ...props }) =>
                 props.href?.startsWith("#") ? <a {...props} /> : <a {...props} target="_blank" rel="noreferrer" />,
             }}
@@ -36,6 +54,41 @@ export function Markdown({ text, viz = [] }: { text: string; viz?: VizInfo[] }) 
       )}
     </div>
   );
+}
+
+// Упоминания задач в тексте («см. C05», «C01d-rmsnorm-debug») → ссылка «1.5 · KV-cache».
+// Код (`…`, ```…```) и существующие ссылки не трогаем: плагин видит только узлы text.
+const TASK_REF_RE = /(?<![\w/.-])(C-[A-Z]\d+[a-z]?|C\d{2}[a-z]?)((?:-[a-z0-9]+)*)(?![\w])/g;
+
+type MdNode = { type: string; value?: string; children?: MdNode[]; url?: string; title?: string; data?: unknown };
+
+function remarkTaskRefs(index: CourseIndex) {
+  const lookup = codeLookup(index);
+  const split = (value: string): MdNode[] => {
+    const out: MdNode[] = [];
+    let last = 0;
+    for (const m of value.matchAll(TASK_REF_RE)) {
+      const id = lookup.get(m[0]) ?? (m[2] ? undefined : lookup.get(m[1]));
+      if (!id) continue;
+      if (m.index! > last) out.push({ type: "text", value: value.slice(last, m.index) });
+      out.push({
+        type: "link",
+        url: taskHref(id),
+        title: index.get(id)?.title,
+        data: { hProperties: { className: "task-ref" } },
+        children: [{ type: "text", value: labelById(index, id) }],
+      });
+      last = m.index! + m[0].length;
+    }
+    if (!out.length) return [{ type: "text", value }];
+    if (last < value.length) out.push({ type: "text", value: value.slice(last) });
+    return out;
+  };
+  const walk = (node: MdNode) => {
+    if (!node.children || node.type === "link") return;
+    node.children = node.children.flatMap((c) => (c.type === "text" && c.value ? split(c.value) : (walk(c), [c])));
+  };
+  return () => (tree: MdNode) => walk(tree);
 }
 
 export function VizBlock({ id, info }: { id: string; info?: VizInfo }) {

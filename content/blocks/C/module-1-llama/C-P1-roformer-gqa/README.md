@@ -1,4 +1,4 @@
-# C-P1. Статьи: RoFormer (RoPE), MQA и GQA
+# Статьи: RoFormer (RoPE), MQA и GQA
 
 ## Зачем читать
 

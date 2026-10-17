@@ -1,5 +1,6 @@
 id: C16d-mla-debug
 title: "Отладка: MLA генерирует правильно, но памяти ест как MHA"
+short_title: "Найди баг: MLA"
 block: C
 module: module-3-moe
 type: debug

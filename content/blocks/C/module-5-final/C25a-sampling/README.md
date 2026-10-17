@@ -1,4 +1,4 @@
-# C25a. Сэмплирование: temperature, top-k, top-p
+# Сэмплирование: temperature, top-k, top-p
 
 ## Зачем это нужно
 
@@ -47,16 +47,26 @@ $$
 
 ## Формы тензоров
 
+```shapes
+logits [B, V]
+fork
+> T = 0: argmax(dim=-1, keepdim=True)
+next [B, 1] — long
+branch
+> z = logits.float() / T
+z [B, V]
+> top-k: kth = z.topk(min(k, V)).values[:, -1:] → [B, 1]; z[z < kth] = −inf
+> top-p: z_s, order = z.sort(descending=True)
+z_s, order [B, V]
+> before = cumsum(softmax(z_s)) − softmax(z_s) — масса выше токена
+> z_s[before ≥ p] = −inf; z = scatter(z_s → order) — обратно на места словаря
+z [B, V]
+> multinomial(softmax(z), 1, generator)
+next [B, 1] — long
+join
 ```
-logits                       [B, V]
-  T = 0:  argmax(dim=-1, keepdim=True)                        → [B, 1] long
-  z = logits.float() / T     [B, V]
-  top-k:  kth = z.topk(min(k, V)).values[:, -1:]   [B, 1];   z[z < kth] = −inf
-  top-p:  z_s, order = z.sort(descending=True)     [B, V], [B, V]
-          before = cumsum(softmax(z_s)) − softmax(z_s)        [B, V]   масса выше токена
-          z_s[before ≥ p] = −inf;  z = scatter(z_s → order)  [B, V]   обратно на места словаря
-  multinomial(softmax(z), 1, generator)                       → [B, 1] long
-```
+
+:::viz sampling:::
 
 ## Задание
 

@@ -1,4 +1,4 @@
-# C25. Проект: Qwen3-0.6B на своих деталях — загрузка весов и генерация
+# Проект: Qwen3-0.6B на своих деталях — загрузка весов и генерация
 
 ## Зачем это нужно
 
@@ -23,11 +23,16 @@ C24 перевёл `config.json` и имена тензоров. Здесь — 
 
 ## Как устроена твоя модель
 
-```
-idx [B, T] ──embed_tokens──► x [B, T, 1024]
-  28 × ┌ h = x + o_proj(Attn(RoPE(q_norm(q)), RoPE(k_norm(k)), v))   ← GQA 16 / 8 голов × 128, KV-cache
-       └ x = h + down(silu(gate(norm(h))) ⊙ up(norm(h)))               ← SwiGLU 1024 → 3072
-  norm(x) ──lm_head (= embed_tokens)──► logits [B, T, 151936]
+```shapes
+idx [B, T]
+> embed_tokens
+x [B, T, 1024]
+> 28 слоёв, в каждом:
+> h = x + o_proj(Attn(RoPE(q_norm(q)), RoPE(k_norm(k)), v)) — GQA: 16 / 8 голов × 128, KV-cache
+> x = h + down(silu(gate(norm(h))) ⊙ up(norm(h))) — SwiGLU 1024 → 3072
+x [B, T, 1024]
+> norm → lm_head (= embed_tokens)
+logits [B, T, 151936]
 ```
 
 Модель собирает `llmlab/core/model.py` из конфига `llmlab/configs/qwen3-0.6b.yaml` (каждое число сверено с
@@ -57,12 +62,24 @@ $$
 
 ## Формы тензоров
 
+```shapes
+## load_safetensors
+- {"model.layers.0.self_attn.q_proj.weight": [2048, 1024] bf16, …} — 311 тензоров
+## load_pretrained
+- Model: 596 049 920 параметров fp32 (≈ 2.4 ГБ); lm_head.weight is embed_tokens.weight
+## generate
+idx [B, T]
+> prefill: model(idx)
+logits [B, T, V]
+> шаг: model(next [B, 1], caches)
+logits [B, 1, V]
+> n ≤ max_new_tokens шагов
+idx [B, T + n]
 ```
-load_safetensors:   {"model.layers.0.self_attn.q_proj.weight": [2048, 1024] bf16, …}  (311 тензоров)
-load_pretrained:    Model, 596 049 920 параметров fp32 (≈ 2.4 ГБ), lm_head.weight is embed_tokens.weight
-generate:           idx [B, T] → prefill model(idx) [B, T, V] → шаг: model(next [B, 1], caches) [B, 1, V]
-                    → [B, T + n], n ≤ max_new_tokens
-```
+
+:::viz param-budget:::
+
+:::viz sampling:::
 
 ## Задание
 

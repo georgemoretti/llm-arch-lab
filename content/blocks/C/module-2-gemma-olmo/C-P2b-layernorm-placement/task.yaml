@@ -1,5 +1,6 @@
 id: C-P2b-layernorm-placement
 title: "Статья: On Layer Normalization in the Transformer Architecture (Xiong et al.)"
+short_title: "Статья: место LayerNorm"
 block: C
 module: module-2-gemma-olmo
 type: paper
@@ -13,3 +14,4 @@ reading:
   - title: "The Big LLM Architecture Comparison (Sebastian Raschka) — OLMo 2, Gemma 3"
     url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
 questions: [paper-xiong-*]
+viz: [norm-placement]

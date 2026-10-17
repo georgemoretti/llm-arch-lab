@@ -1,5 +1,6 @@
 id: C01d-rmsnorm-debug
 title: "Отладка: RMSNorm расходится с Llama на маленьких активациях"
+short_title: "Найди баг: RMSNorm"
 block: C
 module: module-1-llama
 type: debug
@@ -14,3 +15,4 @@ reading:
   - title: "Hugging Face transformers: modeling_llama.py (LlamaRMSNorm)"
     url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/llama/modeling_llama.py
 questions: [rmsnorm-eps-*]
+viz: [rmsnorm]

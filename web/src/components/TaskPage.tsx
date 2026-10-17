@@ -7,6 +7,7 @@ import { CodeEditor, DiffView, type CodeEditorHandle, type ErrorMark } from "./C
 import { Markdown, VizBlock } from "./Markdown";
 import { DIFFICULTY_LABEL, StatusIcon, TYPE_LABEL } from "./StatusIcon";
 import { TestResults } from "./TestResults";
+import { TYPE_ICON, labelById, useCourseIndex } from "../courseIndex";
 import { Questions } from "./Questions";
 
 type Tab = "readme" | "hints" | "reading" | "viz" | "questions" | "attempts";
@@ -75,10 +76,15 @@ export function TaskPage({ id, theme }: { id: string; theme: Theme }) {
 }
 
 function TaskHeader({ task, onCreateNote, onComplete }: { task: TaskDetail; onCreateNote(): void; onComplete(): void }) {
+  const index = useCourseIndex();
   return (
     <div className="task-head">
       <StatusIcon status={task.progress.status} />
-      <span className="task-id">{task.id}</span>
+      {(task.number || TYPE_ICON[task.type]) && (
+        <span className="task-num-badge" title={task.parent ? `Отладка к задаче ${labelById(index, task.parent)}` : undefined}>
+          {task.parent ? `${TYPE_ICON.debug} ${task.number ?? ""}` : (task.number ?? TYPE_ICON[task.type])}
+        </span>
+      )}
       <h1>{task.title}</h1>
       <span className={`chip type-${task.type}`}>{TYPE_LABEL[task.type]}</span>
       <span className={`chip diff-${task.difficulty}`}>{DIFFICULTY_LABEL[task.difficulty]}</span>
@@ -87,7 +93,7 @@ function TaskHeader({ task, onCreateNote, onComplete }: { task: TaskDetail; onCr
         <span className="chip diff" title={task.diff_from_info.description ?? "С чем сравниваем"}>
           Δ{" "}
           {task.diff_from_info.kind === "task" ? (
-            <a href={taskHref(task.diff_from_info.id)}>{task.diff_from_info.id}</a>
+            <a href={taskHref(task.diff_from_info.id)}>{labelById(index, task.diff_from_info.id)}</a>
           ) : (
             task.diff_from_info.title
           )}
@@ -99,7 +105,7 @@ function TaskHeader({ task, onCreateNote, onComplete }: { task: TaskDetail; onCr
           {task.depends_on.map((d, i) => (
             <span key={d}>
               {i > 0 && ", "}
-              <a href={taskHref(d)}>{d}</a>
+              <a href={taskHref(d)}>{labelById(index, d)}</a>
             </span>
           ))}
         </span>
@@ -154,7 +160,7 @@ function LeftPane(props: { task: TaskDetail; tab: Tab; setTab(t: Tab): void; att
         ))}
       </nav>
       <div className="left-body">
-        {tab === "readme" && <Markdown text={task.readme} viz={task.viz} />}
+        {tab === "readme" && <Markdown text={task.readme} viz={task.viz} linkTasks />}
         {tab === "hints" && <Hints task={task} />}
         {tab === "reading" && <Reading task={task} />}
         {tab === "viz" &&

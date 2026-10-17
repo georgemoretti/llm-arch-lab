@@ -1,5 +1,6 @@
 id: C09-qk-norm
 title: "QK-Norm: нормировать запросы и ключи до RoPE"
+short_title: "QK-Norm"
 block: C
 module: module-2-gemma-olmo
 type: implement
@@ -22,6 +23,7 @@ questions: [qk-norm-*]
 # k_norm = RMSNorm(num_key_value_heads * head_dim), применяются к выходу q_proj/k_proj до view и RoPE.
 # config.json allenai/OLMo-2-1124-7B: num_attention_heads = 32, num_key_value_heads = 32 (MHA),
 # hidden_size = 4096, rope_theta = 500 000.
+viz: [qk-norm]
 arch:
   olmo-2:
     attention: "MHA (7B: 32 / 32 головы) + QK-Norm по всей проекции q и k до RoPE"

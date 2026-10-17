@@ -1,5 +1,6 @@
 id: C14-load-balancing
 title: "Балансировка нагрузки экспертов: aux loss и bias DeepSeek-V3"
+short_title: "Балансировка экспертов"
 block: C
 module: module-3-moe
 type: implement

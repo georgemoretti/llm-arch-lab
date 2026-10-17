@@ -1,5 +1,6 @@
 id: C03d-rope-debug
 title: "Отладка: после RoPE «плывёт» норма и score зависит от абсолютной позиции"
+short_title: "Найди баг: RoPE"
 block: C
 module: module-1-llama
 type: debug
@@ -14,3 +15,4 @@ reading:
   - title: "Hugging Face transformers: modeling_llama.py (rotate_half, apply_rotary_pos_emb)"
     url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/llama/modeling_llama.py
 questions: [rope-relative-*]
+viz: [rope-rotation]

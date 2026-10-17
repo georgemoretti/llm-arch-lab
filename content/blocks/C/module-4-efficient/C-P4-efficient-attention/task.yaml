@@ -1,5 +1,6 @@
 id: C-P4-efficient-attention
 title: "Статьи: Transformers are RNNs, DeltaNet / Gated DeltaNet, Mamba-2"
+short_title: "Статьи: linear attn, DeltaNet, Mamba-2"
 block: C
 module: module-4-efficient
 type: paper
@@ -15,3 +16,4 @@ reading:
   - title: "Songlin Yang — DeltaNet Explained (серия заметок)"
     url: https://sustcsonglin.github.io/blog/2024/deltanet-1/
 questions: [paper-linrnn-*, paper-gdn-*, paper-mamba2-*]
+viz: [state-memory, ssd-decay, hybrid]

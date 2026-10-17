@@ -3,18 +3,40 @@
 // Новая визуализация: компонент в web/src/viz/, строка сюда, описание в content/viz/<id>.yaml,
 // затем `:::viz <id>:::` в README задачи и/или `viz: [<id>]` в task.yaml.
 import type { ComponentType } from "react";
+import Activations from "./Activations";
 import CausalMask from "./CausalMask";
+import GqaGroups from "./GqaGroups";
 import Hybrid from "./Hybrid";
 import KvCache from "./KvCache";
 import Masks from "./Masks";
 import MoeRouting from "./MoeRouting";
+import Mtp from "./Mtp";
+import Nope from "./Nope";
+import NormPlacement from "./NormPlacement";
+import ParamBudget from "./ParamBudget";
+import QkNorm from "./QkNorm";
+import RmsNorm from "./RmsNorm";
 import RopeRotation from "./RopeRotation";
+import Sampling from "./Sampling";
+import SsdDecay from "./SsdDecay";
+import StateMemory from "./StateMemory";
 
 export const VIZ_REGISTRY: Record<string, ComponentType> = {
+  "activations": Activations,
   "causal-mask": CausalMask,
+  "gqa-groups": GqaGroups,
   "hybrid": Hybrid,
   "kv-cache": KvCache,
   "masks": Masks,
   "moe-routing": MoeRouting,
+  "mtp": Mtp,
+  "nope": Nope,
+  "norm-placement": NormPlacement,
+  "param-budget": ParamBudget,
+  "qk-norm": QkNorm,
+  "rmsnorm": RmsNorm,
   "rope-rotation": RopeRotation,
+  "sampling": Sampling,
+  "ssd-decay": SsdDecay,
+  "state-memory": StateMemory,
 };

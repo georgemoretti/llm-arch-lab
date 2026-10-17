@@ -1,4 +1,4 @@
-# C19. Gated attention: выходной гейт и partial RoPE (Qwen3-Next)
+# Gated attention: выходной гейт и partial RoPE (Qwen3-Next)
 
 ## Зачем это нужно
 
@@ -57,18 +57,40 @@ $\operatorname{pRoPE}(u) = [\,\operatorname{RoPE}_m(u_{0:R});\ u_{R:D}\,]$, гд
 
 ## Формы тензоров
 
+```shapes
+x [B, T, C]
+> q_proj
+[B, T, H·2D]
+> view [B, T, H, 2D] → chunk(2, -1)
+fork
+q [B, T, H, D]
+> q_norm → transpose
+q [B, H, T, D]
+branch
+gate [B, T, H, D]
+> reshape
+gate [B, T, H·D]
+join
+- k = k_norm(k_proj(x)) → [B, H_kv, T, D]; v — так же, без нормы
+
+## partial RoPE
+cos, sin [T, R] — rope_cos_sin(T, R, θ)
+> apply_partial_rope(q / k) — первые R каналов → apply_rope, остальные как есть, cat
+q, k [B, ·, T, D]
+
+## внимание и выходной гейт
+> repeat_kv, q·kᵀ/√D, causal, softmax
+weights [B, H, T, T]
+> @ v → transpose → reshape
+attn [B, T, H·D]
+> ⊙ σ(gate)
+[B, T, H·D]
+> o_proj
+y [B, T, C]
+axis R = сколько каналов головы вращает RoPE
 ```
-x                                  [B, T, C]
-q_proj(x)                          [B, T, H·2D] → view [B, T, H, 2D] → chunk(2, -1)
-  q                                [B, T, H, D] → q_norm → transpose → [B, H, T, D]
-  gate                             [B, T, H, D] → reshape [B, T, H·D]
-k = k_norm(k_proj(x))              [B, T, H_kv, D] → [B, H_kv, T, D];   v аналогично
-cos, sin = rope_cos_sin(T, R, θ)   [T, R]
-apply_partial_rope(q / k)          [..., :R] → apply_rope;  [..., R:] как есть;  cat → [B, ·, T, D]
-repeat_kv, scores, causal, softmax [B, H, T, T] → @ v → [B, H, T, D] → [B, T, H·D]
-⊙ σ(gate)                          [B, T, H·D]
-o_proj                             [B, T, C]
-```
+
+:::viz qk-norm:::
 
 ## Задание
 

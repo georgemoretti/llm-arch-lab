@@ -1,4 +1,4 @@
-# C07d. Отладка: sliding window пропускает лишний токен
+# Отладка: sliding window пропускает лишний токен
 
 ## Зачем это нужно
 
@@ -19,8 +19,13 @@ $$M_{p,j} = 0 \iff 0 \le p - j < W$$
 
 ## Формы тензоров
 
-```
-q_pos [T, 1], k_pos [1, S] → mask [T, S] → scores [B, H, T, T] + mask → out [B, T, C]
+```shapes
+q_pos [T, 1]
+k_pos [1, S]
+> sliding_window_mask
+mask [T, S]
+> scores [B, H, T, T] + mask, softmax, @ v
+out [B, T, C]
 ```
 
 Формы правильные, расписание слоёв правильное, RoPE и GQA правильные.

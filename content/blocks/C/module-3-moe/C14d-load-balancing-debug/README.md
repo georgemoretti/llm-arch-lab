@@ -1,4 +1,4 @@
-# C14d. Отладка: bias-балансировка делает перекос только хуже
+# Отладка: bias-балансировка делает перекос только хуже
 
 ## Зачем это нужно
 
@@ -17,8 +17,15 @@ $$\mathcal{T} = \operatorname{top-}k(s + b),\qquad w = \operatorname{normalize}(
 
 ## Формы тензоров
 
-```
-scores [N,E] + bias [E] → indices [N,k]; load [E] → новый bias [E]
+```shapes
+scores [N, E]
+bias [E]
+> top-k по scores + bias
+indices [N, k]
+
+load [E]
+> update_bias
+bias [E] — новый
 ```
 
 ## Симптом

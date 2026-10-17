@@ -1,4 +1,4 @@
-# C24. Чекпойнт Hugging Face → своя модель: config.json и имена весов
+# Чекпойнт Hugging Face → своя модель: config.json и имена весов
 
 ## Зачем это нужно
 
@@ -74,38 +74,40 @@ $d_h = 128 \ne 1024 / 16$, и `q_proj` имеет форму $[H d_h, C] = [2048
 
 Qwen3-0.6B, один слой (имена в файле → наши):
 
-```
-model.embed_tokens.weight                    [151936, 1024]   → embed_tokens.weight
-model.layers.{i}.input_layernorm.weight      [1024]           → layers.{i}.input_layernorm.weight
-model.layers.{i}.self_attn.q_proj.weight     [2048, 1024]     ← 16 голов × 128 = 2048 ≠ 1024!
-model.layers.{i}.self_attn.k_proj.weight     [1024, 1024]     ← 8 KV-голов × 128
-model.layers.{i}.self_attn.v_proj.weight     [1024, 1024]
-model.layers.{i}.self_attn.o_proj.weight     [1024, 2048]
-model.layers.{i}.self_attn.q_norm.weight     [128]            ← QK-Norm по голове
-model.layers.{i}.self_attn.k_norm.weight     [128]
+```shapes
+model.embed_tokens.weight [151936, 1024] — → embed_tokens.weight
+model.layers.{i}.input_layernorm.weight [1024] — → layers.{i}.input_layernorm.weight
+model.layers.{i}.self_attn.q_proj.weight [2048, 1024] — 16 голов × 128 = 2048 ≠ 1024!
+model.layers.{i}.self_attn.k_proj.weight [1024, 1024] — 8 KV-голов × 128
+model.layers.{i}.self_attn.v_proj.weight [1024, 1024]
+model.layers.{i}.self_attn.o_proj.weight [1024, 2048]
+model.layers.{i}.self_attn.q_norm.weight [128] — QK-Norm по голове
+model.layers.{i}.self_attn.k_norm.weight [128]
 model.layers.{i}.post_attention_layernorm.weight [1024]
-model.layers.{i}.mlp.{gate,up}_proj.weight   [3072, 1024]
-model.layers.{i}.mlp.down_proj.weight        [1024, 3072]
-model.norm.weight                            [1024]           → norm.weight
-lm_head.weight                               [151936, 1024]   ← в файле есть, но == embed_tokens (tied)
+model.layers.{i}.mlp.{gate,up}_proj.weight [3072, 1024]
+model.layers.{i}.mlp.down_proj.weight [1024, 3072]
+model.norm.weight [1024] — → norm.weight
+lm_head.weight [151936, 1024] — в файле есть, но == embed_tokens (tied)
 ```
 
 Имена нашей модели специально повторяют HF, поэтому для Qwen3 перевод — это снятие префикса плюс
 обработка связанного `lm_head`. GPT-2 интереснее:
 
-```
-h.{i}.attn.c_attn.weight   [C, 3C]   Conv1D: [in, out]  → .t() → [3C, C] → split по dim 0 → q, k, v [C, C]
-h.{i}.attn.c_attn.bias     [3C]                         → split → q, k, v bias [C]
-h.{i}.attn.c_proj.weight   [C, C]    Conv1D             → .t() → self_attn.o_proj.weight   ⚠ квадратный!
-h.{i}.mlp.c_fc.weight      [C, 4C]   Conv1D             → .t() → mlp.c_fc.weight [4C, C]
-h.{i}.mlp.c_proj.weight    [4C, C]   Conv1D             → .t() → mlp.c_proj.weight [C, 4C]
-h.{i}.attn.bias            [1, 1, 1024, 1024]           → выбросить: это causal-маска, а не вес
-wte / wpe / ln_f / h.{i}.ln_1 / ln_2                    → embed_tokens / embed_positions / norm / нормы блока
+```shapes
+h.{i}.attn.c_attn.weight [C, 3C] — Conv1D хранит (in, out) → .t() → [3C, C] → split по dim 0 → q, k, v по [C, C]
+h.{i}.attn.c_attn.bias [3C] — → split → bias q, k, v по [C]
+h.{i}.attn.c_proj.weight [C, C] — Conv1D → .t() → self_attn.o_proj.weight ⚠ квадратный!
+h.{i}.mlp.c_fc.weight [C, 4C] — Conv1D → .t() → mlp.c_fc.weight [4C, C]
+h.{i}.mlp.c_proj.weight [4C, C] — Conv1D → .t() → mlp.c_proj.weight [C, 4C]
+h.{i}.attn.bias [1, 1, 1024, 1024] — выбросить: это causal-маска, а не вес
+- wte / wpe / ln_f / h.{i}.ln_1 / ln_2 → embed_tokens / embed_positions / norm / нормы блока
 ```
 
 `Conv1D` в GPT-2 — это линейный слой, у которого матрица хранится транспонированной (`y = x @ W + b`,
 `W: [in, out]`). У прямоугольных матриц ошибку выдаст `load_state_dict`, а `c_proj` квадратный: форма
 совпадёт, и модель молча посчитает $xW^\top$ вместо $xW$.
+
+:::viz param-budget:::
 
 ## Задание
 

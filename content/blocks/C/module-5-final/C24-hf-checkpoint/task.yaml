@@ -1,5 +1,6 @@
 id: C24-hf-checkpoint
 title: "Чекпойнт Hugging Face → своя модель: config.json и имена весов"
+short_title: "Чекпойнт Hugging Face"
 block: C
 module: module-5-final
 type: implement
@@ -23,3 +24,4 @@ questions: [final-config-*, final-weights-*]
 # Источники: config.json Qwen/Qwen3-0.6B, HuggingFaceTB/SmolLM2-135M, openai-community/gpt2 (скопированы в тесты,
 # сверено 2026-10-17). Имена тензоров — из model.safetensors тех же репозиториев: у Qwen3-0.6B в файле есть и
 # lm_head.weight (равен embed_tokens), у GPT-2 — буферы h.{i}.attn.bias [1, 1, 1024, 1024] и Conv1D-веса [in, out].
+viz: [param-budget]

@@ -1,4 +1,4 @@
-# C22. Гибридный стек 3 : 1: Gated DeltaNet + gated attention, память кеша
+# Гибридный стек 3 : 1: Gated DeltaNet + gated attention, память кеша
 
 ## Зачем это нужно
 
@@ -43,17 +43,29 @@ $S > H_{\text{lin}} d_k d_v / (2 H_{kv} d)$. У Qwen3-Next это $32 \cdot 128 
 
 ## Формы тензоров
 
-```
-x                                    [B, T, C]
-слой i:  input_layernorm(x)          [B, T, C]
-         mixer:  full   → GatedAttention(·)       → [B, T, C]
-                 linear → GatedDeltaNet(·)        → ([B, T, C], state [B, H, dk, dv])   ← взять [0]
-         x + mixer(…)                [B, T, C]
-         x + mlp(post_attention_layernorm(x))     [B, T, C]
-финал:   norm(x)                     [B, T, C]
+```shapes
+x [B, T, C]
 
-память:  full-слой   2 · H_kv · d · S  чисел
-         linear-слой H_lin · dk · dv   чисел
+## слой i
+> input_layernorm
+fork
+> full: GatedAttention(·)
+[B, T, C]
+branch
+> linear: GatedDeltaNet(·) — возвращает ([B, T, C], state [B, H, dk, dv]), берём первый элемент
+[B, T, C]
+join x + mixer(…)
+x [B, T, C]
+> x + mlp(post_attention_layernorm(x))
+x [B, T, C]
+
+## после всех слоёв
+> norm
+x [B, T, C]
+
+## память на слой
+- full-слой: 2 · H_kv · d · S чисел
+- linear-слой: H_lin · dk · dv чисел
 ```
 
 ## Задание

@@ -1,5 +1,6 @@
 id: C-P3-moe-deepseek
 title: "Статьи: Switch Transformer и DeepSeekMoE"
+short_title: "Статьи: Switch, DeepSeekMoE"
 block: C
 module: module-3-moe
 type: paper
@@ -13,3 +14,4 @@ reading:
   - title: "The Big LLM Architecture Comparison (Sebastian Raschka) — DeepSeek-V3, Qwen3, gpt-oss"
     url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
 questions: [paper-switch-*, paper-deepseekmoe-*]
+viz: [moe-routing]

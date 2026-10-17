@@ -1,5 +1,6 @@
 id: C-Q1-llama-quiz
 title: "Квиз модуля: GPT-2 → Llama"
+short_title: "Квиз: GPT-2 → Llama"
 block: C
 module: module-1-llama
 type: quiz

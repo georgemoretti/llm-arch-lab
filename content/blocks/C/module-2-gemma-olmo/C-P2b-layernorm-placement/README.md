@@ -1,4 +1,4 @@
-# C-P2b. Статья: размещение LayerNorm (Xiong et al.)
+# Статья: размещение LayerNorm (Xiong et al.)
 
 ## Зачем читать
 

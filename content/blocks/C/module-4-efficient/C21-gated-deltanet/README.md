@@ -1,4 +1,4 @@
-# C21. DeltaNet → Gated DeltaNet: правило дельты и гейт забывания
+# DeltaNet → Gated DeltaNet: правило дельты и гейт забывания
 
 ## Зачем это нужно
 
@@ -47,19 +47,36 @@ $\beta_t \in (0, 1)$ матрица $I - \beta_t k_t k_t^\top$ сжимает н
 
 ## Формы тензоров
 
-```
-x                                  [B, T, C]
-q, k = l2norm(proj(x) по головам)  [B, T, H, dk] → [B, H, T, dk]
-v                                  [B, H, T, dv]
-β = σ(b_proj(x)),  g = −e^{A_log}·softplus(a_proj(x) + dt_bias)    [B, T, H] → [B, H, T]
+```shapes
+x [B, T, C]
+fork
+> q_proj, k_proj → l2norm по головам
+q, k [B, H, T, dk]
+branch
+> v_proj
+v [B, H, T, dv]
+branch
+> b_proj, a_proj
+β, g [B, H, T] — β = σ(b_proj(x)), g = −e^{A_log}·softplus(a_proj(x) + dt_bias)
+join
 
-шаг t:
-  S ← exp(g_t)·S                   [B, H, dk, dv] · [B, H, 1, 1]
-  v_old = Sᵀk_t                    (S * k_t[..., None]).sum(-2) → [B, H, dv]
-  S ← S + k_t ⊗ β_t(v_t − v_old)   [B, H, dk, 1] * [B, H, 1, dv]
-  o_t = Sᵀq_t / √dk                [B, H, dv]
-out                                [B, H, T, dv] → [B, T, H·dv] → o_proj → [B, T, C]
+## шаг t
+> S ← exp(g_t)·S — [B, H, dk, dv] · [B, H, 1, 1]
+> v_old = Sᵀk_t — (S * k_t[..., None]).sum(-2) → [B, H, dv]
+> S ← S + k_t ⊗ β_t(v_t − v_old) — [B, H, dk, 1] * [B, H, 1, dv]
+S [B, H, dk, dv]
+> o_t = Sᵀq_t / √dk
+o_t [B, H, dv]
+
+## выход
+out [B, H, T, dv]
+> → [B, T, H·dv] → o_proj
+y [B, T, C]
+axis dk = размер ключа
+axis dv = размер значения
 ```
+
+:::viz state-memory:::
 
 ## Задание
 

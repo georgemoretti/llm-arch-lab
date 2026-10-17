@@ -1,4 +1,4 @@
-# C16. MLA: латентный KV-cache и поглощение весов
+# MLA: латентный KV-cache и поглощение весов
 
 ## Зачем это нужно
 
@@ -55,24 +55,51 @@ $d_v$. `kv_b_proj.weight` имеет форму $[H(d + d_v), r]$: после `v
 
 ## Формы тензоров
 
-```
-x                         [B, T, C]
-q = q_proj(x)             [B, T, H·d] → [B, H, T, d]
-c = norm(kv_a_proj(x))    [B, T, r]           ← в кеш (cache.update по dim=1) → [B, S, r]
+```shapes
+x [B, T, C]
+fork
+> q_proj → view → transpose
+q [B, H, T, d]
+branch
+> kv_a_proj → norm
+c [B, T, r] — латент: именно он идёт в кеш
+> cache.update по dim=1
+c [B, S, r]
+join
 
-forward:
-  kv_b_proj(c)            [B, S, H·(d + dv)] → [B, S, H, d + dv] → [B, H, S, d + dv]
-  k, v = split([d, dv])   [B, H, S, d], [B, H, S, dv]
-  scores = q·kᵀ/√d        [B, H, T, S]  + маска со сдвигом S − T
-  out                     [B, H, T, dv] → [B, T, H·dv] → o_proj → [B, T, C]
+## forward: распаковать K и V из латента
+> kv_b_proj(c)
+[B, S, H·(d + dv)]
+> view → transpose
+[B, H, S, d + dv]
+> split по последней оси на d и dv
+k [B, H, S, d]
+v [B, H, S, dv]
+> q·kᵀ/√d + маска со сдвигом S − T
+scores [B, H, T, S]
+> softmax, @ v
+out [B, H, T, dv]
+> → [B, T, H·dv] → o_proj
+y [B, T, C]
 
-forward_absorbed:
-  W = kv_b_proj.weight.view(H, d + dv, r);  W_uk = W[:, :d] [H, d, r];  W_uv = W[:, d:] [H, dv, r]
-  q_lat = einsum("bhtd,hdr->bhtr", q, W_uk)          [B, H, T, r]
-  scores = q_lat · cᵀ / √d                            [B, H, T, S]   (c как [B, 1, S, r])
-  o_lat = softmax(scores) · c                         [B, H, T, r]
-  out = einsum("bhtr,hvr->bhtv", o_lat, W_uv)         [B, H, T, dv]
+## forward_absorbed: внимание прямо в латенте
+- W = kv_b_proj.weight.view(H, d + dv, r)
+W_uk [H, d, r] — первые d строк каждой головы
+W_uv [H, dv, r] — остальные dv строк
+> q_lat = einsum("bhtd,hdr->bhtr", q, W_uk)
+q_lat [B, H, T, r]
+> q_lat · cᵀ / √d — c как [B, 1, S, r]
+scores [B, H, T, S]
+> softmax(scores) · c
+o_lat [B, H, T, r]
+> einsum("bhtr,hvr->bhtv", o_lat, W_uv)
+out [B, H, T, dv]
+axis r:other = размер латента KV (kv_lora_rank)
+axis d = размер головы q/k
+axis dv = размер головы v
 ```
+
+:::viz kv-cache:::
 
 ## Задание
 

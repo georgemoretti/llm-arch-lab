@@ -1,5 +1,6 @@
 id: C13d-moe-layer-debug
 title: "Отладка: с top-1 всё верно, с top-2 токены теряют экспертов"
+short_title: "Найди баг: MoE-слой"
 block: C
 module: module-3-moe
 type: debug
@@ -14,3 +15,4 @@ reading:
   - title: "PyTorch: Tensor.index_add_"
     url: https://pytorch.org/docs/stable/generated/torch.Tensor.index_add_.html
 questions: [moe-layer-*]
+viz: [moe-routing]

@@ -1,4 +1,4 @@
-# C12d. Отладка: маршрут токена зависит от соседей по батчу
+# Отладка: маршрут токена зависит от соседей по батчу
 
 ## Зачем это нужно
 
@@ -18,8 +18,16 @@ $$s = \operatorname{softmax}(W_r x),\qquad w_e = \frac{s_e}{\sum_{j \in \operato
 
 ## Формы тензоров
 
-```
-x [B,T,C] → [N,C] → logits [N,E] → scores [N,E] → weights, indices [N,k]
+```shapes
+x [B, T, C]
+> reshape
+x [N, C]
+> W_r
+logits [N, E]
+> активация
+scores [N, E]
+> top-k
+weights, indices [N, k]
 ```
 
 ## Симптом

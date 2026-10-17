@@ -1,4 +1,4 @@
-# C02. SwiGLU FFN (вместо GELU-MLP)
+# SwiGLU FFN (вместо GELU-MLP)
 
 ## Зачем это нужно
 
@@ -58,18 +58,24 @@ $$
 
 ## Формы тензоров
 
-```
-x                         [B, T, C]
-  ├─ gate_proj (C → F)  →  g        [B, T, F] ─ silu ─┐
-  └─ up_proj   (C → F)  →  u        [B, T, F] ────────┤
-                                                       ⊙  поэлементно
-                                    h        [B, T, F] ◄┘
-  down_proj (F → C)
-  ▼
-y                         [B, T, C]
+```shapes
+x [B, T, C]
+fork
+> gate_proj: C → F
+g [B, T, F]
+> silu
+branch
+> up_proj: C → F
+u [B, T, F]
+join ⊙ — поэлементно
+h [B, T, F]
+> down_proj: F → C
+y [B, T, C]
 ```
 
 FFN действует на каждый токен отдельно — по оси T ничего не смешивается.
+
+:::viz activations:::
 
 ## Задание
 

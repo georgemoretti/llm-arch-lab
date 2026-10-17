@@ -1,4 +1,4 @@
-# C04d. Отладка: GQA работает как MHA и как MQA, но не с группами
+# Отладка: GQA работает как MHA и как MQA, но не с группами
 
 ## Зачем это нужно
 
@@ -21,8 +21,15 @@ $$
 
 ## Формы тензоров
 
-```
-q [B,H,T,D];  k, v [B,H_kv,T,D] → repeat_kv → [B,H,T,D] → attention → [B,T,H·D] → o_proj
+```shapes
+q [B, H, T, D]
+k, v [B, H_kv, T, D]
+> repeat_kv
+k, v [B, H, T, D]
+> attention
+[B, T, H·D]
+> o_proj
+y [B, T, C]
 ```
 
 Все формы в коде правильные.

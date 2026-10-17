@@ -1,4 +1,4 @@
-# C14. Балансировка нагрузки экспертов: aux loss и bias DeepSeek-V3
+# Балансировка нагрузки экспертов: aux loss и bias DeepSeek-V3
 
 ## Зачем это нужно
 
@@ -59,17 +59,30 @@ $$
 
 ## Формы тензоров
 
-```
-router_logits         [N, E]   (выход MoE-слоя из C13)
-probs = softmax       [N, E]
-indices = top-k       [N, k]
-f = expert_load       [E]      (сумма 1, без градиента)
-P = probs.mean(0)     [E]      (сумма 1, с градиентом)
-L_aux                 []       скаляр
+```shapes
+## aux loss
+router_logits [N, E] — выход MoE-слоя
+> softmax
+probs [N, E]
+fork
+> top-k
+indices [N, k]
+> expert_load
+f [E] — доли токенов, сумма 1, без градиента
+branch
+> probs.mean(0)
+P [E] — сумма 1, с градиентом
+join E · Σ f · P
+L_aux []
 
-scores, bias          [N, E], [E]
-route_with_bias       → weights [N, k] (из scores), indices [N, k] (по scores + bias)
-update_bias(b, load)  → [E]
+## bias вместо aux loss (DeepSeek-V3)
+scores [N, E]
+bias [E]
+> route_with_bias
+weights [N, k] — из scores, без bias
+indices [N, k] — по scores + bias
+> update_bias(b, load)
+bias [E] — новый
 ```
 
 ## Задание

@@ -1,5 +1,6 @@
 id: C-P4b-gated-attention-dsa
 title: "Статьи: Gated Attention (Qwen) и DeepSeek Sparse Attention"
+short_title: "Статьи: Gated Attention, DSA"
 block: C
 module: module-4-efficient
 type: paper
@@ -13,3 +14,4 @@ reading:
   - title: "The Big LLM Architecture Comparison (Sebastian Raschka) — Qwen3-Next, гибриды"
     url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
 questions: [paper-gattn-*, paper-dsa-*]
+viz: [masks, qk-norm]

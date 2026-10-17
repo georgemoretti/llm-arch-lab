@@ -4,6 +4,7 @@ import { InterviewPage } from "./components/InterviewPage";
 import { NotesPage } from "./components/NotesPage";
 import { useRoute } from "./router";
 import { useTheme } from "./theme";
+import { labelById, useCourseIndex } from "./courseIndex";
 
 // Monaco тяжёлый (~3 МБ) — грузим его только на странице задачи.
 const TaskPage = lazy(() => import("./components/TaskPage").then((m) => ({ default: m.TaskPage })));
@@ -11,6 +12,7 @@ const TaskPage = lazy(() => import("./components/TaskPage").then((m) => ({ defau
 export function App() {
   const route = useRoute();
   const [theme, toggleTheme] = useTheme();
+  const index = useCourseIndex();
 
   return (
     <div className="app">
@@ -25,7 +27,7 @@ export function App() {
           {route.name === "task" && (
             <>
               <span className="muted">/</span>
-              <span className="mono">{route.id}</span>
+              <span className="crumb-task">{labelById(index, route.id)}</span>
             </>
           )}
           <span className="crumbs-sep" />

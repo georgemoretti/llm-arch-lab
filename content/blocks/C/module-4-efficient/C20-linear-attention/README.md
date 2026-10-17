@@ -1,4 +1,4 @@
-# C20. Линейное внимание: kernel trick, параллельная и рекуррентная формы
+# Линейное внимание: kernel trick, параллельная и рекуррентная формы
 
 ## Зачем это нужно
 
@@ -62,25 +62,38 @@ $v_s$, $s \le t$. Масштаба $1/\sqrt d$ нет: при делении н�
 
 ## Формы тензоров
 
+```shapes
+q, k [B, H, T, d]
+> φ — признаковое отображение
+φ(q), φ(k) [B, H, T, d] — все значения > 0
+v [B, H, T, dv]
+
+## без маски (noncausal)
+φ(K)ᵀV [B, H, d, dv] — считаем первым!
+Σ_s φ(k_s) [B, H, d]
+> φ(Q)·(φ(K)ᵀV) и φ(Q)·Σφ(k)
+числитель [B, H, T, dv]
+знаменатель [B, H, T, 1]
+> деление
+out [B, H, T, dv]
+
+## causal, параллельная форма
+A [B, H, T, T] — (φ(Q)φ(K)ᵀ).tril()
+> A·V / A.sum(-1, keepdim)
+out [B, H, T, dv]
+
+## causal, рекуррентная форма (шаг t)
+S [B, H, d, dv] — S += φ(k_t) ⊗ v_t
+z [B, H, d] — z += φ(k_t)
+> o_t = φ(q_t)ᵀS / φ(q_t)ᵀz
+o_t [B, H, dv]
+> stack по t
+out [B, H, T, dv]
+axis d = размер признаков φ(q), φ(k)
+axis dv = размер значения
 ```
-q, k                           [B, H, T, d]       → φ → [B, H, T, d] (все > 0)
-v                              [B, H, T, dv]
 
-noncausal:
-  φ(K)ᵀV                       [B, H, d, dv]      ← сначала!
-  Σ_s φ(k_s)                   [B, H, d]
-  φ(Q)·(φ(K)ᵀV)                [B, H, T, dv]
-  φ(Q)·Σφ(k)                   [B, H, T, 1]       → деление
-
-causal parallel:
-  A = (φ(Q)φ(K)ᵀ).tril()       [B, H, T, T]
-  A·V / A.sum(-1, keepdim)     [B, H, T, dv]
-
-causal recurrent (шаг t):
-  S += φ(k_t) ⊗ v_t            [B, H, d, dv]
-  z += φ(k_t)                  [B, H, d]
-  o_t = φ(q_t)ᵀS / φ(q_t)ᵀz    [B, H, dv]         → stack по t → [B, H, T, dv]
-```
+:::viz state-memory:::
 
 ## Задание
 

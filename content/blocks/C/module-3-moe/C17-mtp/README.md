@@ -1,4 +1,4 @@
-# C17. Multi-Token Prediction: учим модель смотреть на несколько токенов вперёд
+# Multi-Token Prediction: учим модель смотреть на несколько токенов вперёд
 
 ## Зачем это нужно
 
@@ -51,20 +51,30 @@ $$
 
 ## Формы тензоров
 
+```shapes
+h_main [B, T, C] — выход основной модели
+tokens [B, T]
+
+## глубина k = 1 … D
+h_prev [B, T−k, C] — h[:, :T−k]; при k = 1 это h_main, дальше — выход глубины k−1
+e [B, T−k, C] — embed(tokens[:, k:])
+> cat(enorm(e), hnorm(h_prev))
+[B, T−k, 2C]
+> eh_proj
+x [B, T−k, C]
+> block
+h [B, T−k, C]
+> lm_head(norm(h))
+logits_k [B, T−k, V]
+
+## loss
+- L_main = CE(main_logits[:, :−1], tokens[:, 1:])
+- L_k = CE(logits_k[:, :−1], tokens[:, k+1:])
+- total = L_main + λ/D · Σ L_k
+axis T−k = позиции, для которых известен токен на k шагов вперёд
 ```
-h_main                         [B, T, C]       выход основной модели
-tokens                         [B, T]
-глубина k (k = 1..D):
-  h_prev = h[:, :T−k]          [B, T−k, C]     (для k = 1 — h_main; дальше — выход глубины k−1)
-  e = embed(tokens[:, k:])     [B, T−k, C]
-  x = eh_proj(cat(enorm(e), hnorm(h_prev)))    [B, T−k, 2C] → [B, T−k, C]
-  h = block(x)                 [B, T−k, C]
-  logits_k = lm_head(norm(h))  [B, T−k, V]
-loss:
-  L_main = CE(main_logits[:, :−1], tokens[:, 1:])
-  L_k    = CE(logits_k[:, :−1],    tokens[:, k+1:])
-  total  = L_main + λ/D · Σ L_k
-```
+
+:::viz mtp:::
 
 ## Задание
 

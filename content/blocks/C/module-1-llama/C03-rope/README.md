@@ -1,4 +1,4 @@
-# C03. Rotary Position Embeddings (RoPE)
+# Rotary Position Embeddings (RoPE)
 
 ## Зачем это нужно
 
@@ -80,20 +80,17 @@ $$
 
 ## Формы тензоров
 
-```
-positions          [T]          (номера позиций; при KV-cache — не обязательно с нуля)
-inv_freq           [D/2]        θ^(−2i/D)
-  │ positions[:, None] * inv_freq[None, :]
-  ▼
-angles             [T, D/2]
-  │ cat((angles, angles), dim=-1)      — одна частота на пару (j, j + D/2)
-  ▼
-cos, sin           [T, D]       каждый
+```shapes
+positions [T] — номера позиций; при KV-cache — не обязательно с нуля
+inv_freq [D/2] — θ^(−2i/D)
+> positions[:, None] * inv_freq[None, :]
+angles [T, D/2]
+> cat((angles, angles), dim=-1) — одна частота на пару (j, j + D/2)
+cos, sin [T, D] — каждый
 
-q (или k)          [B, H, T, D]
-  │ q * cos + rotate_half(q) * sin     — cos/sin транслируются по B и H
-  ▼
-q_rot              [B, H, T, D]
+q (или k) [B, H, T, D]
+> q * cos + rotate_half(q) * sin — cos/sin транслируются по B и H
+q_rot [B, H, T, D]
 ```
 
 В attention-слое RoPE применяется после разбиения на головы и до $QK^\top$ — к q и к k, но не к v.

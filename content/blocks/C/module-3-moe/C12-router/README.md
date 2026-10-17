@@ -1,4 +1,4 @@
-# C12. Роутер MoE: оценки → top-k → перенормировка
+# Роутер MoE: оценки → top-k → перенормировка
 
 ## Зачем это нужно
 
@@ -69,12 +69,19 @@ $$
 
 ## Формы тензоров
 
+```shapes
+x [B, T, C]
+> reshape — каждый токен роутится отдельно
+x [N, C]
+> x · W_rᵀ, в float32
+logits [N, E]
+> softmax по оси E (или sigmoid)
+scores [N, E]
+> top-k по оси E
+weights, indices [N, k] — weights в float32
 ```
-x                     [B, T, C]  → reshape → [N, C],  N = B·T (каждый токен роутится отдельно)
-logits = x · W_rᵀ     [N, E]     (float32)
-scores                [N, E]     softmax по оси E (или sigmoid)
-weights, indices      [N, k]     top-k по оси E; weights — float32
-```
+
+:::viz moe-routing:::
 
 ## Задание
 

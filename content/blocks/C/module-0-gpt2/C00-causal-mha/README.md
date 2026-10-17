@@ -1,4 +1,4 @@
-# C00. Causal Multi-Head Self-Attention (как в GPT-2)
+# Causal Multi-Head Self-Attention (как в GPT-2)
 
 ## Зачем это нужно
 
@@ -57,31 +57,24 @@ $W_Q^{(h)}$ (и K, V) склеены в одну матрицу `c_attn` раз�
 
 ## Формы тензоров
 
-```
-x                         [B, T, C]
-  │ c_attn (Linear C → 3C)
-  ▼
-qkv                       [B, T, 3C]
-  │ split по последней оси → q | k | v
-  ▼
-q, k, v                   [B, T, C]   каждый
-  │ view(B, T, H, D)       — C разрезаем на H голов по D
-  │ transpose(1, 2)        — головы становятся «батчевой» осью
-  ▼
-q, k, v                   [B, H, T, D]
-  │ q @ kᵀ / √D
-  ▼
-scores                    [B, H, T, T]   строка t — запрос t, столбец s — ключ s
-  │ + causal mask, softmax(dim=-1)
-  ▼
-weights                   [B, H, T, T]   каждая строка суммируется в 1
-  │ @ v
-  ▼
-out                       [B, H, T, D]
-  │ transpose(1, 2) → [B, T, H, D], contiguous().view(B, T, C)
-  │ c_proj (Linear C → C)
-  ▼
-y                         [B, T, C]
+```shapes
+x [B, T, C]
+> c_attn: Linear C → 3C
+qkv [B, T, 3C]
+> split по последней оси → q | k | v
+q, k, v [B, T, C] — каждый
+> view(B, T, H, D) — C разрезаем на H голов по D
+> transpose(1, 2) — головы становятся «батчевой» осью
+q, k, v [B, H, T, D]
+> q @ kᵀ / √D
+scores [B, H, T, T] — строка t — запрос t, столбец s — ключ s
+> + causal mask, softmax(dim=-1)
+weights [B, H, T, T] — каждая строка суммируется в 1
+> @ v
+out [B, H, T, D]
+> transpose(1, 2) → [B, T, H, D], contiguous().view(B, T, C)
+> c_proj: Linear C → C
+y [B, T, C]
 ```
 
 B — батч, T — длина последовательности, C — `d_model`, H — `n_heads`, D = C / H.

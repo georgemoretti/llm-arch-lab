@@ -1,5 +1,6 @@
 id: C16b-mla-rope
 title: "MLA с decoupled RoPE и размер его кеша"
+short_title: "MLA + decoupled RoPE"
 block: C
 module: module-3-moe
 type: implement

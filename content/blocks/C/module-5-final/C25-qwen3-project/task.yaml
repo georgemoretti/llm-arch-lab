@@ -1,5 +1,6 @@
 id: C25-qwen3-project
 title: "Проект: Qwen3-0.6B на своих деталях — загрузка весов и генерация"
+short_title: "Проект: Qwen3-0.6B"
 block: C
 module: module-5-final
 type: project
@@ -21,6 +22,7 @@ questions: [final-load-*, final-sampling-eos-01]
 # Источник: Qwen/Qwen3-0.6B (config.json, model.safetensors, сверено 2026-10-17): 596 049 920 параметров
 # (посчитано по весам и совпадает с transformers), bf16, один файл ~1.5 ГБ, lm_head.weight == embed_tokens.weight.
 # Расхождение логитов с transformers 5.x (fp32, eager attention) на промпте из теста: max |Δ| ≈ 6e-5 при |logit| ≤ 21.
+viz: [param-budget, sampling]
 arch:
   qwen3:
     norm: "RMSNorm (ε = 1e-6), Pre-Norm + QK-Norm по голове (q_norm, k_norm размера head_dim)"

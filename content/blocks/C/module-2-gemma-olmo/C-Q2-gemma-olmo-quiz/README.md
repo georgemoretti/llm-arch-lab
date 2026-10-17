@@ -1,4 +1,4 @@
-# C-Q2. Квиз модуля: Gemma 3 / OLMo 2 / SmolLM3
+# Квиз модуля: Gemma 3 / OLMo 2 / SmolLM3
 
 ## Зачем это нужно
 

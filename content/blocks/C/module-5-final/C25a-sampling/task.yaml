@@ -1,5 +1,6 @@
 id: C25a-sampling
 title: "Сэмплирование: temperature, top-k, top-p"
+short_title: "Сэмплирование"
 block: C
 module: module-5-final
 type: implement
@@ -15,3 +16,4 @@ reading:
   - title: "Hugging Face: How to generate text (greedy, beam, top-k, top-p)"
     url: https://huggingface.co/blog/how-to-generate
 questions: [final-sampling-top-p-01, iv-generation-01, iv-generation-02, iv-generation-03, iv-generation-04]
+viz: [sampling]

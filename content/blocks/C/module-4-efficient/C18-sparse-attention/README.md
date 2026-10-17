@@ -1,4 +1,4 @@
-# C18. Sparse attention в стиле DSA: индексатор и top-k ключей
+# Sparse attention в стиле DSA: индексатор и top-k ключей
 
 ## Зачем это нужно
 
@@ -51,23 +51,40 @@ $$
 
 ## Формы тензоров
 
-```
-x                              [B, T, C]
-LightningIndexer:
-  q_I = q_proj(x)              [B, T, H_I·d_I] → [B, T, H_I, d_I]
-  k_I = k_proj(x)              [B, T, d_I]                 ← одна «голова» ключей
-  w   = weights_proj(x)/√H_I   [B, T, H_I]
-  q_I·k_I / √d_I               [B, T, H_I, S]              (einsum "bthd,bsd->bths")
-  ReLU, Σ_h w·(…)              [B, T, S]                   (einsum "bth,bths->bts")
-  будущее (s > t) → −inf       [B, T, S]
-topk_mask:
-  topk(min(k, S), dim=-1)      [B, T, k] индексы → scatter → bool [B, T, S]
-  & isfinite(scores)           убрать −inf, которые topk добрал в коротких строках
-DSAttention:
-  q, k, v                      [B, H, T, d]
-  scores = q·kᵀ/√d             [B, H, T, S]
-  masked_fill(~keep[:, None])  маска общая для всех H голов
-  softmax · v                  [B, H, T, d] → [B, T, C] → o_proj
+```shapes
+x [B, T, C]
+
+## LightningIndexer: дешёвая оценка, какие ключи важны
+fork
+> q_proj → view
+q_I [B, T, H_I, d_I]
+branch
+> k_proj — одна «голова» ключей
+k_I [B, T, d_I]
+join q_I·k_I / √d_I — einsum "bthd,bsd->bths"
+[B, T, H_I, S]
+> ReLU, Σ_h w·(…) — w = weights_proj(x)/√H_I [B, T, H_I], einsum "bth,bths->bts"
+> будущее (s > t) → −inf
+index_scores [B, T, S]
+
+## topk_mask
+> topk(min(k, S), dim=-1) — индексы [B, T, k]
+> scatter → bool
+> & isfinite(scores) — убрать −inf, которые topk добрал в коротких строках
+keep [B, T, S]
+
+## DSAttention
+q, k, v [B, H, T, d]
+> q·kᵀ/√d
+scores [B, H, T, S]
+> masked_fill(~keep[:, None]) — маска общая для всех H голов
+> softmax, @ v
+out [B, H, T, d]
+> → [B, T, C] → o_proj
+axis H_I:heads = головы индексатора
+axis d_I = размер головы индексатора
+axis S = позиции ключей
+axis k = сколько ключей оставляем каждому запросу
 ```
 
 ## Задание

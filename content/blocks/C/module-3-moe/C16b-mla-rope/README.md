@@ -1,4 +1,4 @@
-# C16b. MLA с decoupled RoPE и размер его кеша
+# MLA с decoupled RoPE и размер его кеша
 
 ## Зачем это нужно
 
@@ -55,17 +55,36 @@ $$
 
 ## Формы тензоров
 
-```
-x                                [B, T, C]
-q = q_proj(x)                    [B, T, H·(dn + dr)] → [B, H, T, dn + dr] → q_nope [.., dn], q_rope [.., dr]
-q_rope = RoPE(q_rope, позиции start..start+T−1)
-kv_a_proj_with_mqa(x)            [B, T, r + dr] → c [B, T, r] (→ norm), k_rope [B, T, dr]
-k_rope = RoPE(k_rope[:, None])[:, 0]        [B, T, dr]  (одна «голова»)
-cache.update(c, k_rope)          → c [B, S, r], k_rope [B, S, dr]
-kv_b_proj(c)                     → k_nope [B, H, S, dn], v [B, H, S, dv]
-k = cat(k_nope, k_rope[:, None].expand(B, H, S, dr))     [B, H, S, dn + dr]
-scores = q·kᵀ / √(dn + dr)       [B, H, T, S]  + causal_mask(T, S)
-out                              [B, T, C]
+```shapes
+x [B, T, C]
+fork
+> q_proj → view → transpose
+q [B, H, T, dn + dr]
+> split
+q_nope [B, H, T, dn]
+q_rope [B, H, T, dr] — RoPE, позиции start … start + T − 1
+branch
+> kv_a_proj_with_mqa
+[B, T, r + dr]
+> split
+c [B, T, r] — после norm
+k_rope [B, T, dr] — RoPE как одна «голова»
+> cache.update(c, k_rope)
+c [B, S, r]
+k_rope [B, S, dr]
+> kv_b_proj(c)
+k_nope [B, H, S, dn]
+v [B, H, S, dv]
+> cat(k_nope, k_rope[:, None].expand(B, H, S, dr))
+k [B, H, S, dn + dr]
+join q·kᵀ / √(dn + dr) + causal_mask(T, S)
+scores [B, H, T, S]
+> softmax, @ v, o_proj
+out [B, T, C]
+axis r:other = размер латента KV
+axis dn = часть головы без RoPE
+axis dr = часть головы с RoPE
+axis dv = размер головы v
 ```
 
 ## Задание

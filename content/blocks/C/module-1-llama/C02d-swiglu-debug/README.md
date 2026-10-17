@@ -1,4 +1,4 @@
-# C02d. Отладка: FFN с весами Llama даёт не те числа
+# Отладка: FFN с весами Llama даёт не те числа
 
 ## Зачем это нужно
 
@@ -20,8 +20,14 @@ $$
 
 ## Формы тензоров
 
-```
-x [B,T,C] → gate_proj, up_proj → [B,T,F] каждая → ⊙ → [B,T,F] → down_proj → [B,T,C]
+```shapes
+x [B, T, C]
+> gate_proj, up_proj
+g, u [B, T, F] — каждая
+> ⊙
+h [B, T, F]
+> down_proj
+y [B, T, C]
 ```
 
 Формы в коде правильные.

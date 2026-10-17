@@ -1,4 +1,4 @@
-# C01. RMSNorm (вместо LayerNorm)
+# RMSNorm (вместо LayerNorm)
 
 ## Зачем это нужно
 
@@ -51,23 +51,22 @@ $$
 
 ## Формы тензоров
 
-```
-x                    [B, T, C]
-  │ .float()            — считаем в fp32
-  │ pow(2).mean(dim=-1, keepdim=True)
-  ▼
-mean_sq              [B, T, 1]     одно число на токен
-  │ + eps, rsqrt
-  ▼
-inv_rms              [B, T, 1]
-  │ x * inv_rms          — трансляция [B,T,1] → [B,T,C]
-  │ .to(x.dtype)
-  │ * weight             — weight [C] транслируется по B и T
-  ▼
-y                    [B, T, C]
+```shapes
+x [B, T, C]
+> .float() — считаем в fp32
+> pow(2).mean(dim=-1, keepdim=True)
+mean_sq [B, T, 1] — одно число на токен
+> + eps, rsqrt
+inv_rms [B, T, 1]
+> x * inv_rms — трансляция [B, T, 1] → [B, T, C]
+> .to(x.dtype)
+> * weight — weight [C] транслируется по B и T
+y [B, T, C]
 ```
 
 Каждый токен нормируется **независимо**: статистика берётся только по оси C.
+
+:::viz rmsnorm:::
 
 ## Задание
 

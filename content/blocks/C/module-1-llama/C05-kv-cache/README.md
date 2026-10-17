@@ -1,4 +1,4 @@
-# C05. KV-cache — генерация без пересчёта прошлого
+# KV-cache — генерация без пересчёта прошлого
 
 ## Зачем это нужно
 
@@ -58,22 +58,31 @@ $$
 
 ## Формы тензоров
 
-```
-x (новые токены)       [B, T, C]
-start = cache.seq_len  (S₀, до обновления!)
-positions = arange(start, start + T)               [T]
-cos, sin = rope_cos_sin(positions, D, θ)           [T, D]
+```shapes
+## позиции новых токенов
+- start = cache.seq_len — это S₀, длина кеша до обновления!
+positions [T] — arange(start, start + T)
+> rope_cos_sin(positions, D, θ)
+cos, sin [T, D]
 
-q                      [B, H, T, D]     → apply_rope
-k, v                   [B, H_kv, T, D]  → apply_rope (только k)
-  │ cache.update(k, v): cat по оси времени (dim=2)
-  ▼
-K, V (весь кеш)        [B, H_kv, S, D]   S = S₀ + T
-  │ repeat_kv
-  ▼
-K, V                   [B, H, S, D]
-scores = q·Kᵀ/√D       [B, H, T, S]     + маска [T, S] со сдвигом S − T
-out                    [B, H, T, D] → [B, T, H·D] → o_proj → [B, T, C]
+## внимание с кешем
+x [B, T, C] — только новые токены
+fork
+> q_proj → apply_rope
+q [B, H, T, D]
+branch
+> k_proj, v_proj → apply_rope (только k)
+k, v [B, H_kv, T, D]
+> cache.update(k, v): cat по оси времени (dim=2)
+K, V [B, H_kv, S, D] — весь кеш, S = S₀ + T
+> repeat_kv
+K, V [B, H, S, D]
+join q·Kᵀ/√D + маска [T, S] со сдвигом S − T
+scores [B, H, T, S]
+> softmax, @ V
+out [B, H, T, D]
+> → [B, T, H·D] → o_proj
+y [B, T, C]
 ```
 
 Пример маски для $S_0 = 3$, $T = 2$ (строки — новые токены, столбцы — все ключи):

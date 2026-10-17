@@ -1,4 +1,4 @@
-# C06. Собрать блок и модель Llama
+# Собрать блок и модель Llama
 
 ## Зачем это нужно
 
@@ -59,20 +59,19 @@ $$
 
 ## Формы тензоров
 
+```shapes
+idx [B, T] — только новые токены, если есть кеш
+> embed_tokens
+x [B, T, C]
+> каждый слой ℓ = 1…L со своим caches[ℓ]:
+> x = x + self_attn(input_layernorm(x), caches[ℓ]) — [B, T, C]
+> x = x + mlp(post_attention_layernorm(x)) — [B, T, C]
+x [B, T, C]
+> norm → lm_head
+logits [B, T, V]
 ```
-idx                     [B, T]                (только новые токены, если есть кеш)
-  │ embed_tokens
-  ▼
-x                       [B, T, C]
-  │ для каждого слоя ℓ (со своим caches[ℓ]):
-  │   x = x + self_attn(input_layernorm(x), caches[ℓ])        [B, T, C]
-  │   x = x + mlp(post_attention_layernorm(x))                [B, T, C]
-  ▼
-x                       [B, T, C]
-  │ norm → lm_head
-  ▼
-logits                  [B, T, V]
-```
+
+:::viz norm-placement:::
 
 ## Задание
 
