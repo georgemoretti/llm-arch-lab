@@ -4,7 +4,8 @@
 Llama, Gemma 3 / Olmo 2, MoE и MLA из DeepSeek и гибридам с линейным вниманием. Каждая задача —
 маленький кусок механизма с автотестами, теорией, подсказками и автоконспектом.
 
-> Статус: ранняя разработка (готовы веб-интерфейс, демо-задача и автоконспекты). План — `docs/PLAN.md`.
+> Статус: блок C готов целиком — 50 задач от GPT-2 до гибридов и финальный проект на настоящих весах
+> Qwen3-0.6B. План — `docs/PLAN.md`.
 
 ## Быстрый старт
 
@@ -40,9 +41,33 @@ llmlab notes export                   # zip с конспектами
 llmlab questions import               # импорт своей базы вопросов из data/interview_raw/
 ```
 
+## Финальный проект: своя модель на настоящих весах
+
+Все детали блока C собираются в одну модель из YAML (`llmlab/core/model.py`, конфиги — `llmlab/configs/`,
+схема и как добавить компонент — `docs/MODEL.md`). Задачи **C24** (config.json и имена весов) и **C25**
+(загрузка safetensors, сэмплирование, генерация, сверка логитов с `transformers`) превращают её в
+настоящую Qwen3-0.6B.
+
+```bash
+uv sync --extra weights                       # huggingface_hub, tokenizers, transformers (для сверки)
+llmlab model                                  # готовые конфиги и число параметров
+llmlab model qwen3-0.6b                       # расписание слоёв
+llmlab generate qwen3-0.6b "The capital of France is"
+llmlab generate qwen3-0.6b "Name three planets of the solar system" --chat -n 60
+llmlab generate smollm2-135m "Once upon a time" -t 0.8 --top-p 0.9
+
+llmlab test C25-qwen3-project                 # тесты на случайных весах — без скачивания
+llmlab test C25-qwen3-project --weights       # + логиты и генерация против transformers на реальных весах
+llmlab generate qwen3-0.6b "Hello" --impl workspace   # генерировать своим решением C25
+```
+
+Первый запуск с реальными весами скачивает ~1.5 ГБ в `~/.cache/huggingface`. Без `--weights` (и без
+`LLMLAB_WEIGHTS=1`) тесты `@pytest.mark.weights` пропускаются, так что курс работает и офлайн.
+
 ## Для авторов
 
 - `docs/TASK_FORMAT.md` — формат задачи и чек-лист качества;
+- `docs/MODEL.md` — конфигурируемая модель: схема YAML, реестр компонентов;
 - `llmlab validate --all` — эталоны проходят тесты, заготовки — нет;
 - `pytest tests/` — тесты платформы;
 - фронтенд: `cd web && npm install && npm run dev` (Vite на :5173, API проксируется на

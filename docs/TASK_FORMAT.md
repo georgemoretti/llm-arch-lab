@@ -163,7 +163,11 @@ def test_something(impl, ref):
   (см. `_diagnose_attention` в C00);
 - если готовые функции запрещены — запрещать через `monkeypatch` в autouse-фикстуре,
   а оракул сохранять до патча;
-- тесты, которым нужны реальные веса, — `@pytest.mark.weights` (по умолчанию не запускаются).
+- тесты, которым нужны реальные веса, — `@pytest.mark.weights` (по умолчанию пропускаются; запуск —
+  `llmlab test <id> --weights`, `pytest … --weights` или `LLMLAB_WEIGHTS=1`). Они не участвуют в инварианте
+  `validate`: заготовка обязана падать и на тестах без весов, а эталон — проходить их на случайной
+  инициализации. Нет пакетов `weights` (`uv sync --extra weights`) — `pytest.importorskip` с
+  объяснением, а не падение; веса качать через `llmlab.core.hf.download` (кеш HF, повторно не качает).
 
 ### 2.7 `hints.md`
 
@@ -181,6 +185,9 @@ def test_something(impl, ref):
 ## Формы тензоров
 ## Что поменялось относительно <diff_from>
 ```
+
+Дополнительные разделы (`## …`) можно добавлять — в конспекте они идут после четырёх обязательных, в
+порядке автора (пример — карта «деталь → задача» в C25).
 
 ---
 
@@ -279,7 +286,8 @@ models:                        # модели (строки)
 ### 4.2 pytest-плагин (`llmlab/pytest_plugin.py`)
 
 Флаги: `--impl=workspace|reference|starter|buggy` (по умолчанию `workspace`),
-`--impl-path=<file>` (перекрывает `--impl`), `--llmlab-report=<json>`.
+`--impl-path=<file>` (перекрывает `--impl`), `--llmlab-report=<json>`, `--weights` (запускать
+`@pytest.mark.weights`; то же — `LLMLAB_WEIGHTS=1`).
 
 | `--impl` | файл |
 |----------|------|
@@ -397,7 +405,7 @@ SM-2: оценки again / hard / good / easy → q = 2 / 3 / 4 / 5; прова�
 ```bash
 llmlab list                         # задачи в порядке зависимостей и статус
 llmlab init-workspace <id> [--force]
-llmlab test <id> [--impl reference|starter|buggy] [--impl-path file.py] [--timeout 60]
+llmlab test <id> [--impl reference|starter|buggy] [--impl-path file.py] [--timeout 60] [--weights]
 llmlab validate <id> | --all [-j 4]
 llmlab serve [--port 8765] [--no-open]   # веб-интерфейс на 127.0.0.1
 llmlab notes build [<id>] [--insight "строка\nстрока"]   # создать/пересобрать конспект(ы)
