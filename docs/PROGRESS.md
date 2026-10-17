@@ -3,14 +3,16 @@
 > Обновляется в конце КАЖДОЙ сессии Claude Code. Пиши кратко и конкретно.
 
 ## Текущая фаза
-Фаза 8 — **в процессе** (2026-10-17). Ядро, конфиги, задачи C24/C25, CLI и тесты готовы и закоммичены.
+Фаза 8 — **завершена** (2026-10-17). Конфигурируемая модель из YAML (9 конфигов), задачи C24 (config.json и имена
+весов) и C25 (Qwen3-0.6B на своих деталях: логиты = transformers до 6e-5), `llmlab model` / `llmlab generate`,
+итоговый конспект «Моя модель». Следующая: Фаза 9 — полировка и выпуск.
 
 ## Следующий шаг (точный)
-Закончить Фазу 8: (1) README.md — раздел «Финальный проект» (`uv sync --extra weights`, `llmlab model`,
-`llmlab generate qwen3-0.6b "…" --chat`, `llmlab test C25-qwen3-project --weights`); (2) `docs/MODEL.md` — схема
-YAML-конфига и как добавить компонент в реестр; `docs/TASK_FORMAT.md` — флаг `--weights`; (3) сквозная проверка
-конспекта C25 в копии репо (`llmlab notes build C25-qwen3-project --insight …`, ячейки строки qwen3);
-(4) `llmlab validate --all`, `pytest tests/`; (5) PROGRESS: блок «Фаза 8» в «Сделано», решения, журнал; коммит, отчёт.
+Запустить Фазу 9 (PLAN.md → «Фаза 9»; отдельного промпта в PROMPTS.md нет — по PLAN): README с GIF/скриншотами и
+быстрым стартом, `docs/CONTRIBUTING.md` (как добавить задачу — на основе TASK_FORMAT), NOTICE, `llmlab doctor`
+(python/torch/uv, пакеты weights, порт 8765, права на `.llmlab/`, свежесть бандла), проверка установки с нуля
+(чистый venv, `pip install -e .` и `uv sync`), тег v0.1. Заодно решить долги «Решить в Фазе 9» (ячейки
+`gemma-3.ffn` / `olmo-2.ffn`).
 
 ## Сделано
 **Фаза 0:**
@@ -288,6 +290,33 @@ YAML-конфига и как добавить компонент в реест�
   (интервал вылезал за рамку).
 - Тесты платформы: 94; вопросов в курсе: 219.
 
+**Фаза 8:**
+- `llmlab/core/model.py` — модель из YAML: pydantic-схема (`extra=forbid`, понятные ошибки), `layer_specs` через
+  расписания эталонов C07/C10/C15/C22, реестр `norm` / `mixer` / `ffn` (`register`, `build`), общая `Attention`
+  (GQA, QK-Norm head/full, окно + кольцевой кеш, partial RoPE, NoPE, выходной гейт, bias), MLA, Gated DeltaNet,
+  SwiGLU/GeGLU/GELU, MoE; нормы `(1 + w)`; 4 схемы размещения норм; кеши по слоям; имена параметров = HF.
+- Конфиги `llmlab/configs/`: gpt2, llama-like, gemma3-like (свой θ у sliding-слоёв), olmo2-like, smollm3-like,
+  deepseek-tiny, hybrid-tiny, qwen3-0.6b, smollm2-135m — у каждого источник чисел в комментарии.
+- `llmlab/core/hf.py` (= эталоны C24/C25): `config_from_hf` (qwen3, llama, gpt2; transformers 4.x и 5.x),
+  `convert_state_dict` (Conv1D → Linear, связанный lm_head), `check_state_dict`, `load_safetensors` (шарды),
+  `load_pretrained` (meta + assign + восстановление tie), `sample_next` (T, top-k, top-p), `generate` (KV-cache, eos).
+- Новый модуль `module-5-final`: **C24-hf-checkpoint**, **C25-qwen3-project** (17 тестов: 12 на случайных весах +
+  5 `@pytest.mark.weights` — число параметров, логиты против transformers, жадная генерация токен в токен, бонус
+  GPT-2 и SmolLM2-135M). Строка таблицы архитектур `qwen3` («моя модель», открывает C25). 10 вопросов
+  `final-project.yaml`, статья `qwen3`.
+- CLI: `llmlab model [имя]` (конфиги, расписание слоёв, параметры), `llmlab generate <модель> "…"`
+  (`--chat`, `-t`, `--top-k`, `--top-p`, `--impl workspace`), `llmlab test <id> --weights` (таймаут ≥ 30 мин).
+  pytest-флаг `--weights` / `LLMLAB_WEIGHTS=1`; extras `weights` в pyproject, CI ставит их (без скачивания весов).
+- Документация: README — раздел «Финальный проект»; `docs/MODEL.md` — схема YAML, реестр, как добавить компонент,
+  реальные веса; TASK_FORMAT — `--weights`, дополнительные разделы summary.md.
+- Конспект: дополнительные разделы `summary.md` попадают в конспект после четырёх обязательных — у C25 это карта
+  «деталь Qwen3 → задача» (итоговый конспект «Моя модель»).
+- Проверено: `llmlab test C25-qwen3-project --weights --impl reference` — 17/17 за 75 с на реальных весах;
+  `LLMLAB_WEIGHTS=1 pytest tests/test_core_hf.py` — 7/7; `llmlab generate qwen3-0.6b … --chat` — 12.6 ток/с на CPU;
+  сквозной сценарий в копии репо: заготовка 0/17 → эталон → конспект с картой, выводом, вопросами; ячейка qwen3
+  открыта в `notes/index.md`, вывод сохраняется при пересборке.
+- Тесты платформы: 122 (+1 weights); задач: 50; вопросов в курсе: 229.
+
 ## Не сделано / долги
 - E2E-сценарий UI не в репозитории (Playwright ставился во временную папку). Если UI начнёт
   ломаться — завести `web/e2e/` с Playwright и отдельный CI-job.
@@ -342,9 +371,18 @@ YAML-конфига и как добавить компонент в реест�
   вопросов курса.
 - Импорт `.xlsx` не поддержан (нужен openpyxl) — просим сохранить как csv.
 - Визуальную проверку UI в 5a не делал (новых viz нет); README отдаются API, KaTeX проверен скриптом.
+- Фаза 8: из долгов прошлых фаз закрыты нормы (1 + w), свой θ у local-слоёв Gemma 3, KV-cache у gated attention
+  (общая `Attention`). **Не сделано:** загрузка весов Gemma 3 / OLMo 2 / DeepSeek / Qwen3-Next (`config_from_hf`
+  знает только qwen3, llama, gpt2); эксперты MoE в 3D-тензорах HF (Mixtral, Qwen3-MoE); conv1d, выходной гейт и
+  32:16 головы Gated DeltaNet; MTP и сжатие запроса в `deepseek-tiny`. Конфиги `*-like`/`*-tiny` проверяются
+  только на случайных весах.
+- `solution.py` C24/C25 дублируют `llmlab/core/hf.py` (страховка — `tests/test_core_hf.py`) — при правке менять оба.
+- Weights-тесты C25 качают ~1.5 ГБ при первом запуске и без сети падают ошибкой `snapshot_download` (не skip) —
+  сознательно: флаг `--weights` пользователь ставит сам.
+- UI-страницу C24/C25 в браузере глазами не смотрел (README отдаются API как у всех задач).
 
 ## Решения (почему сделано так, а не иначе)
-- **Фаза 8 (черновые записи):** одна общая `Attention` в `core/model.py` из функций эталонов (rope, partial rope,
+- **Фаза 8:** одна общая `Attention` в `core/model.py` из функций эталонов (rope, partial rope,
   repeat_kv, KVCache, RingKVCache) вместо обёрток над 6 классами — у Qwen3 head_dim ≠ d/H, нужны сочетания идей; её
   частные случаи сверяются с LlamaAttention/QKNorm/SWA/NoPE/GatedAttention/блоками C08 в `tests/test_core_model.py`.
   MLA, Gated DeltaNet, MoE, FFN — классы эталонов. Имена параметров = HF без `model.`. Задача-проект разбита на
@@ -352,6 +390,10 @@ YAML-конфига и как добавить компонент в реест�
   генерация, сверка с transformers). Бонус — GPT-2 и SmolLM2-135M одной `load_pretrained`. Поддержан формат
   config.json transformers 5.x (`rope_parameters`). Допуск логитов 1e-3 в fp32 (факт 6e-5 на Qwen3-0.6B).
   Новая строка таблицы архитектур `qwen3` (открывает C25). Weights-тесты: флаг `--weights`/`LLMLAB_WEIGHTS=1`.
+  **Дополнительные разделы summary.md идут в конспект** (после четырёх обязательных), а не отдельный файл «Моя
+  модель»: итоговый конспект = конспект C25 с картой «деталь → задача» и wiki-ссылками на все задачи. Генерация в
+  CLI — без `transformers` (только `tokenizers`), transformers нужен лишь для сверки в тестах. Чат-шаблон Qwen3 в
+  `--chat` — строкой, с пустым `<think>` (режим без размышлений).
 
 - **pytest-плагин в пакете** (`llmlab/pytest_plugin.py`), а корневой `conftest.py` только
   подключает его: раннер передаёт `-p llmlab.pytest_plugin` явно и работает в любом корне
@@ -577,3 +619,4 @@ YAML-конфига и как добавить компонент в реест�
 | 2026-10-17 | 6a | C18 DSA, C19 gated attention + partial RoPE, C20 линейное внимание + C20d, 3 статьи, 12 вопросов, строка DeepSeek-V3.2, sparse-режим V-masks, core/efficient.py, 79 тестов | см. `git log` |
 | 2026-10-17 | 6b | C21 Gated DeltaNet + C21d, C22 гибрид 3:1, C23 Mamba-2 SSD, C-P4, C-Q4, 3 статьи, 16 вопросов, столбец `layers`, V-hybrid, 82 теста | см. `git log` |
 | 2026-10-17 | 7 | Импортёр вопросов + CLI, 244 сырых → 105 вопросов (7 файлов), SM-2 + SQLite v3, API и вкладка Interview, самооценка в задачах, «пройдено» для paper/quiz, 94 теста | см. `git log` |
+| 2026-10-17 | 8 | core/model.py из YAML + реестр, 9 конфигов, core/hf.py, C24 + C25 (Qwen3-0.6B, логиты = transformers), `llmlab model/generate`, `--weights`, docs/MODEL.md, 122 теста | см. `git log` |

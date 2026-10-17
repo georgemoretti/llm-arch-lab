@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import importlib.util
 import json
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -93,9 +94,10 @@ def test_weights_marker_skipped_without_flag(tmp_path):
     (tmp_path / "test_w.py").write_text("import pytest\n\n@pytest.mark.weights\ndef test_w():\n    assert False\n")
     base = [sys.executable, "-m", "pytest", str(tmp_path / "test_w.py"), "-p", "llmlab.pytest_plugin", "-q",
             "-p", "no:cacheprovider", f"--rootdir={tmp_path}"]
-    skipped = subprocess.run(base, capture_output=True, text=True, cwd=tmp_path)
+    env = {k: v for k, v in os.environ.items() if k != "LLMLAB_WEIGHTS"}   # иначе флаг придёт из окружения
+    skipped = subprocess.run(base, capture_output=True, text=True, cwd=tmp_path, env=env)
     assert skipped.returncode == 0 and "1 skipped" in skipped.stdout, skipped.stdout
-    run = subprocess.run(base + ["--weights"], capture_output=True, text=True, cwd=tmp_path)
+    run = subprocess.run(base + ["--weights"], capture_output=True, text=True, cwd=tmp_path, env=env)
     assert run.returncode == 1 and "1 failed" in run.stdout, run.stdout
 
 
