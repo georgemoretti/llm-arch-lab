@@ -2,6 +2,7 @@
 // своими словами сформулированный вывод — самая ценная часть конспекта.
 import { useEffect, useRef, useState } from "react";
 import { api } from "../api";
+import { useCourseIndex } from "../courseIndex";
 
 const MAX_LINES = 3;
 const MAX_CHARS = 600;
@@ -15,6 +16,7 @@ export function InsightModal(props: {
   onClose(): void;
 }) {
   const [text, setText] = useState(props.initial ?? "");
+  const number = useCourseIndex()?.get(props.taskId)?.number;
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const area = useRef<HTMLTextAreaElement>(null);
@@ -53,7 +55,8 @@ export function InsightModal(props: {
           {props.mode === "create" && <div className="modal-kicker">✓ Все тесты прошли</div>}
           <h2 id="insight-title">{props.mode === "create" ? "Главное, что я понял" : "Изменить вывод"}</h2>
           <div className="muted">
-            {props.taskId} — {props.title}
+            {number ? `${number} · ` : ""}
+            {props.title}
           </div>
         </div>
         <p className="modal-text">
