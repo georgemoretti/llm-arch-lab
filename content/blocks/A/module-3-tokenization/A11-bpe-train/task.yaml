@@ -1,0 +1,20 @@
+id: A11-bpe-train
+title: "Byte-level BPE: обучение словаря слияний"
+short_title: "BPE: обучение"
+block: A
+module: module-3-tokenization
+type: implement
+difficulty: medium
+depends_on: [A10-char-lm]
+diff_from: A10-char-lm
+tags: [tokenization, bpe, byte-level]
+entrypoint: [count_pairs, merge_pair, train_bpe, build_vocab]
+time_estimate_min: 40
+papers: [bpe-sennrich]
+reading:
+  - title: "Hugging Face LLM Course: Byte-Pair Encoding tokenization"
+    url: https://huggingface.co/learn/llm-course/chapter6/5
+  - title: "Andrej Karpathy: minbpe (минимальный BPE-токенизатор, код и упражнения)"
+    url: https://github.com/karpathy/minbpe
+viz: [bpe]
+questions: [bpe-train-*, iv-tokenization-01, iv-tokenization-03]
