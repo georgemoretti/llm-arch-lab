@@ -1,0 +1,21 @@
+id: B02-sinusoidal
+title: "Синусоидальные позиции и вход Transformer"
+short_title: "Синусоидальные позиции"
+block: B
+module: module-1-encdec
+type: implement
+difficulty: medium
+depends_on: [B01-padding-mask]
+recommended_after: [A15-embeddings]
+diff_from: A15-embeddings
+tags: [positional-encoding, embeddings, encoder]
+entrypoint: [sinusoidal_positions, shift_matrix, TransformerEmbedding]
+time_estimate_min: 35
+papers: [attention-is-all-you-need]
+reading:
+  - title: "Amirhossein Kazemnejad: Transformer Architecture — The Positional Encoding (разбор синусоид и сдвига)"
+    url: https://kazemnejad.com/blog/transformer_architecture_positional_encoding/
+  - title: "Harvard NLP: The Annotated Transformer, раздел Positional Encoding"
+    url: https://nlp.seas.harvard.edu/annotated-transformer/
+viz: [sinusoidal]
+questions: [encdec-sinusoid-*, iv-positional-01, iv-positional-02]

@@ -1,0 +1,21 @@
+id: B01-padding-mask
+title: "Padding-маска и двунаправленное multi-head attention"
+short_title: "Padding-маска и MHA"
+block: B
+module: module-1-encdec
+type: implement
+difficulty: medium
+depends_on: []
+recommended_after: [A16-attention]
+diff_from: A16-attention
+tags: [attention, padding, multi-head, encoder]
+entrypoint: [padding_mask, attention, MultiHeadAttention]
+time_estimate_min: 40
+papers: [attention-is-all-you-need]
+reading:
+  - title: "PyTorch: nn.MultiheadAttention — параметры key_padding_mask и attn_mask (обрати внимание на смысл True)"
+    url: https://pytorch.org/docs/stable/generated/torch.nn.MultiheadAttention.html
+  - title: "Hugging Face: Padding and truncation (зачем паддинг и attention_mask)"
+    url: https://huggingface.co/docs/transformers/pad_truncation
+viz: [encdec-masks]
+questions: [encdec-padding-*, encdec-mha-*, iv-attention-03]

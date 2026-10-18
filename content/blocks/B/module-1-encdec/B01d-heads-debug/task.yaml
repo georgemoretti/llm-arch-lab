@@ -1,0 +1,18 @@
+id: B01d-heads-debug
+title: "Отладка: с одной головой всё верно, с четырьмя — PAD протекает"
+short_title: "Найди баг: multi-head"
+block: B
+module: module-1-encdec
+type: debug
+difficulty: medium
+depends_on: [B01-padding-mask]
+diff_from: B01-padding-mask
+tags: [attention, multi-head, padding, debug]
+entrypoint: [padding_mask, attention, MultiHeadAttention]
+time_estimate_min: 20
+papers: []
+reading:
+  - title: "PyTorch: Tensor.view (когда view меняет смысл данных, а когда только форму)"
+    url: https://pytorch.org/docs/stable/generated/torch.Tensor.view.html
+viz: [encdec-masks]
+questions: [encdec-mha-*]

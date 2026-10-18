@@ -1,0 +1,27 @@
+id: B
+title: "Энкодеры: от Transformer к BERT и эмбеддингам"
+optional: true
+description: >
+  Вторая ветка эволюции трансформеров: исходный энкодер-декодер, BERT и его наследники (RoBERTa, DistilBERT),
+  T5, ModernBERT и эмбеддинги текста для поиска. Блок необязательный и не нужен для блока C, но без энкодеров не
+  обходятся классификация, разметка, извлечение ответов и семантический поиск. Для старта хватит задач A16–A17.
+modules:
+  - id: module-1-encdec
+    title: "Transformer: энкодер и декодер"
+    description: "Padding-маска, синусоидальные позиции, энкодер, cross-attention, seq2seq с label smoothing и greedy decode."
+  - id: module-2-bert
+    title: "BERT"
+    description: "WordPiece, вход BERT, MLM-маскирование, модель и головы дообучения."
+  - id: module-3-distil-t5
+    title: "DistilBERT и T5"
+    description: "Дистилляция, относительный позиционный bias, слой T5, span corruption."
+  - id: module-4-modernbert
+    title: "ModernBERT и эмбеддинги текста"
+    description: "Слой ModernBERT, unpadding, sentence-эмбеддинги, контрастивное обучение, мини-поиск."
+baselines:
+  rnn-seq2seq:
+    title: "Seq2seq на RNN"
+    description: >
+      Энкодер-RNN сжимает весь источник в один вектор состояния, декодер-RNN разворачивает его в цель токен за
+      токеном. Позже добавили attention к состояниям энкодера (Bahdanau et al., 2014), но вычисления оставались
+      последовательными.
