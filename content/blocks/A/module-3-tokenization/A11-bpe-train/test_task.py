@@ -4,7 +4,7 @@
   impl — проверяемая реализация (workspace / reference / starter);
   ref  — эталон solution.py.
 
-Корпус — content/data/corpus-ru.txt (текст написан авторами курса, ~8 тыс. символов, ~15 тыс. байтов UTF-8).
+Корпус — content/data/corpus-ru.txt (текст написан авторами курса, ~23 тыс. символов, ~42 тыс. байтов UTF-8).
 """
 
 from pathlib import Path

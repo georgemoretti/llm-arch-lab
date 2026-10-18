@@ -4,7 +4,7 @@
   impl — проверяемая реализация (workspace / reference / starter);
   ref  — эталон solution.py.
 
-Корпус — content/data/corpus-ru.txt (текст написан авторами курса, ~8 тыс. символов).
+Корпус — content/data/corpus-ru.txt (текст написан авторами курса, ~23 тыс. символов).
 """
 
 import math
@@ -28,7 +28,7 @@ def test_vocab(impl, text):
     stoi, itos = impl.build_vocab(text)
     assert itos == sorted(set(text)), (
         "itos должен быть списком уникальных символов текста, отсортированным по возрастанию (sorted(set(text)))")
-    assert len(itos) == 61, f"в корпусе 61 уникальный символ, а в словаре {len(itos)}"
+    assert len(itos) == 67, f"в корпусе 67 уникальный символ, а в словаре {len(itos)}"
     assert all(itos[stoi[c]] == c for c in itos) and len(stoi) == len(itos), "stoi[c] — позиция символа c в itos"
 
 
@@ -57,7 +57,7 @@ def test_make_dataset(impl):
     assert torch.equal(X[1:, :-1], X[:-1, 1:]), "соседние окна сдвинуты ровно на один символ"
 
 
-def _models(impl, ref, V=61):
+def _models(impl, ref, V=67):
     torch.manual_seed(0)
     a = ref.MLPLM(V, CONTEXT)
     b = impl.MLPLM(V, CONTEXT)
@@ -68,9 +68,9 @@ def _models(impl, ref, V=61):
 def test_forward_matches_reference(impl, ref):
     """MLPLM.forward: логиты [B, V], совпадают с эталоном при тех же весах"""
     a, b = _models(impl, ref)
-    X = torch.randint(0, 61, (5, CONTEXT), generator=torch.Generator().manual_seed(1))
+    X = torch.randint(0, 67, (5, CONTEXT), generator=torch.Generator().manual_seed(1))
     out = b(X)
-    assert out.shape == (5, 61), f"логиты [B, V] = [5, 61], а получено {tuple(out.shape)}"
+    assert out.shape == (5, 67), f"логиты [B, V] = [5, 67], а получено {tuple(out.shape)}"
     want = a(X)
     if not torch.allclose(out, want, atol=1e-6, rtol=1e-5):
         if torch.allclose(out.softmax(-1), want, atol=1e-6) or torch.allclose(out, want.softmax(-1), atol=1e-6):
@@ -89,16 +89,16 @@ def test_perplexity_of_uniform_model_is_vocab_size(impl, ref):
     with torch.no_grad():
         b.out.weight.zero_()
         b.out.bias.zero_()
-    X = torch.randint(0, 61, (20, CONTEXT), generator=torch.Generator().manual_seed(2))
-    Y = torch.randint(0, 61, (20,), generator=torch.Generator().manual_seed(3))
+    X = torch.randint(0, 67, (20, CONTEXT), generator=torch.Generator().manual_seed(2))
+    Y = torch.randint(0, 67, (20,), generator=torch.Generator().manual_seed(3))
     b.train()
     ppl = impl.perplexity(b, X, Y)
     assert isinstance(ppl, float), f"perplexity возвращает float, а не {type(ppl).__name__}"
-    if math.isclose(ppl, math.log(61), rel_tol=1e-5):
+    if math.isclose(ppl, math.log(67), rel_tol=1e-5):
         pytest.fail("вернулась cross-entropy (log V), а перплексия — это exp от неё.", pytrace=False)
-    assert math.isclose(ppl, 61.0, rel_tol=1e-5), (
-        f"модель, которая всем символам даёт равные логиты, «колеблется» между всеми V = 61 вариантами — "
-        f"перплексия должна быть 61, а получено {ppl:.3f}")
+    assert math.isclose(ppl, 67.0, rel_tol=1e-5), (
+        f"модель, которая всем символам даёт равные логиты, «колеблется» между всеми V = 67 вариантами — "
+        f"перплексия должна быть 67, а получено {ppl:.3f}")
     assert b.training, "perplexity должна вернуть модель в прежний режим (train)"
 
 
