@@ -1,0 +1,18 @@
+id: A16d-attention-debug
+title: "Отладка: веса будущих позиций нулевые, а будущее всё равно протекает"
+short_title: "Найди баг: attention"
+block: A
+module: module-4-gpt
+type: debug
+difficulty: easy
+depends_on: [A16-attention]
+diff_from: A16-attention
+tags: [attention, causal-mask, debug]
+entrypoint: [causal_mask, attention, AttentionHead]
+time_estimate_min: 15
+papers: []
+reading:
+  - title: "PyTorch: torch.nn.functional.scaled_dot_product_attention (эквивалентный код в документации)"
+    url: https://pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html
+viz: [causal-mask]
+questions: [attn1-mask-*]

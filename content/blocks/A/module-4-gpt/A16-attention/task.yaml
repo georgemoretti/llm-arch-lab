@@ -1,0 +1,20 @@
+id: A16-attention
+title: "Attention: одна голова с causal-маской"
+short_title: "Attention (одна голова)"
+block: A
+module: module-4-gpt
+type: implement
+difficulty: medium
+depends_on: [A15-embeddings]
+diff_from: A15-embeddings
+tags: [attention, causal-mask, softmax]
+entrypoint: [causal_mask, attention, AttentionHead]
+time_estimate_min: 40
+papers: [attention-is-all-you-need]
+reading:
+  - title: "Jay Alammar: The Illustrated Transformer"
+    url: https://jalammar.github.io/illustrated-transformer/
+  - title: "PyTorch: torch.nn.functional.scaled_dot_product_attention (документация, раздел с эквивалентным кодом)"
+    url: https://pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html
+viz: [causal-mask]
+questions: [attn1-*]
