@@ -1,0 +1,18 @@
+id: B09d-mlm-debug
+title: "Отладка: лосс MLM быстро падает, а слова модель угадывает плохо"
+short_title: "Найди баг: MLM"
+block: B
+module: module-2-bert
+type: debug
+difficulty: easy
+depends_on: [B09-mlm-masking]
+diff_from: B09-mlm-masking
+tags: [mlm, masking, debug]
+entrypoint: [mlm_mask]
+time_estimate_min: 15
+papers: []
+reading:
+  - title: "PyTorch: torch.nn.functional.cross_entropy (параметр ignore_index)"
+    url: https://pytorch.org/docs/stable/generated/torch.nn.functional.cross_entropy.html
+viz: []
+questions: [bert-mlm-*]

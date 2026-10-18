@@ -1,0 +1,20 @@
+id: B09-mlm-masking
+title: "MLM-маскирование: 15 %, 80 / 10 / 10 и маскирование целых слов"
+short_title: "MLM-маскирование"
+block: B
+module: module-2-bert
+type: implement
+difficulty: easy
+depends_on: [B08-bert-input]
+diff_from: A18-minigpt
+tags: [bert, mlm, pretraining, masking]
+entrypoint: [mlm_mask]
+time_estimate_min: 30
+papers: [bert, roberta]
+reading:
+  - title: "Hugging Face: DataCollatorForLanguageModeling (параметр mlm_probability)"
+    url: https://huggingface.co/docs/transformers/main_classes/data_collator
+  - title: "Google Research: README репозитория bert (раздел про Whole Word Masking)"
+    url: https://github.com/google-research/bert
+viz: [mlm-masking]
+questions: [bert-mlm-*, iv-bert-02]
