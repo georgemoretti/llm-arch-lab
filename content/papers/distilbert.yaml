@@ -1,0 +1,7 @@
+id: distilbert
+title: "DistilBERT, a distilled version of BERT: smaller, faster, cheaper and lighter"
+authors: "Sanh, Debut, Chaumond, Wolf"
+year: 2019
+venue: EMC² Workshop, NeurIPS 2019
+url: https://arxiv.org/abs/1910.01108
+tags: [distillation, bert, compression]

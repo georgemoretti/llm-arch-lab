@@ -1,0 +1,7 @@
+id: hinton-distillation
+title: "Distilling the Knowledge in a Neural Network"
+authors: "Hinton, Vinyals, Dean"
+year: 2015
+venue: NIPS 2014 Deep Learning Workshop
+url: https://arxiv.org/abs/1503.02531
+tags: [distillation, soft-targets, temperature]

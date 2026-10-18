@@ -1,0 +1,22 @@
+id: B12-distillation
+title: "Дистилляция: мягкие метки, температура и ученик DistilBERT"
+short_title: "Дистилляция"
+block: B
+module: module-3-distil-t5
+type: implement
+difficulty: medium
+depends_on: [B10-bert-model]
+diff_from: B10-bert-model
+tags: [distillation, distilbert, temperature, kl-divergence, compression]
+entrypoint: [soft_targets, distill_kl, distillation_loss, hidden_cosine_loss, student_from_teacher]
+time_estimate_min: 40
+papers: [hinton-distillation, distilbert]
+reading:
+  - title: "distilbert-base-uncased: config.json на Hugging Face"
+    url: https://huggingface.co/distilbert/distilbert-base-uncased/blob/main/config.json
+  - title: "Hugging Face: research_projects/distillation (distiller.py, extract_distilbert.py, README)"
+    url: https://github.com/huggingface/transformers/tree/v4.30.0/examples/research_projects/distillation
+  - title: "PyTorch: torch.nn.KLDivLoss (reduction=batchmean, log_target)"
+    url: https://pytorch.org/docs/stable/generated/torch.nn.KLDivLoss.html
+viz: [distill-temperature]
+questions: [distill-*]

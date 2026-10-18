@@ -9,6 +9,7 @@ import BigramTable from "./BigramTable";
 import Bpe from "./Bpe";
 import CausalMask from "./CausalMask";
 import CrossAttention from "./CrossAttention";
+import DistillTemperature from "./DistillTemperature";
 import EncdecMasks from "./EncdecMasks";
 import GqaGroups from "./GqaGroups";
 import GradCheck from "./GradCheck";
@@ -45,6 +46,7 @@ export const VIZ_REGISTRY: Record<string, ComponentType> = {
   "bpe": Bpe,
   "causal-mask": CausalMask,
   "cross-attention": CrossAttention,
+  "distill-temperature": DistillTemperature,
   "encdec-masks": EncdecMasks,
   "gqa-groups": GqaGroups,
   "gradcheck": GradCheck,
