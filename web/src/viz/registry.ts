@@ -11,6 +11,7 @@ import GradCheck from "./GradCheck";
 import Hybrid from "./Hybrid";
 import KvCache from "./KvCache";
 import Masks from "./Masks";
+import MlpBoundary from "./MlpBoundary";
 import MoeRouting from "./MoeRouting";
 import Mtp from "./Mtp";
 import Nope from "./Nope";
@@ -32,6 +33,7 @@ export const VIZ_REGISTRY: Record<string, ComponentType> = {
   "hybrid": Hybrid,
   "kv-cache": KvCache,
   "masks": Masks,
+  "mlp-boundary": MlpBoundary,
   "moe-routing": MoeRouting,
   "mtp": Mtp,
   "nope": Nope,

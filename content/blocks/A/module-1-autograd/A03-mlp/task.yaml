@@ -1,0 +1,20 @@
+id: A03-mlp
+title: "MLP на скалярах: нейрон, слой, обучение"
+short_title: "MLP на Value"
+block: A
+module: module-1-autograd
+type: implement
+difficulty: medium
+depends_on: [A01-value]
+diff_from: A01-value
+tags: [mlp, training, sgd, autograd]
+entrypoint: [Neuron, Layer, MLP, mse_loss, zero_grad, sgd_step, train]
+time_estimate_min: 40
+papers: [backprop-1986]
+reading:
+  - title: "3Blue1Brown: Neural networks (видеосерия)"
+    url: https://www.3blue1brown.com/topics/neural-networks
+  - title: "TensorFlow Playground — интерактивное обучение маленьких сетей на 2D-данных"
+    url: https://playground.tensorflow.org/
+viz: [mlp-boundary]
+questions: [mlp-*]
