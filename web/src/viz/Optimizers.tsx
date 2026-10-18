@@ -72,7 +72,7 @@ const GRID = 44;
 export default function Optimizers() {
   const [surf, setSurf] = useState<Surf>("ravine");
   const [logLr, setLogLr] = useState(-1.7);
-  const [mu, setMu] = useState(0.9);
+  const [mu, setMu] = useState(0.7);
   const [logAdam, setLogAdam] = useState(-1);
   const [steps, setSteps] = useState(60);
   const lr = 10 ** logLr;
@@ -148,7 +148,7 @@ export default function Optimizers() {
       <p className="viz-caption">
         Фон показывает лосс (чем темнее, тем меньше), кружок — минимум, точка — старт. В овраге кривизна по вертикали в 40
         раз больше, чем по горизонтали. SGD с безопасным lr почти стоит вдоль оврага, а с lr больше 2/40 = 0.05 начинает
-        прыгать между стенками и расходится. Momentum гасит прыжки и разгоняется вдоль дна. Adam нормирует каждую
+        прыгать между стенками и расходится. Momentum гасит прыжки и разгоняется вдоль дна. Если поднять его до 0.9, инерция начнёт проносить точку мимо минимума, и траектория будет колебаться вдоль оврага. Adam нормирует каждую
         координату отдельно и идёт к минимуму почти по диагонали, шагами около lr. В повёрнутом овраге оси не совпадают
         с координатами, и это преимущество Adam пропадает.
       </p>
