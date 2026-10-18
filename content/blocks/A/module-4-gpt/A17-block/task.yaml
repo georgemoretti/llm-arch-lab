@@ -1,0 +1,20 @@
+id: A17-block
+title: "Блок трансформера: attention, MLP, остатки, pre-LN и post-LN"
+short_title: "Блок трансформера"
+block: A
+module: module-4-gpt
+type: implement
+difficulty: medium
+depends_on: [A16-attention, A05-layernorm-backward]
+diff_from: A16-attention
+tags: [transformer-block, residual, layernorm, pre-norm, mlp]
+entrypoint: [MLP, Block]
+time_estimate_min: 35
+papers: [attention-is-all-you-need, layernorm-placement]
+reading:
+  - title: "PyTorch docs: torch.nn.functional.gelu (approximate='tanh')"
+    url: https://pytorch.org/docs/stable/generated/torch.nn.functional.gelu.html
+  - title: "Sebastian Raschka: The Big LLM Architecture Comparison (раздел про размещение нормализации)"
+    url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
+viz: [norm-placement]
+questions: [block-*]
