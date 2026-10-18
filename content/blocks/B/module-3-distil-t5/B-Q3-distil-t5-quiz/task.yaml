@@ -1,0 +1,13 @@
+id: B-Q3-distil-t5-quiz
+title: "Квиз модуля: DistilBERT и T5"
+short_title: "Квиз: DistilBERT и T5"
+block: B
+module: module-3-distil-t5
+type: quiz
+difficulty: medium
+depends_on: [B12-distillation, B15-span-corruption]
+diff_from: null
+tags: [quiz, distillation, t5, interview]
+time_estimate_min: 30
+papers: []
+questions: [distill-*, t5-*, iv-positional-01, iv-positional-02]

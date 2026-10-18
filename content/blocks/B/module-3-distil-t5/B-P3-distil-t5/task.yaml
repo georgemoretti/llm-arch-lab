@@ -1,0 +1,19 @@
+id: B-P3-distil-t5
+title: "Статьи: дистилляция (Hinton et al.), DistilBERT, T5"
+short_title: "Статьи: дистилляция и T5"
+block: B
+module: module-3-distil-t5
+type: paper
+difficulty: medium
+depends_on: [B12-distillation, B15-span-corruption]
+diff_from: null
+tags: [paper, distillation, distilbert, t5]
+time_estimate_min: 60
+papers: [hinton-distillation, distilbert, t5]
+reading:
+  - title: "Google Research: text-to-text-transfer-transformer (код и чекпойнты T5)"
+    url: https://github.com/google-research/text-to-text-transfer-transformer
+  - title: "Hugging Face: research_projects/distillation (README DistilBERT)"
+    url: https://github.com/huggingface/transformers/tree/v4.30.0/examples/research_projects/distillation
+viz: [distill-temperature, t5-buckets]
+questions: [paper-hinton-*, paper-distilbert-*, paper-t5-*, t5-text-to-text-01]
