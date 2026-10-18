@@ -34,6 +34,7 @@ import Sinusoidal from "./Sinusoidal";
 import SoftmaxCe from "./SoftmaxCe";
 import SsdDecay from "./SsdDecay";
 import StateMemory from "./StateMemory";
+import T5Buckets from "./T5Buckets";
 import TrainingCurve from "./TrainingCurve";
 import Wordpiece from "./Wordpiece";
 
@@ -69,6 +70,7 @@ export const VIZ_REGISTRY: Record<string, ComponentType> = {
   "softmax-ce": SoftmaxCe,
   "ssd-decay": SsdDecay,
   "state-memory": StateMemory,
+  "t5-buckets": T5Buckets,
   "training-curve": TrainingCurve,
   "wordpiece": Wordpiece,
 };

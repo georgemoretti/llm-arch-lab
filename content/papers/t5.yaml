@@ -1,0 +1,7 @@
+id: t5
+title: "Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer"
+authors: "Raffel, Shazeer, Roberts, Lee, Narang, Matena, Zhou, Li, Liu"
+year: 2019
+venue: JMLR 2020
+url: https://arxiv.org/abs/1910.10683
+tags: [t5, encoder-decoder, span-corruption, relative-position]

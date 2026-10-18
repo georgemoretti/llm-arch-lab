@@ -1,0 +1,23 @@
+id: B14-t5-layer
+title: "Слой T5: RMSNorm, Pre-LN, attention без 1/√d с относительным bias"
+short_title: "Слой T5"
+block: B
+module: module-3-distil-t5
+type: implement
+difficulty: medium
+depends_on: [B13-t5-relative-bias, B04-decoder]
+recommended_after: [C01-rmsnorm, C08-norm-placement]
+diff_from: B04-decoder
+tags: [t5, encoder-decoder, rmsnorm, pre-ln, relative-position]
+entrypoint: [T5LayerNorm, T5Attention, T5Block, T5Stack, T5Model]
+time_estimate_min: 50
+papers: [t5]
+reading:
+  - title: "Hugging Face transformers: modeling_t5.py (исходный код, сверка имён)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/t5/modeling_t5.py
+  - title: "t5-small: config.json на Hugging Face"
+    url: https://huggingface.co/google-t5/t5-small/blob/main/config.json
+  - title: "t5-v1_1-small: config.json (GeGLU, без связанной головы)"
+    url: https://huggingface.co/google/t5-v1_1-small/blob/main/config.json
+viz: [t5-buckets]
+questions: [t5-layer-*]

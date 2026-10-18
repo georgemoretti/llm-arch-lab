@@ -1,0 +1,7 @@
+id: shaw-relative-2018
+title: "Self-Attention with Relative Position Representations"
+authors: "Shaw, Uszkoreit, Vaswani"
+year: 2018
+venue: NAACL 2018
+url: https://arxiv.org/abs/1803.02155
+tags: [relative-position, attention, positional-encoding]

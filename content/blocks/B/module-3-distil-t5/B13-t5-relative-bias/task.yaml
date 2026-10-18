@@ -1,0 +1,21 @@
+id: B13-t5-relative-bias
+title: "T5: относительный позиционный bias — бакеты расстояний"
+short_title: "Относительный bias T5"
+block: B
+module: module-3-distil-t5
+type: implement
+difficulty: medium
+depends_on: [B02-sinusoidal]
+recommended_after: [C03-rope]
+diff_from: B02-sinusoidal
+tags: [t5, positional-encoding, relative-position, attention]
+entrypoint: [relative_position_bucket, relative_position_bias]
+time_estimate_min: 35
+papers: [t5, shaw-relative-2018]
+reading:
+  - title: "Hugging Face transformers: modeling_t5.py (T5Attention._relative_position_bucket, compute_bias)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/t5/modeling_t5.py
+  - title: "t5-small: config.json на Hugging Face"
+    url: https://huggingface.co/google-t5/t5-small/blob/main/config.json
+viz: [t5-buckets]
+questions: [t5-bias-*, iv-positional-01, iv-positional-02]

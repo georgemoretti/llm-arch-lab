@@ -1,0 +1,18 @@
+id: B13d-t5-bias-debug
+title: "Отладка: энкодер T5 путает левый и правый контекст, а декодер не видит порядка"
+short_title: "Найди баг: bias T5"
+block: B
+module: module-3-distil-t5
+type: debug
+difficulty: easy
+depends_on: [B13-t5-relative-bias]
+diff_from: B13-t5-relative-bias
+tags: [t5, relative-position, debug]
+entrypoint: [relative_position_bucket, relative_position_bias]
+time_estimate_min: 15
+papers: []
+reading:
+  - title: "Hugging Face transformers: modeling_t5.py (T5Attention.compute_bias)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/t5/modeling_t5.py
+viz: [t5-buckets]
+questions: [t5-bias-*]
