@@ -1,0 +1,18 @@
+id: B11d-span-debug
+title: "Отладка: модель отвечает на вопросы, но ответы иногда обрывки"
+short_title: "Найди баг: QA"
+block: B
+module: module-2-bert
+type: debug
+difficulty: medium
+depends_on: [B11-finetune-heads]
+diff_from: B11-finetune-heads
+tags: [question-answering, decoding, debug]
+entrypoint: [SequenceClassifier, align_labels, qa_loss, best_span]
+time_estimate_min: 20
+papers: []
+reading:
+  - title: "Hugging Face LLM Course: Question answering (раздел Post-processing)"
+    url: https://huggingface.co/learn/llm-course/chapter7/7
+viz: []
+questions: [bert-heads-*]

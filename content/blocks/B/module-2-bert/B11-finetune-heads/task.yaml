@@ -1,0 +1,20 @@
+id: B11-finetune-heads
+title: "Головы дообучения: классификация, разметка токенов, extractive QA"
+short_title: "Головы дообучения"
+block: B
+module: module-2-bert
+type: implement
+difficulty: medium
+depends_on: [B10-bert-model]
+diff_from: B10-bert-model
+tags: [bert, fine-tuning, classification, ner, question-answering]
+entrypoint: [SequenceClassifier, align_labels, qa_loss, best_span]
+time_estimate_min: 45
+papers: [bert, squad]
+reading:
+  - title: "Hugging Face LLM Course: Token classification (выравнивание меток по подтокенам)"
+    url: https://huggingface.co/learn/llm-course/chapter7/2
+  - title: "Hugging Face LLM Course: Question answering (поиск лучшего span)"
+    url: https://huggingface.co/learn/llm-course/chapter7/7
+viz: [mlm-masking]
+questions: [bert-heads-*, iv-bert-05]
