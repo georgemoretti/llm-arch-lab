@@ -1,0 +1,22 @@
+id: A14-gpt2-tokenizer
+title: "Свой токенизатор с merges GPT-2: сверка с эталонным"
+short_title: "Токенизатор GPT-2"
+block: A
+module: module-3-tokenization
+type: implement
+difficulty: medium
+depends_on: [A13-pretokenize]
+diff_from: A13-pretokenize
+tags: [tokenization, bpe, gpt-2, weights]
+entrypoint: [load_gpt2_files, GPT2Tokenizer]
+time_estimate_min: 40
+papers: [gpt2]
+reading:
+  - title: "Hugging Face: openai-community/gpt2 (vocab.json, merges.txt, tokenizer.json)"
+    url: https://huggingface.co/openai-community/gpt2/tree/main
+  - title: "Hugging Face tokenizers: ByteLevel pre-tokenizer и модель BPE"
+    url: https://huggingface.co/docs/tokenizers/components
+  - title: "tiktokenizer: интерактивное сравнение токенизаторов разных моделей"
+    url: https://tiktokenizer.vercel.app/
+viz: [bpe]
+questions: [gpt2tok-*]
