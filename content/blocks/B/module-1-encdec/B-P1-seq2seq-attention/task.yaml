@@ -1,0 +1,19 @@
+id: B-P1-seq2seq-attention
+title: "Статьи: seq2seq, attention Bahdanau и энкодер-декодер Transformer"
+short_title: "Статьи: от seq2seq к Transformer"
+block: B
+module: module-1-encdec
+type: paper
+difficulty: medium
+depends_on: [B05-seq2seq]
+diff_from: null
+tags: [paper, seq2seq, attention, encoder-decoder]
+time_estimate_min: 60
+papers: [seq2seq-sutskever, bahdanau-2014, attention-is-all-you-need, label-smoothing]
+reading:
+  - title: "Jay Alammar: Visualizing A Neural Machine Translation Model (seq2seq с attention)"
+    url: https://jalammar.github.io/visualizing-neural-machine-translation-mechanics-of-seq2seq-models-with-attention/
+  - title: "Lilian Weng: Attention? Attention! (история механизма внимания)"
+    url: https://lilianweng.github.io/posts/2018-06-24-attention/
+viz: [cross-attention, encdec-masks]
+questions: [paper-seq2seq-*, paper-bahdanau-*, paper-aiayn-three-*, paper-aiayn-regularization-*, paper-aiayn-shared-*]

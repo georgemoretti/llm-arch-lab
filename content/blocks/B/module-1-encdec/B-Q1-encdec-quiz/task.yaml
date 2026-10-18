@@ -1,0 +1,13 @@
+id: B-Q1-encdec-quiz
+title: "Квиз модуля: Transformer — энкодер и декодер"
+short_title: "Квиз: энкодер-декодер"
+block: B
+module: module-1-encdec
+type: quiz
+difficulty: medium
+depends_on: [B06-num2words]
+diff_from: null
+tags: [quiz, encoder-decoder, attention, interview]
+time_estimate_min: 30
+papers: []
+questions: [encdec-*, iv-architecture-02, iv-architecture-03, iv-attention-03, iv-attention-05, iv-positional-01, iv-positional-02]
