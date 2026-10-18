@@ -1,0 +1,20 @@
+id: A12-bpe-encode
+title: "BPE: encode по рангам и decode через байты"
+short_title: "BPE: encode/decode"
+block: A
+module: module-3-tokenization
+type: implement
+difficulty: medium
+depends_on: [A11-bpe-train]
+diff_from: A11-bpe-train
+tags: [tokenization, bpe, utf-8]
+entrypoint: [encode, decode]
+time_estimate_min: 35
+papers: [bpe-sennrich]
+reading:
+  - title: "Python docs: Unicode HOWTO (UTF-8, bytes.decode, errors='replace')"
+    url: https://docs.python.org/3/howto/unicode.html
+  - title: "Andrej Karpathy: minbpe (минимальный BPE-токенизатор, код и упражнения)"
+    url: https://github.com/karpathy/minbpe
+viz: [bpe]
+questions: [bpe-encode-*, utf8-*]

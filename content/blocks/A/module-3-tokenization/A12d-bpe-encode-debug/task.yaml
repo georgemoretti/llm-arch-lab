@@ -1,0 +1,18 @@
+id: A12d-bpe-encode-debug
+title: "Отладка: токенизатор кодирует текст не так, как при обучении"
+short_title: "Найди баг: BPE encode"
+block: A
+module: module-3-tokenization
+type: debug
+difficulty: easy
+depends_on: [A12-bpe-encode]
+diff_from: A12-bpe-encode
+tags: [tokenization, bpe, debug]
+entrypoint: [encode, decode]
+time_estimate_min: 15
+papers: []
+reading:
+  - title: "Hugging Face LLM Course: Byte-Pair Encoding tokenization (раздел про токенизацию нового текста)"
+    url: https://huggingface.co/learn/llm-course/chapter6/5
+viz: [bpe]
+questions: [bpe-encode-*]
