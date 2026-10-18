@@ -1,0 +1,21 @@
+id: B06-num2words
+title: "Проект: seq2seq «число цифрами → число словами»"
+short_title: "Проект: число → слова"
+block: B
+module: module-1-encdec
+type: project
+difficulty: medium
+depends_on: [B05-seq2seq]
+recommended_after: [A09-training-loop]
+diff_from: A18-minigpt
+tags: [encoder-decoder, seq2seq, training, cross-attention, project]
+entrypoint: [encode_pair, collate, train_step, exact_match]
+time_estimate_min: 45
+papers: [attention-is-all-you-need, bahdanau-2014]
+reading:
+  - title: "Harvard NLP: The Annotated Transformer (раздел про обучение и жадное декодирование)"
+    url: https://nlp.seas.harvard.edu/annotated-transformer/
+  - title: "PyTorch tutorial: NLP From Scratch — Translation with a Sequence to Sequence Network and Attention"
+    url: https://pytorch.org/tutorials/intermediate/seq2seq_translation_tutorial.html
+viz: [cross-attention]
+questions: [encdec-project-*]
