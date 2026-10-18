@@ -50,7 +50,7 @@ Node.js не нужен: собранный интерфейс лежит в р�
 | A1. Autograd | `Value` с графом и backward, проверка градиентов, MLP на скалярах, backprop Linear / ReLU / softmax-CE, backward LayerNorm | 9 |
 | A2. Обучение нейросети | инициализация Xavier/Kaiming, SGD/Adam/AdamW, warmup + cosine, clipping, цикл обучения, языковая модель на символах | 10 |
 | A3. Токенизация | byte-level BPE: обучение, encode по рангам, decode через байты, пре-токенизация GPT-2, спецтокены, загрузка `merges.txt` GPT-2 (= `tokenizers`) | 8 |
-| A4. Свой GPT | эмбеддинги и позиции, weight tying, attention с causal-маской, блок pre-LN / post-LN, мини-GPT на корпусе курса: обучение (~30 с на CPU) и генерация | 10 |
+| A4. Свой GPT | эмбеддинги и позиции, weight tying, attention с causal-маской, блок pre-LN / post-LN, мини-GPT на корпусе курса: обучение (~30 с на CPU) и генерация | 8 |
 
 **Блок C — эволюция декодеров.**
 
