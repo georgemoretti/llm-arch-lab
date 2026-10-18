@@ -1,0 +1,20 @@
+id: A15-embeddings
+title: "Эмбеддинги токенов и позиций, weight tying"
+short_title: "Эмбеддинги и позиции"
+block: A
+module: module-4-gpt
+type: implement
+difficulty: easy
+depends_on: [A10-char-lm]
+diff_from: A10-char-lm
+tags: [embeddings, positional-encoding, weight-tying, language-model]
+entrypoint: [TokenPositionEmbedding, tie_weights, count_params, EmbeddingLM]
+time_estimate_min: 30
+papers: [gpt2, weight-tying]
+reading:
+  - title: "PyTorch docs: torch.nn.Embedding"
+    url: https://pytorch.org/docs/stable/generated/torch.nn.Embedding.html
+  - title: "PyTorch docs: модули и параметры (как модули делят один nn.Parameter)"
+    url: https://pytorch.org/docs/stable/notes/modules.html
+viz: [bigram-table]
+questions: [emb-*, tying-*]

@@ -1,0 +1,7 @@
+id: weight-tying
+title: "Using the Output Embedding to Improve Language Models"
+authors: "Press, Wolf"
+year: 2017
+venue: EACL 2017
+url: https://arxiv.org/abs/1608.05859
+tags: [embeddings, weight-tying]
