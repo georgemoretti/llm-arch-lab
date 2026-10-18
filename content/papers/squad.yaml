@@ -1,0 +1,7 @@
+id: squad
+title: "SQuAD: 100,000+ Questions for Machine Comprehension of Text"
+authors: "Rajpurkar, Zhang, Lopyrev, Liang"
+year: 2016
+venue: EMNLP
+url: https://arxiv.org/abs/1606.05250
+tags: [qa, dataset, extractive-qa]

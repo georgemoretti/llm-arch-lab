@@ -1,0 +1,21 @@
+id: B07-wordpiece
+title: "WordPiece: токенизатор BERT"
+short_title: "WordPiece"
+block: B
+module: module-2-bert
+type: implement
+difficulty: medium
+depends_on: [B06-num2words]
+recommended_after: [A12-bpe-encode]
+diff_from: A12-bpe-encode
+tags: [tokenization, wordpiece, bert]
+entrypoint: [strip_accents, basic_tokenize, wordpiece, tokenize]
+time_estimate_min: 35
+papers: [bert, wordpiece-gnmt]
+reading:
+  - title: "Hugging Face LLM Course: WordPiece tokenization"
+    url: https://huggingface.co/learn/llm-course/chapter6/6
+  - title: "Hugging Face tokenizers: BertNormalizer и BertPreTokenizer (документация компонентов)"
+    url: https://huggingface.co/docs/tokenizers/components
+viz: [wordpiece]
+questions: [bert-wordpiece-*, iv-tokenization-03, iv-bert-04]

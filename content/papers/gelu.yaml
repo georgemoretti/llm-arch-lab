@@ -1,0 +1,6 @@
+id: gelu
+title: "Gaussian Error Linear Units (GELUs)"
+authors: "Hendrycks, Gimpel"
+year: 2016
+url: https://arxiv.org/abs/1606.08415
+tags: [activation, gelu]
