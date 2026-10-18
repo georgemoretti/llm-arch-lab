@@ -1,0 +1,24 @@
+id: A
+title: "Фундамент: от производной до своего GPT"
+optional: true
+description: >
+  Необязательный блок для тех, кто хочет собрать основы руками: autograd на скалярах, backprop по тензорам,
+  оптимизаторы и обучение, BPE-токенизатор и маленький GPT, обученный на CPU. Если всё это уже знакомо —
+  начинай сразу с блока C.
+modules:
+  - id: module-1-autograd
+    title: "Autograd: производные своими руками"
+    description: "Граф вычислений, backward, проверка градиентов, backprop по тензорам: softmax + cross-entropy, LayerNorm."
+  - id: module-2-training
+    title: "Обучение нейросети"
+    description: "Инициализация, SGD / Adam / AdamW, расписание LR, тренировочный цикл, языковая модель на символах."
+  - id: module-3-tokenization
+    title: "Токенизация"
+    description: "Byte-level BPE: обучение, encode/decode, пре-токенизация как в GPT-2."
+  - id: module-4-gpt
+    title: "Свой GPT"
+    description: "Embeddings, attention с causal-маской, блок трансформера, мини-GPT на символах."
+baselines:
+  scalar-math:
+    title: "Ручное дифференцирование"
+    description: "Производные выписываются на бумаге для каждой формулы отдельно; общего механизма нет."

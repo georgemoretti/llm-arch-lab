@@ -56,9 +56,10 @@ export function Markdown({ text, viz = [], linkTasks = false }: { text: string; 
   );
 }
 
-// Упоминания задач в тексте («см. C05», «C01d-rmsnorm-debug») → ссылка «1.5 · KV-cache».
+// Упоминания задач в тексте («см. C05», «A01d-…-debug») → ссылка «C1.5 · KV-cache». Ссылкой становится только код
+// существующей задачи, так что «A100» или «B2» в тексте не трогаются.
 // Код (`…`, ```…```) и существующие ссылки не трогаем: плагин видит только узлы text.
-const TASK_REF_RE = /(?<![\w/.-])(C-[A-Z]\d+[a-z]?|C\d{2}[a-z]?)((?:-[a-z0-9]+)*)(?![\w])/g;
+const TASK_REF_RE = /(?<![\w/.-])([A-Z]-[A-Z]\d+[a-z]?|[A-Z]\d{2}[a-z]?)((?:-[a-z0-9]+)*)(?![\w])/g;
 
 type MdNode = { type: string; value?: string; children?: MdNode[]; url?: string; title?: string; data?: unknown };
 

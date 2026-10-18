@@ -7,7 +7,7 @@ import { TYPE_ICON, taskLabel, withDebugUnderParent } from "../courseIndex";
 import { usePersistent } from "../theme";
 import { StatusIcon } from "./StatusIcon";
 
-type ModuleNav = { id: string; title: string; num: number; tasks: TaskSummary[] };
+type ModuleNav = { id: string; title: string; num: string; tasks: TaskSummary[] };
 
 function useCourse(reloadKey: unknown): CourseData | null {
   const [data, setData] = useState<CourseData | null>(null);
@@ -19,7 +19,7 @@ function useCourse(reloadKey: unknown): CourseData | null {
 
 function modulesOf(data: CourseData): ModuleNav[] {
   return data.blocks.flatMap((b) =>
-    b.modules.filter((m) => m.tasks.length).map((m) => ({ id: m.id, title: m.title, num: b.modules.indexOf(m), tasks: withDebugUnderParent(m.tasks) })),
+    b.modules.filter((m) => m.tasks.length).map((m) => ({ id: m.id, title: m.title, num: `${b.id}${m.number}`, tasks: withDebugUnderParent(m.tasks) })),
   );
 }
 

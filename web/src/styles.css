@@ -475,7 +475,7 @@ main {
 }
 .task-num {
   flex: none;
-  min-width: 30px;
+  min-width: 38px;
   font: 600 12px var(--mono);
   color: var(--muted);
   text-align: right;
@@ -484,7 +484,7 @@ main {
   font-size: 13px;
 }
 .task-row.sub {
-  padding-left: 44px;
+  padding-left: 52px;
   background: color-mix(in srgb, var(--panel-2) 45%, transparent);
 }
 .task-row.sub .task-title {
@@ -496,10 +496,11 @@ main {
 .module-num {
   display: inline-grid;
   place-items: center;
-  width: 20px;
+  min-width: 20px;
   height: 20px;
+  padding: 0 5px;
   margin-right: 8px;
-  border-radius: 50%;
+  border-radius: 10px;
   background: var(--text);
   color: var(--bg);
   font: 700 11px var(--mono);
@@ -2590,7 +2591,7 @@ a.btn:hover {
   font-weight: 600;
 }
 .course-nav-num {
-  min-width: 26px;
+  min-width: 34px;
   font-size: 11.5px;
 }
 .course-nav-name {

@@ -13,7 +13,7 @@ export interface TaskSummary {
   id: string;
   title: string;
   short_title: string; // для навигации: граф, крошки, «после: …»
-  number: string | null; // «1.3» = модуль 1, шаг 3; у debug — номер задачи, которую чинит
+  number: string | null; // «C1.3» = блок C, модуль 1, шаг 3; у debug — номер задачи, которую чинит
   parent: string | null; // debug → implement-задача, к которой относится
   block: string;
   module: string;
@@ -31,6 +31,7 @@ export interface ModuleInfo {
   id: string;
   title: string;
   description: string;
+  number: number; // из id «module-<N>-…»
   tasks: TaskSummary[];
 }
 
@@ -38,6 +39,7 @@ export interface BlockInfo {
   id: string;
   title: string;
   description: string;
+  optional: boolean; // необязательный блок (фундамент): не предлагается «следующим» тем, кто уже идёт дальше
   baselines: Record<string, { title: string; path: string | null; description: string }>;
   modules: ModuleInfo[];
 }

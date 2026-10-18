@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { api, type CourseData } from "../api";
+import { api, type BlockInfo, type CourseData } from "../api";
 import { TYPE_ICON, taskLabel, withDebugUnderParent } from "../courseIndex";
 import { taskHref } from "../router";
 import { usePersistent } from "../theme";
@@ -21,7 +21,11 @@ export function CourseMap() {
   const all = data.blocks.flatMap((b) => b.modules.flatMap((m) => m.tasks));
   const solved = all.filter((t) => t.progress.status === "solved").length;
   const byId = new Map(all.map((t) => [t.id, t]));
-  const next = all.find((t) => t.progress.status !== "solved" && t.depends_on.every((d) => all.find((x) => x.id === d)?.progress.status === "solved"));
+  // Необязательный блок (фундамент) не предлагаем тем, кто его не начинал, но уже решает обязательные.
+  const started = (b: BlockInfo) => b.modules.some((m) => m.tasks.some((t) => t.progress.status !== "new"));
+  const skipOptional = data.blocks.some((b) => !b.optional && started(b));
+  const candidates = data.blocks.filter((b) => !(b.optional && skipOptional && !started(b))).flatMap((b) => b.modules.flatMap((m) => m.tasks));
+  const next = candidates.find((t) => t.progress.status !== "solved" && t.depends_on.every((d) => byId.get(d)?.progress.status === "solved"));
 
   return (
     <div className="map">
@@ -60,7 +64,9 @@ export function CourseMap() {
         return (
           <section key={block.id} className="block">
             <h2>
+              <span className="block-id">{block.id}</span>
               {block.title}
+              {block.optional && <span className="chip" title="Можно пропустить, если основы уже знакомы">необязательный</span>}
             </h2>
             {block.description && <p className="muted block-desc">{block.description}</p>}
 
@@ -73,11 +79,11 @@ export function CourseMap() {
               </div>
             )}
 
-            {block.modules.map((m, mi) => (
+            {block.modules.map((m) => (
               <div key={m.id} className={`module ${m.tasks.length ? "" : "empty"}`}>
                 <div className="module-head">
                   <h3>
-                    <span className="module-num" title={`Модуль ${mi}`}>{mi}</span>
+                    <span className="module-num" title={`Блок ${block.id}, модуль ${m.number}`}>{m.number}</span>
                     {m.title}
                   </h3>
                   <span className="muted">{m.description}</span>

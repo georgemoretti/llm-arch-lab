@@ -31,15 +31,40 @@ def test_course_map_gives_human_labels_instead_of_ids(client, toy_root):
     write_task(toy_root, "Z-P1-paper", type_="paper", meta={"short_title": "Статья про сложение"})
     write_task(toy_root, "Z03-next", module="module-2")
     tasks = {t["id"]: t for b in client.get("/api/course").json()["blocks"] for m in b["modules"] for t in m["tasks"]}
-    # «модуль.шаг»: номер модуля — позиция в block.yaml, шаги — implement/project по порядку
-    assert (tasks["Z01-add"]["number"], tasks["Z02-more"]["number"], tasks["Z03-next"]["number"]) == ("0.1", "0.2", "1.1")
+    # «блок модуль.шаг»: номер модуля — из id «module-<N>», шаги — implement/project по порядку
+    assert (tasks["Z01-add"]["number"], tasks["Z02-more"]["number"], tasks["Z03-next"]["number"]) == ("Z1.1", "Z1.2", "Z2.1")
     # debug получает номер задачи, которую чинит, и ссылку на неё; paper — без номера
-    assert (tasks["Z01d-add-debug"]["number"], tasks["Z01d-add-debug"]["parent"]) == ("0.1", "Z01-add")
+    assert (tasks["Z01d-add-debug"]["number"], tasks["Z01d-add-debug"]["parent"]) == ("Z1.1", "Z01-add")
     assert tasks["Z-P1-paper"]["number"] is None
     # short_title: явный из task.yaml или title без служебного префикса
     assert tasks["Z-P1-paper"]["short_title"] == "Статья про сложение"
     assert tasks["Z01d-add-debug"]["short_title"] == "сложение врёт"
     assert client.get("/api/tasks/Z01d-add-debug").json()["parent"] == "Z01-add"
+
+
+def test_two_blocks_have_own_numbers_order_and_optional_flag(client, toy_root):
+    block = toy_root / "content" / "blocks" / "Y"
+    block.mkdir()
+    (block / "block.yaml").write_text(
+        "id: Y\ntitle: Фундамент\noptional: true\nmodules:\n  - {id: module-1-basics, title: Основы}\n", encoding="utf-8")
+    write_task(toy_root, "Y01-first", block="Y", module="module-1-basics")
+    # межблочная зависимость — допустима (рекомендация «после: …»)
+    write_task(toy_root, "Z03-next", module="module-2", depends_on=["Y01-first"])
+    data = client.get("/api/course").json()
+    assert [(b["id"], b["optional"]) for b in data["blocks"]] == [("Y", True), ("Z", False)]
+    assert [m["number"] for m in data["blocks"][0]["modules"]] == [1]
+    tasks = {t["id"]: t for b in data["blocks"] for m in b["modules"] for t in m["tasks"]}
+    # один и тот же «модуль 1, шаг 1» в двух блоках различается буквой блока
+    assert (tasks["Y01-first"]["number"], tasks["Z01-add"]["number"]) == ("Y1.1", "Z1.1")
+    assert not [i for i in data["issues"] if i["level"] == "error"]
+
+
+def test_module_ids_must_be_unique_across_blocks(toy_root):
+    from llmlab.content_loader import load_course
+    block = toy_root / "content" / "blocks" / "Y"
+    block.mkdir()
+    (block / "block.yaml").write_text("id: Y\ntitle: Y\nmodules:\n  - {id: module-1, title: M}\n", encoding="utf-8")
+    assert any("уникальны во всём курсе" in i.message for i in load_course(toy_root).errors)
 
 
 def test_task_detail(client):

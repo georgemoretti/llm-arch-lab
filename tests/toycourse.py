@@ -27,13 +27,13 @@ STARTER = "def add(a, b):\n    raise NotImplementedError('add')\n"
 BUGGY = "def add(a, b):\n    return a + abs(b)\n"  # ловится только тестом с отрицательными
 
 
-def write_task(root: Path, task_id: str, *, type_: str = "implement", module: str = "module-1",
+def write_task(root: Path, task_id: str, *, type_: str = "implement", module: str = "module-1", block: str = "Z",
                depends_on: list[str] | None = None, files: dict[str, str] | None = None,
                meta: dict | None = None) -> Path:
-    task_dir = root / "content" / "blocks" / "Z" / module / task_id
+    task_dir = root / "content" / "blocks" / block / module / task_id
     task_dir.mkdir(parents=True, exist_ok=True)
     data = {
-        "id": task_id, "title": f"Задача {task_id}", "block": "Z", "module": module,
+        "id": task_id, "title": f"Задача {task_id}", "block": block, "module": module,
         "type": type_, "difficulty": "easy", "depends_on": depends_on or [],
         "diff_from": None, "tags": ["toy"], "entrypoint": "add", "time_estimate_min": 15,
         **(meta or {}),

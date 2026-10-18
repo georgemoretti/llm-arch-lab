@@ -230,6 +230,11 @@ class Module(_Strict):
     title: str
     description: str = ""
 
+    def number(self, position: int) -> int:
+        """Номер модуля в навигации: из id «module-<N>-…», иначе позиция в block.yaml."""
+        m = re.match(r"module-(\d+)(?:-|$)", self.id)
+        return int(m.group(1)) if m else position
+
 
 class Baseline(_Strict):
     title: str
@@ -241,6 +246,9 @@ class Block(_Strict):
     id: str
     title: str
     description: str = ""
+    # Необязательный блок (фундамент A): карта его помечает и не предлагает «следующей» тем, кто уже идёт по
+    # обязательным блокам.
+    optional: bool = False
     modules: list[Module] = Field(default_factory=list)
     baselines: dict[str, Baseline] = Field(default_factory=dict)
 
@@ -287,13 +295,14 @@ class Course:
         return out
 
     def labels(self) -> dict[str, dict]:
-        """Номера для навигации вместо id: «1.3» = модуль 1, шаг 3.
+        """Номера для навигации вместо id: «C1.3» = блок C, модуль 1, шаг 3.
 
-        Нумеруются implement/project в порядке topo_order внутри модуля (номер модуля — его
-        позиция в block.yaml). debug получает номер и ссылку `parent` на задачу, которую чинит
-        (первая implement-зависимость); paper/quiz — без номера.
+        Нумеруются implement/project в порядке topo_order внутри модуля (номер модуля — из id
+        «module-<N>-…», см. `Module.number`). Буква блока нужна, потому что «1.3» есть в каждом блоке.
+        debug получает номер и ссылку `parent` на задачу, которую чинит (первая implement-зависимость);
+        paper/quiz — без номера.
         """
-        module_no = {(b.id, m.id): i for b in self.blocks.values() for i, m in enumerate(b.modules)}
+        module_no = {(b.id, m.id): f"{b.id}{m.number(i)}" for b in self.blocks.values() for i, m in enumerate(b.modules)}
         counters: dict[tuple[str, str], int] = {}
         out: dict[str, dict] = {}
         order = self.topo_order()
@@ -465,6 +474,14 @@ def load_course(root: Path | None = None) -> Course:
 
 def _check_references(course: Course) -> None:
     baselines = {name for b in course.blocks.values() for name in b.baselines}
+    # Interview и таблица архитектур ищут модуль по id без блока — id должны быть уникальны во всём курсе.
+    seen_modules: dict[str, str] = {}
+    for b in course.blocks.values():
+        for m in b.modules:
+            if m.id in seen_modules:
+                course.issues.append(Issue("error", f"content/blocks/{b.id}/block.yaml",
+                                           f"модуль '{m.id}' уже есть в блоке {seen_modules[m.id]}: id модулей уникальны во всём курсе"))
+            seen_modules.setdefault(m.id, b.id)
     for task in course.tasks.values():
         where = _rel(task.dir / "task.yaml", course.root)
         block = course.blocks.get(task.block)

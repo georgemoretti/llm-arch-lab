@@ -187,12 +187,12 @@ def create_app(root: Path | None = None) -> FastAPI:
         blocks = []
         for block in c.blocks.values():
             modules = []
-            for m in block.modules:
+            for i, m in enumerate(block.modules):
                 tasks = [task_summary(c.tasks[t], statuses, labels) for t in order
                          if c.tasks[t].block == block.id and c.tasks[t].module == m.id]
-                modules.append({**m.model_dump(), "tasks": tasks})
+                modules.append({**m.model_dump(), "number": m.number(i), "tasks": tasks})
             blocks.append({
-                "id": block.id, "title": block.title, "description": block.description,
+                "id": block.id, "title": block.title, "description": block.description, "optional": block.optional,
                 "baselines": {k: v.model_dump() for k, v in block.baselines.items()},
                 "modules": modules,
             })
