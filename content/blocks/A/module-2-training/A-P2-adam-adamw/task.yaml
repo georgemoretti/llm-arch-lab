@@ -1,0 +1,17 @@
+id: A-P2-adam-adamw
+title: "Статьи: Adam и AdamW"
+short_title: "Статьи: Adam, AdamW"
+block: A
+module: module-2-training
+type: paper
+difficulty: medium
+depends_on: [A07-optimizers, A08-lr-schedule]
+diff_from: null
+tags: [paper, optimizer, adam, adamw]
+time_estimate_min: 45
+papers: [adam, adamw, sgdr]
+reading:
+  - title: "Sebastian Ruder: An overview of gradient descent optimization algorithms"
+    url: https://www.ruder.io/optimizing-gradient-descent/
+viz: [optimizers, lr-schedule]
+questions: [paper-adam-*, paper-adamw-*]

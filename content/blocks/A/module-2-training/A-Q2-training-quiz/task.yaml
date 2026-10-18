@@ -1,0 +1,13 @@
+id: A-Q2-training-quiz
+title: "Квиз модуля: Обучение нейросети"
+short_title: "Квиз: Обучение"
+block: A
+module: module-2-training
+type: quiz
+difficulty: medium
+depends_on: [A10-char-lm]
+diff_from: A03-mlp
+tags: [quiz, training, optimizer, interview]
+time_estimate_min: 30
+papers: []
+questions: [init-*, optim-*, schedule-*, clip-*, loop-*, charlm-*, iv-training-*]

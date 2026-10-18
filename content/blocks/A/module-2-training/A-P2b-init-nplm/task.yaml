@@ -1,0 +1,15 @@
+id: A-P2b-init-nplm
+title: "Статьи: Glorot 2010, He 2015 (инициализация) и Bengio 2003 (нейросетевая LM)"
+short_title: "Статьи: инициализация, NPLM"
+block: A
+module: module-2-training
+type: paper
+difficulty: medium
+depends_on: [A06-init, A10-char-lm]
+diff_from: null
+tags: [paper, initialization, language-model, embeddings]
+time_estimate_min: 50
+papers: [glorot-2010, kaiming-2015, bengio-2003]
+reading: []
+viz: [init-depth, bigram-table]
+questions: [paper-glorot-*, paper-he-*, paper-bengio-*]
