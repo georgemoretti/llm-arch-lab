@@ -47,7 +47,8 @@ Node.js не нужен: собранный интерфейс лежит в р�
 | модуль | что реализуешь | задач |
 |---|---|---|
 | A1. Autograd | `Value` с графом и backward, проверка градиентов, MLP на скалярах, backprop Linear / ReLU / softmax-CE, backward LayerNorm | 9 |
-| A2–A4 | обучение (Adam, AdamW, расписание LR), токенизация (BPE), свой GPT | скоро |
+| A2. Обучение нейросети | инициализация Xavier/Kaiming, SGD/Adam/AdamW, warmup + cosine, clipping, цикл обучения, языковая модель на символах | 10 |
+| A3–A4 | токенизация (BPE), свой GPT | скоро |
 
 **Блок C — эволюция декодеров.**
 
