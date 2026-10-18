@@ -321,7 +321,99 @@ attention уже понятны. Блок A закрывает этот фунд
 
 ---
 
-## Позже (блоки B, D)
+## Блок B — Энкодеры: от Transformer к ModernBERT и эмбеддингам
 
-B — энкодеры (Transformer enc-dec, BERT, RoBERTa, DistilBERT, T5, ModernBERT, Sentence-BERT);
+**Зачем:** блок C — только декодеры. Но классификация, разметка, извлечение ответов, эмбеддинги для поиска
+и reranking в проде держатся на энкодерах, а исходный Transformer был энкодер-декодером. Блок B показывает
+вторую ветку эволюции: Transformer (2017) → BERT → RoBERTa / DistilBERT → T5 → ModernBERT → Sentence-BERT.
+Блок необязательный и не нужен для C. Для старта достаточно A16–A17 (attention, блок), multi-head
+объясняется в B01 заново.
+
+**Общие правила блока:**
+- Реализации на `torch.nn` без готовых слоёв трансформера: `nn.MultiheadAttention`, `nn.Transformer*`,
+  `F.scaled_dot_product_attention` служат эталонами в тестах и запрещены в коде пользователя.
+- Имена параметров — как в Hugging Face (`BertModel`, `T5Model`, `ModernBertModel`), где задача сверяется с
+  `transformers` на случайных весах. Тесты с реальными весами — `@pytest.mark.weights`.
+- Обучение в тестах — игрушечные синтетические данные, < 2 с; проекты обучаются ~1 мин на CPU вне тестов.
+- Гиперпараметры реальных моделей — только из `config.json` на HF или статей, со ссылкой.
+
+### Фаза B1 — Модуль 1: Transformer encoder-decoder
+
+| id | Задача | Тип |
+|----|--------|-----|
+| B01 | Padding-маска и двунаправленное multi-head attention: маска ключей `[B, 1, 1, S]`, разные длины запросов и ключей (`T ≠ S`) | implement |
+| B02 | Синусоидальные позиции (§3.5): формула, PE(pos + k) — поворот PE(pos), скалярное произведение зависит только от k; эмбеддинги × √d_model | implement |
+| B03 | Энкодер: слой Post-LN (как в статье) и Pre-LN, стопка слоёв; паддинг не влияет на реальные токены | implement |
+| B04 | Cross-attention и слой декодера: masked self-attention → cross-attention → FFN; Q из декодера, K/V из энкодера | implement |
+| B05 | Seq2seq целиком: shift right, teacher forcing, label smoothing с `ignore_index`, greedy decode с одним проходом энкодера | implement |
+| B06 | Проект: обучить seq2seq «число цифрами → число словами» (согласование «тысяча / тысячи / тысяч»), exact match на отложенных числах, карта cross-attention | project |
+| B01d | Padding-маска наложена на ось запросов, а не ключей: nan на PAD и протечка PAD в реальные токены | debug |
+| B04d | В cross-attention попала causal-маска: ранние позиции цели не видят конец источника | debug |
+| B05d | shift right через `torch.roll`: на позиции 0 вместо BOS — последний токен цели | debug |
+| B-P1 | Статьи: Sutskever et al. 2014 (seq2seq), Bahdanau et al. 2014 (attention в переводе), Vaswani et al. 2017 (энкодер-декодер, label smoothing) | paper |
+| B-Q1 | Квиз по модулю | quiz |
+
+Визуализации: **V-encdec-masks** (три матрицы внимания энкодер-декодера: self с паддингом, causal + паддинг,
+cross; длины и паддинг ползунками), **V-sinusoidal** (тепловая карта PE, скалярное произведение от сдвига),
+**V-cross-attention** (выравнивание цифры → слова из предзаписанного прогона B06).
+
+### Фаза B2 — Модуль 2: BERT
+
+| id | Задача | Тип |
+|----|--------|-----|
+| B07 | WordPiece: basic-токенизация (регистр, пунктуация), greedy longest-match-first с `##`, `[UNK]` на всё слово | implement |
+| B08 | Вход BERT: `[CLS] A [SEP] B [SEP]`, `token_type_ids`, `attention_mask`, обрезка пары longest-first; эмбеддинги word + position + token_type → LayerNorm | implement |
+| B09 | MLM-маскирование: 15 %, 80 / 10 / 10, спецтокены и PAD не трогаем, labels = −100; whole word masking | implement |
+| B10 | Модель BERT: Post-LN энкодер с GELU, MLM-голова (transform → LN → декодер, связанный с эмбеддингами, + bias), pooler; == `BertForMaskedLM` на случайных весах; weights-тест fill-mask | implement |
+| B11 | Головы дообучения: классификация по pooler, разметка токенов (метка на первом субтокене), extractive QA (лучший span с `start ≤ end ≤ start + L`) | implement |
+| B09d | Маскирование выбирает и `[CLS]` / `[SEP]` / PAD | debug |
+| B11d | QA: start и end выбираются независимыми argmax — span может быть «перевёрнутым» | debug |
+| B-P2 | Статьи: BERT (Devlin et al. 2018), RoBERTa (Liu et al. 2019) | paper |
+| B-Q2 | Квиз по модулю | quiz |
+
+Визуализации: **V-wordpiece** (разбор слова по шагам longest-match), **V-mlm-masking** (какие токены выбраны и
+чем заменены, 80/10/10 на большом тексте).
+
+### Фаза B3 — Модуль 3: DistilBERT и T5
+
+| id | Задача | Тип |
+|----|--------|-----|
+| B12 | Дистилляция: KL на мягких метках с температурой (× T²), смесь с hard loss, cosine-loss скрытых состояний; ученик из каждого второго слоя учителя (DistilBERT) | implement |
+| B13 | T5: относительный позиционный bias — бакеты (близкие точно, дальние логарифмически), двунаправленный и causal режим, один bias на все слои | implement |
+| B14 | Слой T5: RMSNorm без центрирования (T5LayerNorm), Pre-LN, FFN без bias, attention без 1/√d; == `T5Model` на случайных весах | implement |
+| B15 | Span corruption: доля шума 15 %, средняя длина спана 3, sentinel-токены во входе и в цели | implement |
+| B13d | Знак относительной позиции перепутан (query − key вместо key − query) | debug |
+| B15d | Sentinel-токены в цели идут не в том порядке, что во входе | debug |
+| B-P3 | Статьи: Hinton et al. 2015 (дистилляция), DistilBERT (Sanh et al. 2019), T5 (Raffel et al. 2020) | paper |
+| B-Q3 | Квиз по модулю | quiz |
+
+Визуализации: **V-distill-temperature** (softmax учителя при разных T), **V-t5-buckets** (номер бакета от
+расстояния, двунаправленный и causal).
+
+### Фаза B4 — Модуль 4: ModernBERT и эмбеддинги текста
+
+| id | Задача | Тип |
+|----|--------|-----|
+| B16 | Слой ModernBERT: RoPE, GeGLU, без bias, Pre-LN, чередование global / local attention (окно и шаг — из config.json) | implement |
+| B17 | Unpadding: упаковка батча без PAD (`cu_seqlens`, индексы), блочно-диагональная маска == батч с паддингом; доля сэкономленных FLOPs | implement |
+| B18 | Sentence-эмбеддинги: mean pooling по маске, CLS pooling, L2-нормировка, косинус; bi-encoder и cross-encoder | implement |
+| B19 | Контрастивное обучение: InfoNCE с in-batch негативами и температурой, симметричный вариант; recall@k | implement |
+| B20 | Проект: мини-поиск по корпусу курса — bi-encoder на B16, обучение на парах «фрагмент ↔ абзац», сравнение с мешком слов | project |
+| B17d | `cu_seqlens` со сдвигом на 1: соседние тексты видят друг друга | debug |
+| B18d | Mean pooling усредняет и PAD: эмбеддинг зависит от длины паддинга | debug |
+| B-P4 | Статьи: Sentence-BERT (Reimers & Gurevych 2019), ModernBERT (Warner et al. 2024), E5 / контрастивное предобучение | paper |
+| B-Q4 | Квиз по модулю + итоговый по блоку | quiz |
+
+Визуализации: **V-unpadding** (батч с паддингом против упакованного), **V-embedding-space** (косинусы до и
+после контрастивного обучения, анизотропия).
+
+**В конце B4:** таблица «энкодеры → декодеры» (что общего с блоком C), CHANGELOG, выпуск **v0.3.0**.
+
+Вопросы с собеседований: в базе есть вопросы про BERT, MLM, bi-/cross-encoder, эмбеддинги для поиска
+(`interview-encoders-retrieval.yaml`, `interview-transformer.yaml`) — привязать к задачам B через глобы.
+
+---
+
+## Позже (блок D)
+
 D — обучение и инференс (SFT, LoRA, DPO, GRPO, квантизация, speculative decoding). Формат задач тот же.
