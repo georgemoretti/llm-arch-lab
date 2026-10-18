@@ -119,8 +119,8 @@ def split_special(text: str, special: dict[str, int]) -> list[str]:
     """Разрезать текст по спецтокенам, сохранив их отдельными элементами; пустые куски выбросить."""
     if not special:
         return [text] if text else []
-    # длинные спецтокены — первыми, чтобы `<|a|>` не съел начало `<|a|b|>`
-    pattern = "(" + "|".join(regex.escape(s) for s in sorted(special, key=len, reverse=True)) + ")"
+    # escape обязателен: в `<|endoftext|>` символ | — это «или» регулярки; скобки сохраняют разделители
+    pattern = "(" + "|".join(regex.escape(s) for s in special) + ")"
     return [part for part in regex.split(pattern, text) if part]
 
 

@@ -1,0 +1,22 @@
+id: A13-pretokenize
+title: "Пре-токенизация GPT-2, спецтокены и byte ↔ unicode"
+short_title: "Пре-токенизация"
+block: A
+module: module-3-tokenization
+type: implement
+difficulty: medium
+depends_on: [A12-bpe-encode]
+diff_from: A12-bpe-encode
+tags: [tokenization, bpe, regex, special-tokens, gpt-2]
+entrypoint: [pretokenize, bytes_to_unicode, train_regex_bpe, split_special, encode_with_special, decode_with_special]
+time_estimate_min: 50
+papers: [gpt2]
+reading:
+  - title: "OpenAI GPT-2: encoder.py (регулярка и bytes_to_unicode в исходном коде)"
+    url: https://github.com/openai/gpt-2/blob/master/src/encoder.py
+  - title: "Документация модуля regex (классы Unicode \\p{L}, \\p{N})"
+    url: https://pypi.org/project/regex/
+  - title: "tiktoken: быстрый BPE-токенизатор OpenAI"
+    url: https://github.com/openai/tiktoken
+viz: [bpe]
+questions: [pretok-*, special-*, iv-tokenization-02]

@@ -1,0 +1,18 @@
+id: A13d-decode-debug
+title: "Отладка: после decode в тексте появляются «�»"
+short_title: "Найди баг: decode"
+block: A
+module: module-3-tokenization
+type: debug
+difficulty: easy
+depends_on: [A13-pretokenize]
+diff_from: A13-pretokenize
+tags: [tokenization, utf-8, debug]
+entrypoint: [pretokenize, bytes_to_unicode, train_regex_bpe, split_special, encode_with_special, decode_with_special]
+time_estimate_min: 15
+papers: []
+reading:
+  - title: "Python docs: Unicode HOWTO (UTF-8, bytes.decode, errors='replace')"
+    url: https://docs.python.org/3/howto/unicode.html
+viz: [bpe]
+questions: [utf8-*]
