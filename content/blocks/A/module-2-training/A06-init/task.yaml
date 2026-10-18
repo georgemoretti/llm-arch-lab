@@ -1,0 +1,20 @@
+id: A06-init
+title: "Инициализация весов: Xavier и Kaiming"
+short_title: "Инициализация"
+block: A
+module: module-2-training
+type: implement
+difficulty: easy
+depends_on: [A03-mlp]
+diff_from: A03-mlp
+tags: [initialization, training, xavier, kaiming]
+entrypoint: [gain, xavier_uniform_, kaiming_normal_, activation_stds]
+time_estimate_min: 30
+papers: [glorot-2010, kaiming-2015]
+reading:
+  - title: "PyTorch docs: torch.nn.init"
+    url: https://pytorch.org/docs/stable/nn.init.html
+  - title: "deeplearning.ai: Initializing neural networks (интерактивная статья)"
+    url: https://www.deeplearning.ai/ai-notes/initialization/index.html
+viz: [init-depth]
+questions: [init-*]

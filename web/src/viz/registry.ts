@@ -9,6 +9,7 @@ import CausalMask from "./CausalMask";
 import GqaGroups from "./GqaGroups";
 import GradCheck from "./GradCheck";
 import Hybrid from "./Hybrid";
+import InitDepth from "./InitDepth";
 import KvCache from "./KvCache";
 import LayerNormGrad from "./LayerNormGrad";
 import Masks from "./Masks";
@@ -33,6 +34,7 @@ export const VIZ_REGISTRY: Record<string, ComponentType> = {
   "gqa-groups": GqaGroups,
   "gradcheck": GradCheck,
   "hybrid": Hybrid,
+  "init-depth": InitDepth,
   "kv-cache": KvCache,
   "layernorm-grad": LayerNormGrad,
   "masks": Masks,

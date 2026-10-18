@@ -1,0 +1,7 @@
+id: glorot-2010
+title: "Understanding the difficulty of training deep feedforward neural networks"
+authors: "Glorot, Bengio"
+year: 2010
+venue: AISTATS
+url: https://proceedings.mlr.press/v9/glorot10a.html
+tags: [initialization]

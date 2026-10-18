@@ -1,0 +1,7 @@
+id: kaiming-2015
+title: "Delving Deep into Rectifiers: Surpassing Human-Level Performance on ImageNet Classification"
+authors: "He, Zhang, Ren, Sun"
+year: 2015
+venue: ICCV
+url: https://arxiv.org/abs/1502.01852
+tags: [initialization, relu]
