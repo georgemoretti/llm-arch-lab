@@ -21,6 +21,7 @@ import QkNorm from "./QkNorm";
 import RmsNorm from "./RmsNorm";
 import RopeRotation from "./RopeRotation";
 import Sampling from "./Sampling";
+import SoftmaxCe from "./SoftmaxCe";
 import SsdDecay from "./SsdDecay";
 import StateMemory from "./StateMemory";
 
@@ -43,6 +44,7 @@ export const VIZ_REGISTRY: Record<string, ComponentType> = {
   "rmsnorm": RmsNorm,
   "rope-rotation": RopeRotation,
   "sampling": Sampling,
+  "softmax-ce": SoftmaxCe,
   "ssd-decay": SsdDecay,
   "state-memory": StateMemory,
 };

@@ -1,0 +1,18 @@
+id: A04d-softmax-debug
+title: "Отладка: лосс внезапно становится nan"
+short_title: "Найди баг: softmax-CE"
+block: A
+module: module-1-autograd
+type: debug
+difficulty: easy
+depends_on: [A04-tensor-backprop]
+diff_from: A04-tensor-backprop
+tags: [softmax, cross-entropy, numerics, debug]
+entrypoint: [linear_forward, linear_backward, relu_forward, relu_backward, softmax_cross_entropy, mlp_loss_and_grads]
+time_estimate_min: 15
+papers: []
+reading:
+  - title: "Wikipedia: LogSumExp"
+    url: https://en.wikipedia.org/wiki/LogSumExp
+viz: [softmax-ce]
+questions: [softmax-*]

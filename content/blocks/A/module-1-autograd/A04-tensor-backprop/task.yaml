@@ -1,0 +1,22 @@
+id: A04-tensor-backprop
+title: "Backprop руками на тензорах: Linear, ReLU, softmax + cross-entropy"
+short_title: "Backprop на тензорах"
+block: A
+module: module-1-autograd
+type: implement
+difficulty: medium
+depends_on: [A02-gradcheck, A03-mlp]
+diff_from: A03-mlp
+tags: [backprop, softmax, cross-entropy, logsumexp, numerics]
+entrypoint: [linear_forward, linear_backward, relu_forward, relu_backward, softmax_cross_entropy, mlp_loss_and_grads]
+time_estimate_min: 50
+papers: [backprop-1986]
+reading:
+  - title: "CS231n: Derivatives, Backpropagation, and Vectorization (Justin Johnson)"
+    url: https://cs231n.stanford.edu/handouts/derivatives.pdf
+  - title: "Andrej Karpathy: Yes you should understand backprop"
+    url: https://karpathy.medium.com/yes-you-should-understand-backprop-e2f06eab496b
+  - title: "PyTorch docs: torch.nn.functional.cross_entropy"
+    url: https://pytorch.org/docs/stable/generated/torch.nn.functional.cross_entropy.html
+viz: [softmax-ce]
+questions: [backprop-*, softmax-*]
