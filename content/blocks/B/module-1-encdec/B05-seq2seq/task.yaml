@@ -1,0 +1,21 @@
+id: B05-seq2seq
+title: "Seq2seq целиком: teacher forcing, label smoothing, greedy decode"
+short_title: "Seq2seq целиком"
+block: B
+module: module-1-encdec
+type: implement
+difficulty: medium
+depends_on: [B04-decoder]
+recommended_after: [A18-minigpt]
+diff_from: A18-minigpt
+tags: [encoder-decoder, teacher-forcing, label-smoothing, generation, weight-tying]
+entrypoint: [shift_right, label_smoothed_ce, Seq2Seq, greedy_decode]
+time_estimate_min: 50
+papers: [attention-is-all-you-need, label-smoothing, label-smoothing-when, weight-tying]
+reading:
+  - title: "PyTorch: torch.nn.functional.cross_entropy (параметр label_smoothing)"
+    url: https://pytorch.org/docs/stable/generated/torch.nn.functional.cross_entropy.html
+  - title: "Hugging Face: How to generate text (greedy search и другие стратегии)"
+    url: https://huggingface.co/blog/how-to-generate
+viz: [encdec-masks, softmax-ce]
+questions: [encdec-seq2seq-*, encdec-smoothing-*, iv-generation-01]
