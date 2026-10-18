@@ -1,0 +1,20 @@
+id: A10-char-lm
+title: "Языковая модель на символах: окно → следующий символ"
+short_title: "LM на символах"
+block: A
+module: module-2-training
+type: implement
+difficulty: medium
+depends_on: [A09-training-loop]
+diff_from: A09-training-loop
+tags: [language-model, embeddings, perplexity, bengio]
+entrypoint: [build_vocab, encode, decode, make_dataset, MLPLM, perplexity]
+time_estimate_min: 45
+papers: [bengio-2003]
+reading:
+  - title: "Andrej Karpathy: makemore (bigram и MLP-модели на символах, видеолекции)"
+    url: https://github.com/karpathy/makemore
+  - title: "PyTorch docs: torch.nn.Embedding"
+    url: https://pytorch.org/docs/stable/generated/torch.nn.Embedding.html
+viz: [bigram-table]
+questions: [charlm-*]

@@ -1,0 +1,7 @@
+id: bengio-2003
+title: "A Neural Probabilistic Language Model"
+authors: "Bengio, Ducharme, Vincent, Jauvin"
+year: 2003
+venue: JMLR 3
+url: https://www.jmlr.org/papers/volume3/bengio03a/bengio03a.pdf
+tags: [language-model, embeddings]
