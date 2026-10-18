@@ -1,0 +1,18 @@
+id: A07d-adamw-debug
+title: "Отладка: AdamW почти не регуляризует большие веса"
+short_title: "Найди баг: AdamW"
+block: A
+module: module-2-training
+type: debug
+difficulty: easy
+depends_on: [A07-optimizers]
+diff_from: A07-optimizers
+tags: [optimizer, adamw, weight-decay, debug]
+entrypoint: [SGD, Adam, AdamW]
+time_estimate_min: 15
+papers: [adamw]
+reading:
+  - title: "PyTorch docs: torch.optim.AdamW (псевдокод алгоритма)"
+    url: https://pytorch.org/docs/stable/generated/torch.optim.AdamW.html
+viz: [optimizers]
+questions: [optim-adamw-*]

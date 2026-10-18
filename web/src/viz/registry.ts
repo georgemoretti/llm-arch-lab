@@ -18,6 +18,7 @@ import MoeRouting from "./MoeRouting";
 import Mtp from "./Mtp";
 import Nope from "./Nope";
 import NormPlacement from "./NormPlacement";
+import Optimizers from "./Optimizers";
 import ParamBudget from "./ParamBudget";
 import QkNorm from "./QkNorm";
 import RmsNorm from "./RmsNorm";
@@ -43,6 +44,7 @@ export const VIZ_REGISTRY: Record<string, ComponentType> = {
   "mtp": Mtp,
   "nope": Nope,
   "norm-placement": NormPlacement,
+  "optimizers": Optimizers,
   "param-budget": ParamBudget,
   "qk-norm": QkNorm,
   "rmsnorm": RmsNorm,

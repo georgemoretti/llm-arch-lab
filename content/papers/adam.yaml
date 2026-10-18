@@ -1,0 +1,7 @@
+id: adam
+title: "Adam: A Method for Stochastic Optimization"
+authors: "Kingma, Ba"
+year: 2015
+venue: ICLR
+url: https://arxiv.org/abs/1412.6980
+tags: [optimizer]

@@ -1,0 +1,7 @@
+id: adamw
+title: "Decoupled Weight Decay Regularization"
+authors: "Loshchilov, Hutter"
+year: 2019
+venue: ICLR
+url: https://arxiv.org/abs/1711.05101
+tags: [optimizer, weight-decay]

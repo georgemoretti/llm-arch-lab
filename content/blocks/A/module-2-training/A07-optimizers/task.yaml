@@ -1,0 +1,20 @@
+id: A07-optimizers
+title: "Оптимизаторы руками: SGD с momentum, Adam, AdamW"
+short_title: "SGD, Adam, AdamW"
+block: A
+module: module-2-training
+type: implement
+difficulty: medium
+depends_on: [A03-mlp]
+diff_from: A03-mlp
+tags: [optimizer, adam, adamw, momentum, training]
+entrypoint: [SGD, Adam, AdamW]
+time_estimate_min: 50
+papers: [adam, adamw]
+reading:
+  - title: "PyTorch docs: torch.optim.AdamW (псевдокод алгоритма)"
+    url: https://pytorch.org/docs/stable/generated/torch.optim.AdamW.html
+  - title: "Distill: Why Momentum Really Works (Gabriel Goh)"
+    url: https://distill.pub/2017/momentum/
+viz: [optimizers]
+questions: [optim-*, iv-training-01]
