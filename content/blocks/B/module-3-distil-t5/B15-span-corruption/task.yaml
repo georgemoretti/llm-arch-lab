@@ -1,0 +1,20 @@
+id: B15-span-corruption
+title: "Span corruption T5: спаны шума и sentinel-токены"
+short_title: "Span corruption"
+block: B
+module: module-3-distil-t5
+type: implement
+difficulty: medium
+depends_on: [B09-mlm-masking]
+diff_from: B09-mlm-masking
+tags: [t5, pretraining, span-corruption, masking]
+entrypoint: [random_segmentation, random_spans_noise_mask, noise_span_to_unique_sentinel, span_corruption]
+time_estimate_min: 35
+papers: [t5]
+reading:
+  - title: "Hugging Face transformers: examples/flax/language-modeling/run_t5_mlm_flax.py (DataCollator для T5)"
+    url: https://github.com/huggingface/transformers/blob/v4.30.0/examples/flax/language-modeling/run_t5_mlm_flax.py
+  - title: "Google Research: text-to-text-transfer-transformer (preprocessors.py: random_spans_noise_mask)"
+    url: https://github.com/google-research/text-to-text-transfer-transformer/blob/main/t5/data/preprocessors.py
+viz: []
+questions: [t5-span-*]

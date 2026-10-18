@@ -1,0 +1,18 @@
+id: B15d-sentinel-debug
+title: "Отладка: T5 после предобучения пишет кусок не после своего sentinel"
+short_title: "Найди баг: sentinel"
+block: B
+module: module-3-distil-t5
+type: debug
+difficulty: medium
+depends_on: [B15-span-corruption]
+diff_from: B15-span-corruption
+tags: [t5, span-corruption, debug]
+entrypoint: [random_segmentation, random_spans_noise_mask, noise_span_to_unique_sentinel, span_corruption]
+time_estimate_min: 20
+papers: []
+reading:
+  - title: "Google Research: text-to-text-transfer-transformer (preprocessors.py: noise_span_to_unique_sentinel)"
+    url: https://github.com/google-research/text-to-text-transfer-transformer/blob/main/t5/data/preprocessors.py
+viz: []
+questions: [t5-span-*]
