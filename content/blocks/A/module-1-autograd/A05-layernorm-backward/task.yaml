@@ -1,0 +1,22 @@
+id: A05-layernorm-backward
+title: "Backward LayerNorm руками"
+short_title: "Backward LayerNorm"
+block: A
+module: module-1-autograd
+type: implement
+difficulty: hard
+depends_on: [A04-tensor-backprop]
+diff_from: A04-tensor-backprop
+tags: [backprop, layernorm, normalization, interview]
+entrypoint: [layernorm_forward, layernorm_backward]
+time_estimate_min: 45
+papers: []
+reading:
+  - title: "Layer Normalization (Ba, Kiros, Hinton, 2016)"
+    url: https://arxiv.org/abs/1607.06450
+  - title: "PyTorch docs: torch.nn.LayerNorm"
+    url: https://pytorch.org/docs/stable/generated/torch.nn.LayerNorm.html
+  - title: "llm.c: layernorm_forward / layernorm_backward на C (Andrej Karpathy)"
+    url: https://github.com/karpathy/llm.c/blob/master/doc/layernorm/layernorm.md
+viz: [layernorm-grad]
+questions: [layernorm-bw-*]

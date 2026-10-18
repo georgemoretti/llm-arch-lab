@@ -10,6 +10,7 @@ import GqaGroups from "./GqaGroups";
 import GradCheck from "./GradCheck";
 import Hybrid from "./Hybrid";
 import KvCache from "./KvCache";
+import LayerNormGrad from "./LayerNormGrad";
 import Masks from "./Masks";
 import MlpBoundary from "./MlpBoundary";
 import MoeRouting from "./MoeRouting";
@@ -33,6 +34,7 @@ export const VIZ_REGISTRY: Record<string, ComponentType> = {
   "gradcheck": GradCheck,
   "hybrid": Hybrid,
   "kv-cache": KvCache,
+  "layernorm-grad": LayerNormGrad,
   "masks": Masks,
   "mlp-boundary": MlpBoundary,
   "moe-routing": MoeRouting,
