@@ -3,19 +3,20 @@
 > Обновляется в конце КАЖДОЙ сессии Claude Code. Пиши кратко и конкретно.
 
 ## Текущая фаза
-**Фаза B2 завершена** (2026-10-18): блок B, модуль 2 «BERT» (9 задач). Ждёт просмотра пользователем.
+**Фаза B3 завершена** (2026-10-18): блок B, модуль 3 «DistilBERT и T5» (8 задач). Ждёт просмотра пользователем.
 
-Предыдущее: Фаза B1 (модуль «Transformer: энкодер и декодер»).
+Предыдущее: Фаза B2 (модуль «BERT»).
 
 ## Следующий шаг (точный)
-Фаза **B3** — модуль 3 «DistilBERT и T5» (`content/blocks/B/module-3-distil-t5/`, id модуля уже в block.yaml): B12
-дистилляция (KL с температурой × T², смесь с hard loss, cosine-loss скрытых, ученик из каждого второго слоя учителя),
-B13 относительный позиционный bias T5 (бакеты, двунаправленный / causal, == `T5Attention._relative_position_bucket`),
-B14 слой T5 (T5LayerNorm без центрирования, Pre-LN, FFN без bias, attention без 1/√d; == `transformers.T5Model` на
-случайных весах), B15 span corruption (15 %, средний спан 3, sentinel-токены), B13d (знак относительной позиции),
-B15d (порядок sentinel в цели), B-P3, B-Q3, V-distill-temperature, V-t5-buckets. Эталоны — в `llmlab/core/t5.py` (+
-`tests/test_core_t5.py`); для B12 учитель — `core/bert.py`. Гиперпараметры T5 и DistilBERT сверять по config.json
-(`google-t5/t5-small`, `distilbert/distilbert-base-uncased`).
+Фаза **B4** — модуль 4 «ModernBERT и эмбеддинги текста» (`content/blocks/B/module-4-modernbert/`, id модуля уже в
+block.yaml): B16 слой ModernBERT (RoPE, GeGLU, без bias, Pre-LN, чередование global / local — окно и шаг из
+`answerdotai/ModernBERT-base` config.json; == `transformers.ModernBertModel` на случайных весах, если класс есть в
+установленной версии), B17 unpadding (`cu_seqlens`, блочно-диагональная маска == батч с паддингом), B18 sentence-эмбеддинги
+(mean / CLS pooling, L2, bi- и cross-encoder), B19 InfoNCE с in-batch негативами, B20 проект «мини-поиск по корпусу курса»,
+B17d (`cu_seqlens` со сдвигом), B18d (mean pooling с PAD), B-P4, B-Q4 (+ итоговый по блоку), V-unpadding,
+V-embedding-space. В конце B4 — таблица «энкодеры → декодеры», CHANGELOG, выпуск v0.3.0. Вопросы user-db
+`iv-retrieval-*`, `iv-embeddings-*` — привязать глобами. В кеше HF уже есть `sentence-transformers/all-MiniLM-L6-v2`,
+`BAAI/bge-small-en-v1.5` — можно взять для weights-тестов B18.
 
 ## Сделано
 **Фаза 0:**
@@ -505,6 +506,35 @@ B15d (порядок sentinel в цели), B-P3, B-Q3, V-distill-temperature, V
   «paris» 0.42, «coffee» 0.40); скриншоты двух визуализаций в обеих темах, ошибок в консоли нет; `pytest tests/` 159 + 1
   skip; `validate --all` — 109 задач.
 
+**Фаза B3 (блок B, модуль 3 «DistilBERT и T5»):**
+- `llmlab/core/t5.py` — эталоны B13–B15 (relative_position_bucket, relative_position_bias, T5Config, T5LayerNorm, T5Attention,
+  T5Block, T5Stack, T5Model, random_segmentation, random_spans_noise_mask, noise_span_to_unique_sentinel, span_corruption);
+  имена параметров как в HF — state_dict `transformers.T5Model` грузится strict; `tests/test_core_t5.py` (+ debug-копии).
+- Задачи: **B12** дистилляция (9 тестов: soft targets, T²·KL == `F.kl_div(batchmean)` при T = 1/2/5, градиент = T·(q − p)/N и
+  не идёт в учителя, масштаб при T = 8 и 2 одного порядка, смесь с CE и пустыми метками, cosine-loss без PAD, ученик из слоёв
+  0, 2, … учителя (копии, tying), 60 шагов дистилляции: KL ↓ в 4+ раза, top-1 ≥ 80 %), **B13** относительный bias (11: формула на
+  −300 … 300, ручные примеры, монотонность, == `T5Attention._relative_position_bucket` при трёх конфигах, Тёплиц, causal + offset,
+  == `compute_bias`), **B13d** (сдвиг «запрос − ключ»: бакеты верны, bias нет; падает 4/11), **B14** слой T5 (9: RMSNorm с eps под
+  корнем и fp16, attention без 1/√D + bias / переданный bias / нули / cross, блоки энкодера и декодера с диагностом Post-LN /
+  GELU / без остатка, общий bias стека (шпион на блоке 1), PAD и causal, == `transformers.T5Model`; weights: t5-small в своей
+  модели == `T5ForConditionalGeneration`, ответ с sentinel-ами), **B15** span corruption (10: разбиение (все 36 разбиений 10 на 3),
+  маска на L = 10 … 568, случайность и равномерность, пример из рисунка 2 статьи T5, восстановление текста и длины на
+  случайных масках, лимит sentinel-ов), **B15d** (prev_is_noise дополнен единицей: вход верный, цель съезжает; падает 2/10),
+  **B-P3** (Hinton, DistilBERT, T5), **B-Q3**. Мутационная проверка: B12 — 16, B14 — 16, B15 — 12 мутантов; все убиты, кроме
+  одного эквивалентного (B14: bias после маски: −inf + b = −inf). Найдено и закрыто: «eps после корня» (добавлен тест на
+  |x| ~ 1e-3), «ученик делит модули с учителем» (снимок state_dict клонируется).
+- Статьи: `hinton-distillation`, `distilbert`, `t5`, `shaw-relative-2018`. Вопросы: `content/questions/distil-t5.yaml` (16),
+  `papers-block-b.yaml` (+6); user-db `iv-positional-01/02` → B13 и B-Q3. Ответы к статьям сверены с текстом PDF
+  (абляция DistilBERT −3.69 / −2.96 / −1.46 / −0.31; фильтры C4; L + L слоёв энкодер-декодера = 2L параметров, L вычислений;
+  раздел 3.6 T5; MNIST без троек у Хинтона).
+- Визуализации: `t5-buckets` (кривая бакета от сдвига, оба режима, ползунки num_buckets / max_distance / T, матрица бакетов с
+  диапазонами, неиспользуемый бакет 16), `distill-temperature` (мягкие метки на игрушечном примере, энтропия, масса вне top-1,
+  T²·KL, ‖∇‖ от T с T² и без).
+- README (строка B3), CHANGELOG → Unreleased.
+- Проверено: 114 формул KaTeX без ошибок; ссылки на HF / GitHub / PyTorch отвечают 200; weights-тест B14 (t5-small, ~240 МБ)
+  проходит; скриншоты страниц B12–B15, B-Q3 и обеих визуализаций (светлая 1440, тёмная 860) — ошибок в консоли нет (исправлены
+  широкая формула бакетов и широкий пример t5-small); `pytest tests/` 165 + 1 skip; `validate --all` — 117 задач.
+
 ## Не сделано / долги
 - A4: тесты A16d — копия тестов A16 без ветки диагноста про маску после softmax; при правке тестов A16 синхронизировать.
   `llmlab/core/minigpt.py` дублирует эталоны A15–A17 (страховка — `tests/test_core_minigpt.py`).
@@ -612,6 +642,17 @@ B15d (порядок sentinel в цели), B-P3, B-Q3, V-distill-temperature, V
   описана, но отдельного класса нет (только align_labels); SQuAD 2.0 («нет ответа») — только в вопросе.
 - B2: тесты MLM статистические (пороги 4–6σ на фиксированных сидах; whole word ±2 % — ≈3.4σ).
 - B2: weights-тест B10 качает ~440 МБ (bert-base-uncased) и без сети с `--weights` падает (как C25).
+
+- B3: тесты B13d/B15d — копии тестов B13/B15 с нейтральными сообщениями; при правке синхронизировать. `llmlab/core/t5.py`
+  дублирует эталоны B13–B15 (страховка — `tests/test_core_t5.py`, сверяет и debug-копии `solution.py`).
+- B3: у B12 нет core-копии (дальше дистилляция не используется). Ученик берёт слои 0, 2, 4, …, а скрипт HF — 0, 2, 4, 7, 9, 11
+  (написано в README); без `token_type_embeddings` и pooler ученик не собирается — используется тот же `BertForMaskedLM`.
+- B3: T5 без KV-cache, без dropout, без `T5ForConditionalGeneration` (голова с d_model^−½ — только в weights-тесте и README),
+  без GeGLU v1.1; span corruption — для одного текста (батч и подбор длины 568 → 512 только в README / вопросе).
+- B3: weights-тест B14 качает t5-small (~240 МБ) и токенизатор через `AutoTokenizer`; без сети с `--weights` падает (как C25).
+- B3: тесты B15 статистические на фиксированных сидах (все 36 разбиений за 1500 попыток; средняя длина первого куска ±0.25;
+  доля шума на позициях 10–89 в 0.05 … 0.3 за 300 масок).
+- B3: в базе вопросов пользователя нет вопросов про дистилляцию и T5 — в B-Q3 только `iv-positional-01/02`.
 
 ## Решения (почему сделано так, а не иначе)
 - **Фаза 8:** одна общая `Attention` в `core/model.py` из функций эталонов (rope, partial rope,
@@ -956,6 +997,25 @@ B15d (порядок sentinel в цели), B-P3, B-Q3, V-distill-temperature, V
 - **Тесты с `transformers` / `tokenizers` — через `importorskip`** (как C24): без extras остаются тесты против эталона и
   ручные примеры; в CI с weights-extras они идут.
 
+- **B3: эталоны модуля — в `core/t5.py`, а B12 без core-копии**: B14 импортирует бакеты B13, а дистилляцию дальше никто не
+  импортирует; лишняя копия только добавила бы синхронизацию.
+- **B12: `distill_kl` сам делает `detach` учителя** и принимает логиты любой формы `[..., V]`; мягкая часть — по всем
+  позициям, жёсткая — только по labels ≠ −100 (как в DistilBERT: KL по attention_mask, MLM по закрытым). Без меток в батче
+  hard = 0, а не nan. Учитель в тестах — случайный BERT из `core/bert.py`, ничего не скачиваем.
+- **B13: две функции — бакеты и bias**, а не класс: B14 держит таблицу `relative_attention_bias` внутри `T5Attention` с именем
+  HF, а B13 даёт ей функцию `relative_position_bias(embedding, …, offset)`. `offset` — заготовка под генерацию с кешем.
+- **B13d — знак сдвига в `relative_position_bias`**, а не в формуле бакетов: бакеты остаются верными, ломается только
+  связка, как в реальном коде; в causal-режиме ошибка особенно заметна (все прошлые ключи — бакет 0).
+- **B14: пользователь пишет forward четырёх классов** (норма, attention, блок, стек), `T5Model` дан. Подслои — `nn.Module()`-
+  контейнеры с именами HF (`layer[0].SelfAttention`, `DenseReluDense.wi`), как в B10. Только ReLU-FFN (t5-small, исходный T5);
+  GeGLU v1.1 — в README. Сравнение с `transformers` — только по настоящим позициям (PAD-строки не сравниваем).
+- **B15: алгоритм маски — как в T5** (ровно round(0.15 L) токенов шума, round(·/3) спанов, текст первым, шум последним),
+  а не независимые броски: так тесты проверяют точные числа, а длина входа предсказуема (568 → 512). Sentinel-ы передаются
+  списком id (`<extra_id_i>` = 32 099 − i у T5). Цель — та же функция над `~mask`, как в T5; README объясняет, почему это
+  работает только при маске, начинающейся с текста.
+- **B15d — граничное значение сдвига маски (`new_ones` вместо `new_zeros`)**, а не «перевёрнутый порядок sentinel-ов»: вход
+  остаётся правильным, а цель съезжает на кусок — правдоподобная ошибка на единицу.
+
 ## Известные проблемы
 - Холодный старт subprocess с torch ≈ 1–1.5 с на прогон — приемлемо для UI, но заметно.
 
@@ -987,3 +1047,4 @@ B15d (порядок sentinel в цели), B-P3, B-Q3, V-distill-temperature, V
 | 2026-10-18 | A4 | A15–A18 + A16d, A-P4, A-Q4, A-Q4b, core/minigpt.py, V-training-curve, `recommended_after`, 23 вопроса, README-скриншоты/GIF, v0.2.0, 147 тестов, 89 задач | см. `git log` |
 | 2026-10-18 | B1 | План блока B (B1–B4), B01–B06 + B01d, B04d, B05d, B-P1, B-Q1, core/encdec.py, 3 визуализации, 24 вопроса, 4 статьи, 153 теста, 100 задач | см. `git log` |
 | 2026-10-18 | B2 | B07–B11 + B09d, B11d, B-P2, B-Q2, core/bert.py (== transformers/tokenizers), 2 визуализации, 20 вопросов, 5 статей, weights-тесты bert-base-uncased, 159 тестов, 109 задач | см. `git log` |
+| 2026-10-18 | B3 | B12–B15 + B13d, B15d, B-P3, B-Q3, core/t5.py (== transformers T5), 2 визуализации, 22 вопроса, 4 статьи, weights-тест t5-small, 165 тестов, 117 задач | см. `git log` |

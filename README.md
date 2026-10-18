@@ -59,6 +59,7 @@ BERT, DistilBERT, T5, ModernBERT и эмбеддинги для поиска. Д
 |---|---|---|
 | B1. Transformer: энкодер и декодер | padding-маска и multi-head, синусоидальные позиции, энкодер Post-LN, cross-attention, seq2seq с label smoothing и greedy decode, проект «число цифрами → число словами» (~25 с на CPU) | 11 |
 | B2. BERT | WordPiece (= `tokenizers`), вход с сегментами, MLM 80/10/10 и whole word masking, модель BERT (= `transformers`, настоящие веса bert-base-uncased заполняют `[MASK]`), головы классификации, NER и extractive QA | 9 |
+| B3. DistilBERT и T5 | дистилляция (T²·KL, смесь с hard loss, cosine-loss, ученик из слоёв учителя), относительный bias T5 (= `transformers`), слой T5 (= `transformers`, настоящие веса t5-small заполняют `<extra_id_0>`), span corruption | 8 |
 
 **Блок C — эволюция декодеров.**
 
