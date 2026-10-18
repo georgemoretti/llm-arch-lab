@@ -1,0 +1,21 @@
+id: B08-bert-input
+title: "Вход BERT: сегменты, обрезка пары, маска, три эмбеддинга"
+short_title: "Вход BERT"
+block: B
+module: module-2-bert
+type: implement
+difficulty: easy
+depends_on: [B07-wordpiece]
+recommended_after: [A15-embeddings]
+diff_from: B02-sinusoidal
+tags: [bert, embeddings, segments, padding]
+entrypoint: [truncate_pair, build_inputs, pad_batch, BertEmbeddings]
+time_estimate_min: 30
+papers: [bert]
+reading:
+  - title: "Hugging Face: Padding and truncation (стратегии обрезки пары)"
+    url: https://huggingface.co/docs/transformers/pad_truncation
+  - title: "Hugging Face: BERT — документация модели (token_type_ids, attention_mask)"
+    url: https://huggingface.co/docs/transformers/model_doc/bert
+viz: [wordpiece]
+questions: [bert-input-*, iv-bert-01]
