@@ -1,0 +1,18 @@
+id: B17d-cu-seqlens-debug
+title: "Отладка: после упаковки батча эмбеддинги текстов зависят от соседей"
+short_title: "Найди баг: cu_seqlens"
+block: B
+module: module-4-modernbert
+type: debug
+difficulty: medium
+depends_on: [B17-unpadding]
+diff_from: B17-unpadding
+tags: [modernbert, unpadding, debug]
+entrypoint: [unpad_input, pack, unpack, packed_position_ids, varlen_mask, varlen_attention, padding_savings]
+time_estimate_min: 20
+papers: []
+reading:
+  - title: "flash-attention: bert_padding.py (как считают cu_seqlens в unpad_input)"
+    url: https://github.com/Dao-AILab/flash-attention/blob/main/flash_attn/bert_padding.py
+viz: [unpadding]
+questions: [unpadding-*]

@@ -1,0 +1,20 @@
+id: B17-unpadding
+title: "Unpadding: батч без PAD, cu_seqlens и блочно-диагональная маска"
+short_title: "Unpadding"
+block: B
+module: module-4-modernbert
+type: implement
+difficulty: medium
+depends_on: [B16-modernbert-layer]
+diff_from: B16-modernbert-layer
+tags: [modernbert, unpadding, packing, attention, efficiency]
+entrypoint: [unpad_input, pack, unpack, packed_position_ids, varlen_mask, varlen_attention, padding_savings]
+time_estimate_min: 40
+papers: [modernbert]
+reading:
+  - title: "flash-attention: flash_attn_varlen_func и bert_padding.py (unpad_input / pad_input)"
+    url: https://github.com/Dao-AILab/flash-attention/blob/main/flash_attn/bert_padding.py
+  - title: "Hugging Face blog: Improving Hugging Face Training Efficiency Through Packing with Flash Attention 2"
+    url: https://huggingface.co/blog/packing-with-FA2
+viz: [unpadding]
+questions: [unpadding-*]
