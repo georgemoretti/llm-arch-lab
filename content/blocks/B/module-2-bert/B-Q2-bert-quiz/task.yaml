@@ -1,0 +1,13 @@
+id: B-Q2-bert-quiz
+title: "Квиз модуля: BERT"
+short_title: "Квиз: BERT"
+block: B
+module: module-2-bert
+type: quiz
+difficulty: medium
+depends_on: [B11-finetune-heads]
+diff_from: null
+tags: [quiz, bert, interview]
+time_estimate_min: 30
+papers: []
+questions: [bert-*, iv-bert-*, iv-tokenization-03]

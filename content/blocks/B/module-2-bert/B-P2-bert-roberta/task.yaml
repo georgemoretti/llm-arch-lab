@@ -1,0 +1,19 @@
+id: B-P2-bert-roberta
+title: "Статьи: BERT и RoBERTa"
+short_title: "Статьи: BERT и RoBERTa"
+block: B
+module: module-2-bert
+type: paper
+difficulty: medium
+depends_on: [B11-finetune-heads]
+diff_from: null
+tags: [paper, bert, roberta, pretraining]
+time_estimate_min: 60
+papers: [bert, roberta]
+reading:
+  - title: "Jay Alammar: The Illustrated BERT, ELMo, and co."
+    url: https://jalammar.github.io/illustrated-bert/
+  - title: "Google Research: репозиторий bert (README: модели, Whole Word Masking, советы по дообучению)"
+    url: https://github.com/google-research/bert
+viz: [mlm-masking]
+questions: [paper-bert-*, paper-roberta-*]
