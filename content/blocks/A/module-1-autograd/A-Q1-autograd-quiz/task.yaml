@@ -1,0 +1,13 @@
+id: A-Q1-autograd-quiz
+title: "Квиз модуля: Autograd"
+short_title: "Квиз: Autograd"
+block: A
+module: module-1-autograd
+type: quiz
+difficulty: medium
+depends_on: [A05-layernorm-backward]
+diff_from: scalar-math
+tags: [quiz, autograd, backprop, interview]
+time_estimate_min: 25
+papers: []
+questions: [autograd-*, gradcheck-*, mlp-*, softmax-*, backprop-*, layernorm-bw-*]

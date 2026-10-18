@@ -1,0 +1,17 @@
+id: A-P1-backprop
+title: "Статьи: backpropagation (1986) и обзор автодифференцирования"
+short_title: "Статьи: backprop и AD"
+block: A
+module: module-1-autograd
+type: paper
+difficulty: medium
+depends_on: [A01-value, A04-tensor-backprop]
+diff_from: null
+tags: [paper, backprop, autograd]
+time_estimate_min: 50
+papers: [backprop-1986, autodiff-survey]
+reading:
+  - title: "Christopher Olah: Calculus on Computational Graphs: Backpropagation"
+    url: https://colah.github.io/posts/2015-08-Backprop/
+viz: [autograd-graph]
+questions: [paper-backprop-*, paper-autodiff-*]
