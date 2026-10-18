@@ -1,0 +1,19 @@
+id: A-P3-bpe
+title: "Статьи: BPE для перевода (Sennrich et al.) и токенизатор GPT-2"
+short_title: "Статьи: BPE, GPT-2"
+block: A
+module: module-3-tokenization
+type: paper
+difficulty: medium
+depends_on: [A13-pretokenize, A14-gpt2-tokenizer]
+diff_from: null
+tags: [paper, tokenization, bpe, gpt-2]
+time_estimate_min: 45
+papers: [bpe-sennrich, gpt2]
+reading:
+  - title: "Sebastian Raschka: Implementing A Byte Pair Encoding (BPE) Tokenizer From Scratch"
+    url: https://sebastianraschka.com/blog/2025/bpe-from-scratch.html
+  - title: "Andrej Karpathy: Let's build the GPT Tokenizer (видеолекция)"
+    url: https://www.youtube.com/watch?v=zduSFxRajkE
+viz: [bpe]
+questions: [paper-bpe-*, paper-gpt2-input-*, paper-gpt2-categories-*]

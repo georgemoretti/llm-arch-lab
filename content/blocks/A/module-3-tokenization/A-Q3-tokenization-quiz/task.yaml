@@ -1,0 +1,13 @@
+id: A-Q3-tokenization-quiz
+title: "Квиз модуля: Токенизация"
+short_title: "Квиз: Токенизация"
+block: A
+module: module-3-tokenization
+type: quiz
+difficulty: medium
+depends_on: [A14-gpt2-tokenizer]
+diff_from: A10-char-lm
+tags: [quiz, tokenization, bpe, interview]
+time_estimate_min: 30
+papers: []
+questions: [bpe-*, utf8-*, pretok-*, special-*, gpt2tok-*, iv-tokenization-*]
