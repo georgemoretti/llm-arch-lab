@@ -167,6 +167,7 @@ def create_app(root: Path | None = None) -> FastAPI:
             "id": task.id, "title": task.title, "short_title": task.nav_title, **label,
             "block": task.block, "module": task.module,
             "type": task.type, "difficulty": task.difficulty, "depends_on": task.depends_on,
+            "recommended_after": task.recommended_after,
             "diff_from": task.diff_from, "tags": task.tags, "time_estimate_min": task.time_estimate_min,
             "has_code": task.has_code, "progress": task_progress(task.id, statuses),
         }

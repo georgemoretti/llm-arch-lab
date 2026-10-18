@@ -6,6 +6,7 @@ module: module-0-gpt2
 type: implement
 difficulty: easy
 depends_on: []
+recommended_after: [A16-attention, A18-minigpt]   # блок A — по желанию: свой GPT перед GPT-2
 diff_from: gpt2-baseline
 tags: [attention, causal-mask, multi-head]
 entrypoint: [causal_attention, CausalSelfAttention]

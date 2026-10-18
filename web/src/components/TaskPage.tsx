@@ -112,6 +112,17 @@ function TaskHeader({ task, onCreateNote, onComplete }: { task: TaskDetail; onCr
           ))}
         </span>
       )}
+      {task.recommended_after.length > 0 && (
+        <span className="muted head-deps" title="Рекомендация, а не требование: задача открыта и без этого">
+          лучше после:{" "}
+          {task.recommended_after.map((d, i) => (
+            <span key={d}>
+              {i > 0 && ", "}
+              <a href={taskHref(d)}>{labelById(index, d)}</a>
+            </span>
+          ))}
+        </span>
+      )}
       <span className="head-note">
         {!task.has_code &&
           (task.progress.status === "solved" ? (

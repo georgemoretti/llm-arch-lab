@@ -116,6 +116,9 @@ class Task(_Strict):
     type: TaskType
     difficulty: Difficulty
     depends_on: list[str] = Field(default_factory=list)
+    # Рекомендация «лучше сначала пройти» (обычно из другого блока): показывается в UI, но не участвует в
+    # «следующей задаче» и порядке — блок A необязательный, и C00 не должна ждать A18.
+    recommended_after: list[str] = Field(default_factory=list)
     diff_from: str | None = None
     tags: list[str] = Field(default_factory=list)
     entrypoint: str | list[str] | None = None
@@ -490,6 +493,9 @@ def _check_references(course: Course) -> None:
         for dep in task.depends_on:
             if dep not in course.tasks:
                 course.issues.append(Issue("error", where, f"depends_on: неизвестная задача '{dep}'"))
+        for dep in task.recommended_after:
+            if dep not in course.tasks:
+                course.issues.append(Issue("error", where, f"recommended_after: неизвестная задача '{dep}'"))
         if task.diff_from and task.diff_from not in course.tasks and task.diff_from not in baselines:
             course.issues.append(Issue("error", where,
                                        f"diff_from: '{task.diff_from}' — ни задача, ни baseline из block.yaml"))

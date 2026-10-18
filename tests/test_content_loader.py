@@ -37,6 +37,16 @@ def test_unknown_dependency_and_diff_from(toy_root):
     assert any("diff_from" in e for e in errors)
 
 
+def test_recommended_after_is_checked_but_not_a_dependency(toy_root):
+    write_task(toy_root, "Z01-add")
+    write_task(toy_root, "Z02-add-more", meta={"recommended_after": ["Z01-add"]})
+    course = load_course(toy_root)
+    assert not course.errors, course.errors
+    assert course.tasks["Z02-add-more"].depends_on == []
+    write_task(toy_root, "Z03-x", meta={"recommended_after": ["Z99-missing"]})
+    assert any("recommended_after" in e and "Z99-missing" in e for e in _errors(load_course(toy_root)))
+
+
 def test_baseline_is_valid_diff_from(toy_root):
     write_task(toy_root, "Z01-add", meta={"diff_from": "toy-baseline"})
     assert not load_course(toy_root).errors

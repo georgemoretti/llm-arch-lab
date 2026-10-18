@@ -20,6 +20,7 @@ export interface TaskSummary {
   type: "implement" | "debug" | "paper" | "quiz" | "project";
   difficulty: "easy" | "medium" | "hard";
   depends_on: string[];
+  recommended_after: string[];
   diff_from: string | null;
   tags: string[];
   time_estimate_min: number;
