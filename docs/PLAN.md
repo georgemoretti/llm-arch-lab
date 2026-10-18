@@ -347,7 +347,7 @@ attention уже понятны. Блок A закрывает этот фунд
 | B04 | Cross-attention и слой декодера: masked self-attention → cross-attention → FFN; Q из декодера, K/V из энкодера | implement |
 | B05 | Seq2seq целиком: shift right, teacher forcing, label smoothing с `ignore_index`, greedy decode с одним проходом энкодера | implement |
 | B06 | Проект: обучить seq2seq «число цифрами → число словами» (согласование «тысяча / тысячи / тысяч»), exact match на отложенных числах, карта cross-attention | project |
-| B01d | Padding-маска наложена на ось запросов, а не ключей: nan на PAD и протечка PAD в реальные токены | debug |
+| B01d | Головы режутся `view(B, H, L, D)` без transpose: с одной головой верно, с четырьмя PAD протекает | debug |
 | B04d | В cross-attention попала causal-маска: ранние позиции цели не видят конец источника | debug |
 | B05d | shift right через `torch.roll`: на позиции 0 вместо BOS — последний токен цели | debug |
 | B-P1 | Статьи: Sutskever et al. 2014 (seq2seq), Bahdanau et al. 2014 (attention в переводе), Vaswani et al. 2017 (энкодер-декодер, label smoothing) | paper |

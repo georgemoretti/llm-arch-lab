@@ -3,15 +3,17 @@
 > Обновляется в конце КАЖДОЙ сессии Claude Code. Пиши кратко и конкретно.
 
 ## Текущая фаза
-**Фаза A4 завершена** (2026-10-18): блок A, модуль 4 «Свой GPT» (8 задач), блок A закрыт, выпуск **v0.2.0**. Ждёт
-просмотра пользователем.
+**Фаза B1 завершена** (2026-10-18): блок B «Энкодеры», модуль 1 «Transformer: энкодер и декодер» (11 задач). Блок B
+расписан в PLAN.md (B1–B4). Ждёт просмотра пользователем.
 
-Предыдущее: Фаза A3 (модуль «Токенизация»).
+Предыдущее: Фаза A4 (блок A закрыт, v0.2.0).
 
 ## Следующий шаг (точный)
-Все фазы из PLAN.md (0 … 9, A1 … A4) выполнены. Следующее — по решению пользователя (вопрос в отчёте A4):
-независимое ревью блока A (промпт «Ревью» из PROMPTS.md, отдельная сессия), блок B (энкодеры) или блок D (обучение и
-инференс) из раздела «Позже» PLAN.md — для них сначала нужно расписать фазы в PLAN.md, как это было сделано для блока A.
+Фаза **B2** — модуль 2 «BERT» (`content/blocks/B/module-2-bert/`): B07 WordPiece, B08 вход BERT, B09 MLM-маскирование,
+B10 модель BERT (== `BertForMaskedLM` на случайных весах, weights-тест fill-mask), B11 головы дообучения, B09d, B11d,
+B-P2, B-Q2, визуализации V-wordpiece и V-mlm-masking. Энкодер брать из `llmlab/core/encdec.py` (MultiHeadAttention,
+FeedForward → GELU, Post-LN); эталоны B07–B11 сложить в `llmlab/core/bert.py` + `tests/test_core_bert.py`. Вопросы
+user-db `iv-bert-01…05`, `iv-retrieval-*` (interview-encoders-retrieval.yaml) привязать глобами.
 
 ## Сделано
 **Фаза 0:**
@@ -446,6 +448,36 @@
 - Проверено в браузере: V-training-curve (обе темы), карта с блоком A, страница C04, Interview; ошибок в консоли нет;
   100 формул модуля 4 проходят KaTeX; все внешние ссылки модуля отвечают 200.
 
+**Фаза B1 (блок B, модуль 1 «Transformer: энкодер и декодер»):**
+- План блока B в PLAN.md (фазы B1–B4: энкодер-декодер, BERT, DistilBERT/T5, ModernBERT и эмбеддинги), порядок
+  `/next` → B1…B4. `content/blocks/B/block.yaml` (optional, baseline `rnn-seq2seq`); на карте блок B между A и C.
+- `llmlab/core/encdec.py` — эталоны B01–B05 (padding_mask, attention, MultiHeadAttention, sinusoidal_positions,
+  shift_matrix, TransformerEmbedding, FeedForward, EncoderLayer, Encoder, causal_mask, target_mask, DecoderLayer,
+  Decoder, shift_right, label_smoothed_ce, Seq2SeqConfig, Seq2Seq, greedy_decode); `tests/test_core_encdec.py` сверяет
+  исходники с `solution.py` задач.
+- Задачи: **B01** padding-маска + MHA (8 тестов: маска [B,1,1,S], T ≠ S, оракулы SDPA и nn.MultiheadAttention,
+  padding-инвариантность, эквивариантность к перестановке), **B01d** (`view(B, H, L, D)` без transpose), **B02**
+  синусоиды (5: формула в float64, ‖PE‖² = d/2, PE·PE зависит от k, `shift_matrix` — поворот, × √d), **B03** энкодер
+  (8: == nn.TransformerEncoderLayer в Post-/Pre-LN с неединичными LN, нормированный выход Post-LN, стопка, PAD,
+  двунаправленность), **B04** декодер (8: target_mask, == nn.TransformerDecoderLayer при T ≠ S, cross видит весь
+  источник, causal), **B04d** (causal-маска в cross-attention), **B05** seq2seq (10: shift_right, лосс ==
+  F.cross_entropy(label_smoothing) при ε 0/0.1/0.3, градиент p − q, forward, greedy на «сценарной» фальшивой модели,
+  overfit «развернуть»), **B05d** (`torch.roll` вместо сдвига с BOS), **B06** проект «число → слова» (5: encode_pair,
+  collate, train_step == эталон за 3 шага, правила exact match, запоминание 12 чисел), **B-P1**, **B-Q1**.
+  Мутационная проверка: 61 мутант, все убиты, кроме одного эквивалентного (B06: сравнение «без EOS» с обеих сторон).
+- B06 `main`: 2000 чисел из миллиона, 1500 шагов, 0.24 М параметров, ~22 с на CPU → 99.4 % exact match на 500
+  отложенных; ошибки только на коротких числах (761 → «семь тысяч шестьсот одиннадцать»): 90 % случайных чисел
+  шестизначные. `--record` пишет `content/viz/cross-attention.data.json`.
+- Статьи: `seq2seq-sutskever`, `bahdanau-2014`, `label-smoothing` (Szegedy et al. §7), `label-smoothing-when`.
+  Вопросы: `content/questions/encdec.yaml` (19), `papers-block-b.yaml` (5); user-db `iv-architecture-02/03`,
+  `iv-attention-03/05`, `iv-positional-01/02`, `iv-generation-01` — через глобы task.yaml.
+- Визуализации: `encdec-masks` (три маски, две пары батча, переключатель ошибки «маска по запросам» → nan),
+  `sinusoidal` (тепловая карта PE на canvas, PE(p)·PE(p+k) от k для двух p), `cross-attention` (предзаписанный
+  прогон B06: карта весов для 11 примеров, включая ошибки, и кривая exact match).
+- README (таблица блока B), CHANGELOG → Unreleased.
+- Проверено: 168 формул KaTeX без ошибок; 19 внешних ссылок отвечают 200; скриншоты трёх визуализаций (светлая
+  1440, тёмная 860) и карты с блоком B — ошибок в консоли нет; `pytest tests/` 153 + 1 skip; `validate --all` — 100 задач.
+
 ## Не сделано / долги
 - A4: тесты A16d — копия тестов A16 без ветки диагноста про маску после softmax; при правке тестов A16 синхронизировать.
   `llmlab/core/minigpt.py` дублирует эталоны A15–A17 (страховка — `tests/test_core_minigpt.py`).
@@ -536,6 +568,15 @@
 - UI-страницу C24/C25 в браузере глазами не смотрел (README отдаются API как у всех задач).
 - Скриншоты и GIF README сняты скриптом из scratchpad (Playwright вне репо, кадры → GIF через Pillow), последний раз — после правок UI 2026-10-17; при заметных изменениях UI
   переснять. Проверка установки на Linux/Windows — только в CI (локального Docker не было).
+
+- B1: тесты B01d/B04d/B05d — копии тестов B01/B04/B05 без диагностов, называющих баг; при правке синхронизировать.
+  `llmlab/core/encdec.py` дублирует эталоны B01–B05 (страховка — `tests/test_core_encdec.py`).
+- B1: dropout в энкодер-декодере не реализован (детерминированные тесты) — описан в вопросе к статье; KV-cache
+  декодера и кеш K/V cross-attention не реализованы (greedy пересчитывает префикс) — упомянуты в вопросе
+  `encdec-seq2seq-encode-once-01`; beam search нет.
+- B06: числа в README/вопросах/визуализации (99.4 %, 3 ошибки из 500, 22 с) зависят от сида и версии torch; при
+  правке перезаписать: `python content/blocks/B/module-1-encdec/B06-num2words/solution.py --record
+  content/viz/cross-attention.data.json`.
 
 ## Решения (почему сделано так, а не иначе)
 - **Фаза 8:** одна общая `Attention` в `core/model.py` из функций эталонов (rope, partial rope,
@@ -853,6 +894,23 @@
 - **Синтаксис ` ```shapes ` проверяет загрузчик** (`check_shapes`): ошибка — issue уровня error на README задачи,
   её показывает `llmlab validate`. Грамматика продублирована в Python и в ShapeFlow.tsx — менять обе.
 
+- **Блок B: необязательный, между A и C.** Не нужен для C; B01 рекомендует A16, задачи блока B импортируют
+  только эталоны блока B (`core/encdec.py`). Для BERT/T5/ModernBERT план сверки с `transformers` на случайных весах.
+- **B01d — нарезка голов, а не «маска по запросам»** (как было в первом варианте плана): ошибка оси маски ловится
+  первым же тестом формы и очевидна, а `view(B, H, L, D)` правдоподобна, не видна при H = 1 и учит проверять
+  эквивариантность. «Маска по запросам» осталась в диагносте B01 и в переключателе V-encdec-masks. PLAN исправлен.
+- **Маски — bool, True = «можно смотреть»** (как в A16, C00); различие с `key_padding_mask` PyTorch вынесено в
+  README B01, диагност и вопрос.
+- **Label smoothing — соглашение PyTorch (ε/V всем классам)**, а не fairseq (ε/(V−1) неверным); диагност узнаёт
+  вариант fairseq.
+- **Инициализация эмбеддинга std = 1/√d** (как в fairseq; статья не указывает) и паддинг-строка нулевая: иначе
+  множитель √d из §3.4 бессмыслен при общей с выходным слоем матрице.
+- **B06 — «число → слова», а не перевод текста:** обучается за ~25 с на CPU, есть разная длина, выравнивание,
+  «молчащие» нули и согласование («тысяча / тысячи / тысяч»), данные генерируются кодом (ничего не скачиваем).
+  Перекос по длине чисел оставлен намеренно: учит сдвигу распределения (разобрано в README и вопросе).
+- **B06: пользователь пишет `train_step`, а не `train`** — цикл с валидацией в `main` готов; тест `train_step` ==
+  эталон за 3 шага (лосс и веса) ловит порядок clip/step.
+
 ## Известные проблемы
 - Холодный старт subprocess с torch ≈ 1–1.5 с на прогон — приемлемо для UI, но заметно.
 
@@ -882,3 +940,4 @@
 | 2026-10-18 | A3 | A11–A14 + A12d, A13d, A-P3, A-Q3, core/bpe.py, V-bpe, 22 вопроса, зависимость regex, 142 теста, 81 задача | см. `git log` |
 | 2026-10-18 | правка A3 | корпус 8.4 → 23.1 тыс. символов, пересчёт чисел A10–A14 | см. `git log` |
 | 2026-10-18 | A4 | A15–A18 + A16d, A-P4, A-Q4, A-Q4b, core/minigpt.py, V-training-curve, `recommended_after`, 23 вопроса, README-скриншоты/GIF, v0.2.0, 147 тестов, 89 задач | см. `git log` |
+| 2026-10-18 | B1 | План блока B (B1–B4), B01–B06 + B01d, B04d, B05d, B-P1, B-Q1, core/encdec.py, 3 визуализации, 24 вопроса, 4 статьи, 153 теста, 100 задач | см. `git log` |

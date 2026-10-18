@@ -96,7 +96,7 @@ export default function CrossAttention() {
       </div>
       <LineChart
         xs={steps}
-        series={[{ id: "em", label: "exact match (val)", color: "var(--series-1)", ys: R.curve.map((c) => c.val_em * 100) }]}
+        series={[{ id: "em", label: "val EM", color: "var(--series-1)", ys: R.curve.map((c) => c.val_em * 100) }]}
         xTicks={[0, Math.round(last / 3), Math.round((2 * last) / 3), last]}
         xFormat={(v) => String(Math.round(v))}
         yFormat={(v) => `${Math.round(v)}%`}
