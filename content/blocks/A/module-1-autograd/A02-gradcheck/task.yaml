@@ -1,0 +1,20 @@
+id: A02-gradcheck
+title: "Проверка градиентов конечными разностями"
+short_title: "Gradient check"
+block: A
+module: module-1-autograd
+type: implement
+difficulty: easy
+depends_on: [A01-value]
+diff_from: A01-value
+tags: [autograd, gradient-check, numerics]
+entrypoint: [numerical_grad, rel_error, check_value_grads]
+time_estimate_min: 30
+papers: [autodiff-survey]
+reading:
+  - title: "CS231n: Gradient checks"
+    url: https://cs231n.github.io/neural-networks-3/#gradcheck
+  - title: "PyTorch: torch.autograd.gradcheck"
+    url: https://pytorch.org/docs/stable/generated/torch.autograd.gradcheck.gradcheck.html
+viz: [gradcheck]
+questions: [gradcheck-*]

@@ -7,6 +7,7 @@ import Activations from "./Activations";
 import AutogradGraph from "./AutogradGraph";
 import CausalMask from "./CausalMask";
 import GqaGroups from "./GqaGroups";
+import GradCheck from "./GradCheck";
 import Hybrid from "./Hybrid";
 import KvCache from "./KvCache";
 import Masks from "./Masks";
@@ -27,6 +28,7 @@ export const VIZ_REGISTRY: Record<string, ComponentType> = {
   "autograd-graph": AutogradGraph,
   "causal-mask": CausalMask,
   "gqa-groups": GqaGroups,
+  "gradcheck": GradCheck,
   "hybrid": Hybrid,
   "kv-cache": KvCache,
   "masks": Masks,
