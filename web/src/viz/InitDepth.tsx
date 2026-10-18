@@ -41,7 +41,8 @@ function run(init: string, act: Act, depth: number, seed: number) {
     let v2 = 0;
     for (const v of x) v2 += (v - m) ** 2;
     const sd = Math.sqrt(v2 / x.length);
-    logStd.push(Number.isFinite(sd) && sd > 0 ? Math.max(-40, Math.min(40, Math.log10(sd))) : sd > 0 ? 40 : -40);
+    // NaN/∞ — сигнал переполнился; 0 — погас полностью
+    logStd.push(!Number.isFinite(sd) ? 40 : sd > 0 ? Math.max(-40, Math.min(40, Math.log10(sd))) : -40);
     if (l === depth - 1) saturated = x.filter((v) => Math.abs(v) > 0.99).length / x.length;
   }
   return { logStd, saturated };
