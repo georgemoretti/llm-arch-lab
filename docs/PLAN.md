@@ -366,7 +366,7 @@ cross; длины и паддинг ползунками), **V-sinusoidal** (т�
 | B09 | MLM-маскирование: 15 %, 80 / 10 / 10, спецтокены и PAD не трогаем, labels = −100; whole word masking | implement |
 | B10 | Модель BERT: Post-LN энкодер с GELU, MLM-голова (transform → LN → декодер, связанный с эмбеддингами, + bias), pooler; == `BertForMaskedLM` на случайных весах; weights-тест fill-mask | implement |
 | B11 | Головы дообучения: классификация по pooler, разметка токенов (метка на первом субтокене), extractive QA (лучший span с `start ≤ end ≤ start + L`) | implement |
-| B09d | Маскирование выбирает и `[CLS]` / `[SEP]` / PAD | debug |
+| B09d | labels считаются до исключения спецтокенов: вход верный, а в лосс попадают `[CLS]` / `[SEP]` / PAD | debug |
 | B11d | QA: start и end выбираются независимыми argmax — span может быть «перевёрнутым» | debug |
 | B-P2 | Статьи: BERT (Devlin et al. 2018), RoBERTa (Liu et al. 2019) | paper |
 | B-Q2 | Квиз по модулю | quiz |

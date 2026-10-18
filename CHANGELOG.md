@@ -20,6 +20,19 @@
   cross-attention обученной модели;
 - `llmlab/core/encdec.py` — эталоны B01–B05 для следующих задач и модулей.
 
+Блок B, модуль 2 «BERT»:
+- **B07** WordPiece: очистка, uncased-нормализация (NFD — «й» → «и»), пунктуация, жадный longest-match-first с `##`
+  (== `tokenizers`; с `--weights` — словарь bert-base-uncased);
+- **B08** вход BERT: `[CLS] A [SEP] B [SEP]`, обрезка `longest_first` (== быстрые токенизаторы HF), батч с маской,
+  `BertEmbeddings` (== `transformers`);
+- **B09** MLM-маскирование: 15 %, 80 / 10 / 10, whole word masking; **B09d** — labels считаются до исключения спецтокенов;
+- **B10** модель BERT: Post-LN + GELU, pooler, MLM-голова; state_dict `transformers.BertForMaskedLM` грузится без
+  переименований; с `--weights` настоящий bert-base-uncased отвечает «paris»;
+- **B11** головы: классификация (== `BertForSequenceClassification`), выравнивание меток NER, QA-лосс, лучший span;
+  **B11d** — начало и конец ответа выбраны независимыми argmax;
+- **B-P2** статьи BERT и RoBERTa; **B-Q2** квиз модуля; 20 новых вопросов; визуализации WordPiece по шагам и
+  MLM-маскирования; `llmlab/core/bert.py`.
+
 ## v0.2.0 — 2026-10-18
 
 Новый необязательный блок A «Фундамент: от производной до своего GPT» — 35 задач в четырёх модулях перед блоком C.

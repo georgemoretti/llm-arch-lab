@@ -19,6 +19,7 @@ import LayerNormGrad from "./LayerNormGrad";
 import Masks from "./Masks";
 import LrSchedule from "./LrSchedule";
 import MlpBoundary from "./MlpBoundary";
+import MlmMasking from "./MlmMasking";
 import MoeRouting from "./MoeRouting";
 import Mtp from "./Mtp";
 import Nope from "./Nope";
@@ -34,6 +35,7 @@ import SoftmaxCe from "./SoftmaxCe";
 import SsdDecay from "./SsdDecay";
 import StateMemory from "./StateMemory";
 import TrainingCurve from "./TrainingCurve";
+import Wordpiece from "./Wordpiece";
 
 export const VIZ_REGISTRY: Record<string, ComponentType> = {
   "activations": Activations,
@@ -51,6 +53,7 @@ export const VIZ_REGISTRY: Record<string, ComponentType> = {
   "layernorm-grad": LayerNormGrad,
   "masks": Masks,
   "lr-schedule": LrSchedule,
+  "mlm-masking": MlmMasking,
   "mlp-boundary": MlpBoundary,
   "moe-routing": MoeRouting,
   "mtp": Mtp,
@@ -67,4 +70,5 @@ export const VIZ_REGISTRY: Record<string, ComponentType> = {
   "ssd-decay": SsdDecay,
   "state-memory": StateMemory,
   "training-curve": TrainingCurve,
+  "wordpiece": Wordpiece,
 };

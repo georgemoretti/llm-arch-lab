@@ -3,17 +3,19 @@
 > Обновляется в конце КАЖДОЙ сессии Claude Code. Пиши кратко и конкретно.
 
 ## Текущая фаза
-**Фаза B1 завершена** (2026-10-18): блок B «Энкодеры», модуль 1 «Transformer: энкодер и декодер» (11 задач). Блок B
-расписан в PLAN.md (B1–B4). Ждёт просмотра пользователем.
+**Фаза B2 завершена** (2026-10-18): блок B, модуль 2 «BERT» (9 задач). Ждёт просмотра пользователем.
 
-Предыдущее: Фаза A4 (блок A закрыт, v0.2.0).
+Предыдущее: Фаза B1 (модуль «Transformer: энкодер и декодер»).
 
 ## Следующий шаг (точный)
-Фаза **B2** — модуль 2 «BERT» (`content/blocks/B/module-2-bert/`): B07 WordPiece, B08 вход BERT, B09 MLM-маскирование,
-B10 модель BERT (== `BertForMaskedLM` на случайных весах, weights-тест fill-mask), B11 головы дообучения, B09d, B11d,
-B-P2, B-Q2, визуализации V-wordpiece и V-mlm-masking. Энкодер брать из `llmlab/core/encdec.py` (MultiHeadAttention,
-FeedForward → GELU, Post-LN); эталоны B07–B11 сложить в `llmlab/core/bert.py` + `tests/test_core_bert.py`. Вопросы
-user-db `iv-bert-01…05`, `iv-retrieval-*` (interview-encoders-retrieval.yaml) привязать глобами.
+Фаза **B3** — модуль 3 «DistilBERT и T5» (`content/blocks/B/module-3-distil-t5/`, id модуля уже в block.yaml): B12
+дистилляция (KL с температурой × T², смесь с hard loss, cosine-loss скрытых, ученик из каждого второго слоя учителя),
+B13 относительный позиционный bias T5 (бакеты, двунаправленный / causal, == `T5Attention._relative_position_bucket`),
+B14 слой T5 (T5LayerNorm без центрирования, Pre-LN, FFN без bias, attention без 1/√d; == `transformers.T5Model` на
+случайных весах), B15 span corruption (15 %, средний спан 3, sentinel-токены), B13d (знак относительной позиции),
+B15d (порядок sentinel в цели), B-P3, B-Q3, V-distill-temperature, V-t5-buckets. Эталоны — в `llmlab/core/t5.py` (+
+`tests/test_core_t5.py`); для B12 учитель — `core/bert.py`. Гиперпараметры T5 и DistilBERT сверять по config.json
+(`google-t5/t5-small`, `distilbert/distilbert-base-uncased`).
 
 ## Сделано
 **Фаза 0:**
@@ -478,6 +480,31 @@ user-db `iv-bert-01…05`, `iv-retrieval-*` (interview-encoders-retrieval.yaml) 
 - Проверено: 168 формул KaTeX без ошибок; 19 внешних ссылок отвечают 200; скриншоты трёх визуализаций (светлая
   1440, тёмная 860) и карты с блоком B — ошибок в консоли нет; `pytest tests/` 153 + 1 skip; `validate --all` — 100 задач.
 
+**Фаза B2 (блок B, модуль 2 «BERT»):**
+- `llmlab/core/bert.py` — эталоны B07–B11 (is_punctuation, clean_text, strip_accents, basic_tokenize, wordpiece, tokenize,
+  truncate_pair, build_inputs, pad_batch, BertConfig, BertEmbeddings, mlm_mask, BertSelfAttention, BertLayer, BertModel,
+  BertForMaskedLM, SequenceClassifier, align_labels, qa_loss, best_span); имена параметров как в HF — state_dict
+  `transformers` грузится strict; `tests/test_core_bert.py`.
+- Задачи: **B07** WordPiece (7 тестов: strip_accents с «й», basic_tokenize, жадность, [UNK] на слово, `##`, == `tokenizers` на
+  корпусе, weights — словарь bert-base-uncased), **B08** вход BERT (6: обрезка == `tokenizers` на 1568 сочетаниях, типы
+  сегментов, батч, эмбеддинги == transformers), **B09** MLM (5: labels, спецтокены, доли 15 % и 80/10/10 на ~60 тыс.
+  токенов, детерминизм с generator, whole word), **B09d** (labels до исключения спецтокенов), **B10** модель (8:
+  self-attention, слой с диагностом GELU-tanh/ReLU/Pre-LN, pooler, паддинг, MLM-голова, == transformers BertForMaskedLM,
+  smoke «заполни [MASK]», weights: bert-base-uncased в своей модели → paris), **B11** головы (7: классификатор ==
+  BertForSequenceClassification, обучение за 60 шагов, align_labels, qa_loss, best_span == перебор пар), **B11d**
+  (независимые argmax), **B-P2** (BERT, RoBERTa), **B-Q2**. Мутационная проверка: 61 мутант, все убиты, кроме двух
+  эквивалентных (B07 `split(' ')` после clean_text; B09 позиции word_ids = −1 и так спецтокены).
+- Статьи: `bert`, `roberta`, `wordpiece-gnmt`, `gelu`, `squad`. Вопросы: `content/questions/bert.yaml` (15),
+  `papers-block-b.yaml` (+5); user-db `iv-bert-01…05`, `iv-tokenization-03` — глобами (B-Q2 берёт все `iv-bert-*`).
+- Визуализации: `wordpiece` (нормализация, слова, разбор по шагам на игрушечном словаре, cased/uncased), `mlm-masking`
+  (вход и labels, whole word, доли на 200 масках, переключатель ошибки «спецтокены выбираются»); общий игрушечный
+  токенизатор `web/src/viz/wordpieceToy.ts`.
+- README (строка B2), CHANGELOG → Unreleased. Устаревший скриншот `docs/img/2026-10-17 17.05.42.jpg` (нумерация без буквы
+  блока, нигде не используется) не закоммичен, перенесён в Корзину.
+- Проверено: 44 формулы KaTeX без ошибок; 17 внешних ссылок — 200; weights-тесты B07 и B10 проходят (bert-base-uncased:
+  «paris» 0.42, «coffee» 0.40); скриншоты двух визуализаций в обеих темах, ошибок в консоли нет; `pytest tests/` 159 + 1
+  skip; `validate --all` — 109 задач.
+
 ## Не сделано / долги
 - A4: тесты A16d — копия тестов A16 без ветки диагноста про маску после softmax; при правке тестов A16 синхронизировать.
   `llmlab/core/minigpt.py` дублирует эталоны A15–A17 (страховка — `tests/test_core_minigpt.py`).
@@ -577,6 +604,14 @@ user-db `iv-bert-01…05`, `iv-retrieval-*` (interview-encoders-retrieval.yaml) 
 - B06: числа в README/вопросах/визуализации (99.4 %, 3 ошибки из 500, 22 с) зависят от сида и версии torch; при
   правке перезаписать: `python content/blocks/B/module-1-encdec/B06-num2words/solution.py --record
   content/viz/cross-attention.data.json`.
+
+- B2: тесты B09d/B11d — копии тестов B09/B11 без диагностов, называющих баг; при правке синхронизировать.
+  `llmlab/core/bert.py` дублирует эталоны B07–B11 (страховка — `tests/test_core_bert.py`).
+- B2: CJK-иероглифы (BERT окружает их пробелами) в basic_tokenize не обрабатываются — оговорено в solution.py; NSP-голова
+  и предобучение BERT целиком не реализованы (только MLM-маскирование и smoke-обучение); голова token classification
+  описана, но отдельного класса нет (только align_labels); SQuAD 2.0 («нет ответа») — только в вопросе.
+- B2: тесты MLM статистические (пороги 4–6σ на фиксированных сидах; whole word ±2 % — ≈3.4σ).
+- B2: weights-тест B10 качает ~440 МБ (bert-base-uncased) и без сети с `--weights` падает (как C25).
 
 ## Решения (почему сделано так, а не иначе)
 - **Фаза 8:** одна общая `Attention` в `core/model.py` из функций эталонов (rope, partial rope,
@@ -911,6 +946,16 @@ user-db `iv-bert-01…05`, `iv-retrieval-*` (interview-encoders-retrieval.yaml) 
 - **B06: пользователь пишет `train_step`, а не `train`** — цикл с валидацией в `main` готов; тест `train_step` ==
   эталон за 3 шага (лосс и веса) ловит порядок clip/step.
 
+- **B08: обрезка пары — правило быстрых токенизаторов HF**, а не цикл «по одному у длинного» из исходного BERT: при равных
+  длинах они расходятся; диагност узнаёт цикл и объясняет. Проверено против `tokenizers` на 1568 сочетаниях.
+- **B10: модель с именами HF и вложенными `nn.Module()`-контейнерами** (`attention.self`, `attention.output`) вместо
+  своих имён: настоящие веса грузятся strict без маппинга, а `attention` из B01 переиспользован. MLM-bias — один
+  Parameter под двумя именами, как в HF.
+- **B09d — порядок строк (labels до исключения спецтокенов)**, а не «спецтокены не исключены вовсе»: вход остаётся
+  правильным, и баг виден только в labels — так он и встречается в реальном коде.
+- **Тесты с `transformers` / `tokenizers` — через `importorskip`** (как C24): без extras остаются тесты против эталона и
+  ручные примеры; в CI с weights-extras они идут.
+
 ## Известные проблемы
 - Холодный старт subprocess с torch ≈ 1–1.5 с на прогон — приемлемо для UI, но заметно.
 
@@ -941,3 +986,4 @@ user-db `iv-bert-01…05`, `iv-retrieval-*` (interview-encoders-retrieval.yaml) 
 | 2026-10-18 | правка A3 | корпус 8.4 → 23.1 тыс. символов, пересчёт чисел A10–A14 | см. `git log` |
 | 2026-10-18 | A4 | A15–A18 + A16d, A-P4, A-Q4, A-Q4b, core/minigpt.py, V-training-curve, `recommended_after`, 23 вопроса, README-скриншоты/GIF, v0.2.0, 147 тестов, 89 задач | см. `git log` |
 | 2026-10-18 | B1 | План блока B (B1–B4), B01–B06 + B01d, B04d, B05d, B-P1, B-Q1, core/encdec.py, 3 визуализации, 24 вопроса, 4 статьи, 153 теста, 100 задач | см. `git log` |
+| 2026-10-18 | B2 | B07–B11 + B09d, B11d, B-P2, B-Q2, core/bert.py (== transformers/tokenizers), 2 визуализации, 20 вопросов, 5 статей, weights-тесты bert-base-uncased, 159 тестов, 109 задач | см. `git log` |

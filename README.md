@@ -58,6 +58,7 @@ BERT, DistilBERT, T5, ModernBERT и эмбеддинги для поиска. Д
 | модуль | что реализуешь | задач |
 |---|---|---|
 | B1. Transformer: энкодер и декодер | padding-маска и multi-head, синусоидальные позиции, энкодер Post-LN, cross-attention, seq2seq с label smoothing и greedy decode, проект «число цифрами → число словами» (~25 с на CPU) | 11 |
+| B2. BERT | WordPiece (= `tokenizers`), вход с сегментами, MLM 80/10/10 и whole word masking, модель BERT (= `transformers`, настоящие веса bert-base-uncased заполняют `[MASK]`), головы классификации, NER и extractive QA | 9 |
 
 **Блок C — эволюция декодеров.**
 
