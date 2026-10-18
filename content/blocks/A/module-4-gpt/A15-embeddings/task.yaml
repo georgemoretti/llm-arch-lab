@@ -17,4 +17,4 @@ reading:
   - title: "PyTorch docs: модули и параметры (как модули делят один nn.Parameter)"
     url: https://pytorch.org/docs/stable/notes/modules.html
 viz: [bigram-table]
-questions: [emb-*, tying-*]
+questions: [emb-*, tying-*, iv-positional-01, iv-positional-02]

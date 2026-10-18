@@ -1,0 +1,13 @@
+id: A-Q4-gpt-quiz
+title: "Квиз модуля: Свой GPT"
+short_title: "Квиз: Свой GPT"
+block: A
+module: module-4-gpt
+type: quiz
+difficulty: medium
+depends_on: [A18-minigpt]
+diff_from: A10-char-lm
+tags: [quiz, transformer, attention, interview]
+time_estimate_min: 30
+papers: []
+questions: [emb-*, tying-*, attn1-*, block-*, minigpt-*, iv-positional-01, iv-positional-02, iv-attention-01, iv-attention-02, iv-attention-06, iv-architecture-01, iv-architecture-03, iv-generation-01, iv-generation-07]

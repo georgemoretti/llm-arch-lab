@@ -1,0 +1,19 @@
+id: A-P4-transformer
+title: "Статья: Attention Is All You Need, раздел 3"
+short_title: "Статья: Transformer"
+block: A
+module: module-4-gpt
+type: paper
+difficulty: medium
+depends_on: [A17-block]
+diff_from: null
+tags: [paper, transformer, attention]
+time_estimate_min: 45
+papers: [attention-is-all-you-need]
+reading:
+  - title: "Harvard NLP: The Annotated Transformer (статья с кодом построчно)"
+    url: https://nlp.seas.harvard.edu/annotated-transformer/
+  - title: "Jay Alammar: The Illustrated Transformer"
+    url: https://jalammar.github.io/illustrated-transformer/
+viz: [causal-mask, norm-placement]
+questions: [paper-aiayn-*]

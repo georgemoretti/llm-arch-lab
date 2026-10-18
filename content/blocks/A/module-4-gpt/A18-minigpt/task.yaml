@@ -17,4 +17,4 @@ reading:
   - title: "Sebastian Raschka: Build a Large Language Model (From Scratch), репозиторий с кодом книги"
     url: https://github.com/rasbt/LLMs-from-scratch
 viz: [training-curve, sampling]
-questions: [minigpt-*]
+questions: [minigpt-*, emb-init-loss-01, iv-generation-01, iv-generation-07]

@@ -17,4 +17,4 @@ reading:
   - title: "PyTorch: torch.nn.functional.scaled_dot_product_attention (документация, раздел с эквивалентным кодом)"
     url: https://pytorch.org/docs/stable/generated/torch.nn.functional.scaled_dot_product_attention.html
 viz: [causal-mask]
-questions: [attn1-*]
+questions: [attn1-*, iv-attention-01, iv-attention-02, iv-attention-06, iv-architecture-03]

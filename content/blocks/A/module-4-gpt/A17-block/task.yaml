@@ -17,4 +17,4 @@ reading:
   - title: "Sebastian Raschka: The Big LLM Architecture Comparison (раздел про размещение нормализации)"
     url: https://magazine.sebastianraschka.com/p/the-big-llm-architecture-comparison
 viz: [norm-placement]
-questions: [block-*]
+questions: [block-*, iv-architecture-01]

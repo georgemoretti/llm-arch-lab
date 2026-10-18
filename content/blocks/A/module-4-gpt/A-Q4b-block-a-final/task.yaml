@@ -1,0 +1,13 @@
+id: A-Q4b-block-a-final
+title: "Итоговый квиз блока A: от производной до своего GPT"
+short_title: "Итоговый квиз блока A"
+block: A
+module: module-4-gpt
+type: quiz
+difficulty: medium
+depends_on: [A-Q4-gpt-quiz]
+diff_from: null
+tags: [quiz, interview, final]
+time_estimate_min: 40
+papers: []
+questions: [autograd-reverse-mode-01, autograd-accumulate-01, autograd-memory-01, softmax-ce-grad-01, softmax-stability-01, layernorm-bw-paths-01, init-llm-01, optim-adamw-vs-l2-01, schedule-warmup-01, clip-global-01, loop-overfit-batch-01, charlm-perplexity-01, bpe-train-bytes-01, bpe-encode-rank-01, utf8-decode-01, pretok-why-01, tying-why-01, attn1-scaling-01, attn1-mask-softmax-01, block-residual-01, minigpt-targets-01, minigpt-overfit-01]
