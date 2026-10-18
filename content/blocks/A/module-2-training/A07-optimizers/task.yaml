@@ -17,4 +17,4 @@ reading:
   - title: "Distill: Why Momentum Really Works (Gabriel Goh)"
     url: https://distill.pub/2017/momentum/
 viz: [optimizers]
-questions: [optim-*, iv-training-01]
+questions: [optim-*, iv-training-01, iv-training-04]

@@ -1,0 +1,18 @@
+id: A09d-training-loop-debug
+title: "Отладка: модель не может выучить даже один батч"
+short_title: "Найди баг: цикл обучения"
+block: A
+module: module-2-training
+type: debug
+difficulty: easy
+depends_on: [A09-training-loop]
+diff_from: A09-training-loop
+tags: [training, training-loop, debug]
+entrypoint: [get_batch, evaluate, train_loop, overfit_one_batch]
+time_estimate_min: 15
+papers: []
+reading:
+  - title: "Andrej Karpathy: A Recipe for Training Neural Networks (раздел про overfit one batch)"
+    url: https://karpathy.github.io/2019/04/25/recipe/
+viz: [mlp-boundary]
+questions: [loop-*, mlp-zero-grad-*]

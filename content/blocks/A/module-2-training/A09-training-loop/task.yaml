@@ -1,0 +1,20 @@
+id: A09-training-loop
+title: "Тренировочный цикл: батчи, порядок шага, валидация"
+short_title: "Цикл обучения"
+block: A
+module: module-2-training
+type: implement
+difficulty: medium
+depends_on: [A08-lr-schedule]
+diff_from: A03-mlp
+tags: [training, training-loop, evaluation, dropout]
+entrypoint: [get_batch, evaluate, train_loop, overfit_one_batch]
+time_estimate_min: 40
+papers: []
+reading:
+  - title: "Andrej Karpathy: A Recipe for Training Neural Networks"
+    url: https://karpathy.github.io/2019/04/25/recipe/
+  - title: "PyTorch docs: Module.train / Module.eval"
+    url: https://pytorch.org/docs/stable/generated/torch.nn.Module.html#torch.nn.Module.eval
+viz: [mlp-boundary, lr-schedule]
+questions: [loop-*, iv-training-02, iv-training-03]
