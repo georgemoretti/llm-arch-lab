@@ -1,0 +1,7 @@
+id: sentence-bert
+title: "Sentence-BERT: Sentence Embeddings using Siamese BERT-Networks"
+authors: "Reimers, Gurevych"
+year: 2019
+venue: EMNLP 2019
+url: https://arxiv.org/abs/1908.10084
+tags: [embeddings, bi-encoder, pooling, sentence-similarity]

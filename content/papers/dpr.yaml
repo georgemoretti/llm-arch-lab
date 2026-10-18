@@ -1,0 +1,7 @@
+id: dpr
+title: "Dense Passage Retrieval for Open-Domain Question Answering"
+authors: "Karpukhin, Oğuz, Min, Lewis, Wu, Edunov, Chen, Yih"
+year: 2020
+venue: EMNLP 2020
+url: https://arxiv.org/abs/2004.04906
+tags: [retrieval, bi-encoder, in-batch-negatives, contrastive]

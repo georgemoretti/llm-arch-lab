@@ -1,0 +1,68 @@
+# Вопросы курса к блоку B, модуль 4 (ModernBERT и эмбеддинги текста): слой ModernBERT, unpadding, sentence-эмбеддинги,
+# контрастивное обучение, мини-поиск. Ответы написаны авторами курса. Квиз B-Q4 собирает весь файл.
+- id: modernbert-layer-diff-01
+  topic: architecture
+  tasks: [B16-modernbert-layer]
+  difficulty: easy
+  kind: open
+  question: "Что ModernBERT взял у современных декодеров и что в нём осталось от BERT?"
+  answer: >
+    От декодеров: RoPE вместо таблицы позиций, GeGLU вместо обычного FFN, Pre-LN с финальной нормой, линейные слои и
+    нормы без bias, чередование локального attention (окно) и глобального. От BERT: двунаправленное внимание, цель
+    MLM (без NSP, как у RoBERTa), спецтокены [CLS] / [SEP] / [MASK] и MLM-голова со связанной матрицей. Окно у
+    ModernBERT симметричное, ±64 токена, а не «только назад», как в Gemma или Mistral.
+  source: course
+- id: modernbert-layer-window-01
+  topic: attention
+  tasks: [B16-modernbert-layer]
+  difficulty: medium
+  kind: mcq
+  question: "У ModernBERT-base local_attention = 128, global_attn_every_n_layers = 3. Сколько ключей видит запрос в середине длинного текста в слое 4?"
+  options:
+    - "128"
+    - "129"
+    - "все 8192: слой 4 глобальный"
+    - "65"
+  correct: 1
+  answer: >
+    Глобальные слои — 0, 3, 6, …, так что слой 4 локальный. Окно 128 — это ширина в обе стороны, по 64: условие
+    |i − j| ≤ 64 даёт 64 ключа слева, сам токен и 64 справа, всего 129. Ответ 65 верен только у края текста.
+  source: course
+- id: modernbert-layer-theta-01
+  topic: positional-encoding
+  tasks: [B16-modernbert-layer]
+  difficulty: medium
+  kind: open
+  question: "Почему у глобальных слоёв ModernBERT θ RoPE = 160 000, а у локальных — 10 000?"
+  answer: >
+    θ задаёт самую медленную частоту RoPE. Чем больше θ, тем дольше самые медленные пары не делают полного оборота,
+    и тем лучше модель различает далёкие позиции. Глобальный слой смотрит на весь контекст 8192, ему нужен большой
+    θ (тот же приём, что у Llama 3 с θ = 500 000). Локальный слой видит не дальше 64 токенов: различать дальние
+    позиции ему не нужно, и обычных 10 000 хватает. Так в одной модели две θ, своя у каждого типа слоя.
+  source: course
+- id: modernbert-layer-finfo-01
+  topic: attention
+  tasks: [B16-modernbert-layer]
+  difficulty: medium
+  kind: code-reading
+  question: >
+    В локальном слое закрытые ключи заполнены так: scores.masked_fill(~mask, float("-inf")). На батче с длинным
+    паддингом весь выход модели — nan, хотя без паддинга всё работает. Почему?
+  answer: >
+    PAD-запрос в конце длинного хвоста видит в своём окне ±64 только PAD-ключи, и все они закрыты. Его строка scores
+    целиком −inf, softmax даёт 0/0 = nan. В следующем слое этот nan оказывается в ключах и значениях PAD-позиций. Маска
+    закрывает их в scores, но веса 0 умножаются на v = nan, а 0 · nan = nan, и nan расходится по всем токенам.
+    Лечится заполнением torch.finfo(dtype).min: строка без видимых ключей даёт равномерные веса, но конечные. Другой
+    способ — обнулять выходы PAD-позиций или вообще убрать PAD (unpadding, B17).
+  source: course
+- id: modernbert-layer-noprenorm-01
+  topic: architecture
+  tasks: [B16-modernbert-layer]
+  difficulty: easy
+  kind: open
+  question: "Почему у первого слоя ModernBERT attn_norm = Identity?"
+  answer: >
+    Эмбеддинги ModernBERT сразу проходят через LayerNorm, так что вход слоя 0 уже нормирован. Вторая норма подряд
+    ничего не добавила бы, кроме лишнего вектора весов. В остальных слоях вход attention — сумма остатков, и норма
+    перед подслоем нужна (Pre-LN).
+  source: course

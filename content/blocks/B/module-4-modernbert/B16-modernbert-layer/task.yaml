@@ -1,0 +1,23 @@
+id: B16-modernbert-layer
+title: "Слой ModernBERT: RoPE, GeGLU, без bias, глобальное и локальное attention"
+short_title: "Слой ModernBERT"
+block: B
+module: module-4-modernbert
+type: implement
+difficulty: medium
+depends_on: [B10-bert-model]
+recommended_after: [C03-rope, C07-swa, C08-norm-placement]
+diff_from: B10-bert-model
+tags: [modernbert, encoder, rope, geglu, sliding-window, pre-ln]
+entrypoint: [layer_types, local_window_mask, ModernBertMLP, ModernBertAttention, ModernBertEncoderLayer, ModernBertModel]
+time_estimate_min: 50
+papers: [modernbert]
+reading:
+  - title: "Hugging Face transformers: modeling_modernbert.py (исходный код, сверка имён)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/modernbert/modeling_modernbert.py
+  - title: "ModernBERT-base: config.json на Hugging Face"
+    url: https://huggingface.co/answerdotai/ModernBERT-base/blob/main/config.json
+  - title: "Hugging Face blog: Finally, a Replacement for BERT (ModernBERT)"
+    url: https://huggingface.co/blog/modernbert
+viz: [masks]
+questions: [modernbert-layer-*]

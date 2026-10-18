@@ -1,0 +1,7 @@
+id: modernbert
+title: "Smarter, Better, Faster, Longer: A Modern Bidirectional Encoder for Fast, Memory Efficient, and Long Context Finetuning and Inference"
+authors: "Warner, Chaffin, Clavié, Weller, Hallström, Taghadouini, Gallagher, Biswas, Ladhak, Aarsen, Cooper, Adams, Howard, Poli"
+year: 2024
+venue: arXiv
+url: https://arxiv.org/abs/2412.13663
+tags: [modernbert, encoder, rope, geglu, unpadding, long-context]

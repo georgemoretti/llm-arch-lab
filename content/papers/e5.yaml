@@ -1,0 +1,7 @@
+id: e5
+title: "Text Embeddings by Weakly-Supervised Contrastive Pre-training"
+authors: "Wang, Yang, Huang, Jiao, Yang, Jiang, Majumder, Wei"
+year: 2022
+venue: arXiv
+url: https://arxiv.org/abs/2212.03533
+tags: [embeddings, contrastive, infonce, retrieval]

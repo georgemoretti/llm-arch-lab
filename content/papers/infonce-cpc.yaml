@@ -1,0 +1,7 @@
+id: infonce-cpc
+title: "Representation Learning with Contrastive Predictive Coding"
+authors: "van den Oord, Li, Vinyals"
+year: 2018
+venue: arXiv
+url: https://arxiv.org/abs/1807.03748
+tags: [contrastive, infonce]
