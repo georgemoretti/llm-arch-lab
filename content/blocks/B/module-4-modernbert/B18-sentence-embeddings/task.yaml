@@ -1,0 +1,23 @@
+id: B18-sentence-embeddings
+title: "Sentence-эмбеддинги: mean / CLS pooling, L2, косинус; bi-encoder и cross-encoder"
+short_title: "Sentence-эмбеддинги"
+block: B
+module: module-4-modernbert
+type: implement
+difficulty: easy
+depends_on: [B16-modernbert-layer]
+recommended_after: [B11-finetune-heads]
+diff_from: B11-finetune-heads
+tags: [embeddings, pooling, bi-encoder, cross-encoder, retrieval]
+entrypoint: [mean_pool, cls_pool, l2_normalize, cosine_matrix, BiEncoder, CrossEncoder]
+time_estimate_min: 30
+papers: [sentence-bert]
+reading:
+  - title: "Sentence Transformers: Cross-Encoders vs Bi-Encoders (документация)"
+    url: https://sbert.net/examples/cross_encoder/applications/README.html
+  - title: "all-MiniLM-L6-v2: модель на Hugging Face (mean pooling, 1_Pooling/config.json)"
+    url: https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
+  - title: "bge-small-en-v1.5: модель на Hugging Face (CLS pooling)"
+    url: https://huggingface.co/BAAI/bge-small-en-v1.5
+viz: [embedding-space]
+questions: [embed-pool-*, embed-bi-cross-*, iv-retrieval-01, iv-retrieval-02, iv-retrieval-03]

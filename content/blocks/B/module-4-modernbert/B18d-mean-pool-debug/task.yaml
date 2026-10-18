@@ -1,0 +1,18 @@
+id: B18d-mean-pool-debug
+title: "Отладка: эмбеддинг короткого текста зависит от соседей по батчу"
+short_title: "Найди баг: mean pooling"
+block: B
+module: module-4-modernbert
+type: debug
+difficulty: easy
+depends_on: [B18-sentence-embeddings]
+diff_from: B18-sentence-embeddings
+tags: [embeddings, pooling, debug]
+entrypoint: [mean_pool, cls_pool, l2_normalize, cosine_matrix, BiEncoder, CrossEncoder]
+time_estimate_min: 15
+papers: []
+reading:
+  - title: "Sentence Transformers: models.Pooling (как считают mean pooling по маске)"
+    url: https://github.com/UKPLab/sentence-transformers/blob/master/sentence_transformers/models/Pooling.py
+viz: [embedding-space]
+questions: [embed-pool-*]

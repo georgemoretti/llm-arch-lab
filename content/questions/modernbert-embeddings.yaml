@@ -67,7 +67,7 @@
     перед подслоем нужна (Pre-LN).
   source: course
 - id: unpadding-why-01
-  topic: efficiency
+  topic: inference
   tasks: [B17-unpadding]
   difficulty: easy
   kind: open
@@ -126,4 +126,67 @@
     короткого запроса не бывает. С cu_seqlens (или position_ids, по которым ядро восстанавливает границы) attention
     считается блочно-диагонально, и результат совпадает с обучением на отдельных примерах. Экономия от packing
     при этом сохраняется.
+  source: course
+- id: embed-pool-mean-cls-01
+  topic: embeddings
+  tasks: [B18-sentence-embeddings]
+  difficulty: easy
+  kind: open
+  question: "Mean pooling или CLS pooling — что выбрать, чтобы получить эмбеддинг текста из готовой модели?"
+  answer: >
+    То, на котором модель обучали: вектор, который сближали контрастивным лоссом, и есть эмбеддинг. Для
+    sentence-transformers это записано в 1_Pooling/config.json: all-MiniLM-L6-v2 — mean, bge-small-en-v1.5 — CLS.
+    Перепутанный pooling работает без ошибок, но качество поиска падает. Если модель для эмбеддингов не обучали
+    (голый BERT после MLM), mean pooling обычно лучше [CLS]: вектор [CLS] предобучали только на NSP, и как
+    эмбеддинг он плох (это показано в статье Sentence-BERT). Но и mean pooling голого BERT заметно уступает
+    дообученной модели.
+  source: course
+- id: embed-pool-pad-01
+  topic: embeddings
+  tasks: [B18-sentence-embeddings, B18d-mean-pool-debug]
+  difficulty: medium
+  kind: mcq
+  question: "Какой вариант mean pooling даёт эмбеддинг, который после L2 не зависит от длины паддинга?"
+  options:
+    - "hidden.mean(1)"
+    - "(hidden * m).sum(1) / T"
+    - "hidden.sum(1) / m.sum(1)"
+    - "hidden.mean(1) * T / m.sum(1)"
+  correct: 1
+  answer: >
+    Скрытые состояния PAD-позиций ненулевые: маска закрывает PAD только как ключ, а выход на позиции PAD энкодер
+    считает как для любого токена. Поэтому все варианты, где в сумму попадают PAD (1, 3, 4), меняют направление
+    вектора. Вариант 2 обнуляет PAD и делит на T вместо числа токенов. Это лишь множитель L/T, и после L2 вектор
+    тот же. Без нормировки (dot product) он был бы ошибкой. Правильная формула — (hidden · m).sum(1) / m.sum(1).
+  source: course
+- id: embed-bi-cross-01
+  topic: embeddings
+  tasks: [B18-sentence-embeddings]
+  difficulty: medium
+  kind: open
+  question: "Почему cross-encoder точнее bi-encoder, но в поиске по большому корпусу его используют только вторым этапом?"
+  answer: >
+    В cross-encoder токены запроса и документа видят друг друга во всех слоях: модель сравнивает конкретные слова,
+    отрицания и числа. Bi-encoder сжимает каждый текст в один вектор заранее, не зная запроса, и сравнивает только
+    эти векторы, а детали теряются. Но cross-encoder нужно прогонять на каждой паре (запрос, документ): для
+    миллиона документов — миллион прогонов на каждый запрос. Документы для bi-encoder считают один раз, а поиск —
+    это одно умножение или ANN-индекс. Поэтому сначала bi-encoder (или BM25) отбирает 50–200 кандидатов, а потом
+    cross-encoder переставляет только их.
+  source: course
+- id: embed-bi-cross-cost-01
+  topic: embeddings
+  tasks: [B18-sentence-embeddings, B-P4-sbert-modernbert-e5]
+  difficulty: easy
+  kind: mcq
+  question: "Нужно найти самую похожую пару среди n = 10 000 предложений. Сколько прогонов энкодера потребуется cross-encoder'у и bi-encoder'у?"
+  options:
+    - "10 000 и 10 000"
+    - "≈ 50 млн и 10 000"
+    - "≈ 100 млн и 20 000"
+    - "≈ 50 млн и ≈ 50 млн"
+  correct: 1
+  answer: >
+    Cross-encoder оценивает каждую пару отдельно: n(n − 1)/2 ≈ 5 · 10⁷ прогонов (в статье Sentence-BERT — около 65
+    часов на V100). Bi-encoder кодирует каждое предложение один раз (10 000 прогонов), а дальше считает матрицу
+    косинусов 10 000 × 10 000 одним умножением, около 5 секунд.
   source: course
