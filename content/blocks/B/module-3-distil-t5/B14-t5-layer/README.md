@@ -13,7 +13,8 @@ T5 (Raffel et al., 2019) — энкодер-декодер исходного Tr
 Ты собираешь T5 с именами Hugging Face и в конце загружаешь в **свою** модель настоящие веса `t5-small`:
 
 ```
-The <extra_id_0> walks in <extra_id_1> park.   →   <extra_id_0> park offers <extra_id_1> the <extra_id_2> park.
+вход:   The <extra_id_0> walks in <extra_id_1> park.
+ответ:  <extra_id_0> park offers <extra_id_1> the <extra_id_2> park.
 ```
 
 Ответ странный, но формат верный: модель знает, что после sentinel идёт пропущенный кусок. У t5-small всего 60 М

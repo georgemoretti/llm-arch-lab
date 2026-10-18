@@ -46,11 +46,11 @@ export default function DistillTemperature() {
       </div>
       <div className="viz-subtitle">«Самый большой город на юге Франции — [MASK].» Логиты придуманы для примера.</div>
       <BarRow title={<>учитель, softmax(v / {T.toFixed(1)})</>} stat={<>H = {entropyBits(p).toFixed(2)} бит</>}>
-        <Bars values={p} max={1} labels={WORDS.map((w) => w.slice(0, 5))} titles={WORDS.map((w, i) => `${w}: ${fmtP(p[i])}`)} barWidth={34} height={80} />
+        <Bars values={p} max={1} labels={WORDS.map((w) => w.slice(0, 6))} titles={WORDS.map((w, i) => `${w}: ${fmtP(p[i])}`)} barWidth={40} height={110} />
       </BarRow>
       {view === "both" && (
         <BarRow title={<>ученик, softmax(z / {T.toFixed(1)})</>} stat={<>H = {entropyBits(q).toFixed(2)} бит</>}>
-          <Bars values={q} max={1} color="var(--series-2)" labels={WORDS.map((w) => w.slice(0, 5))} titles={WORDS.map((w, i) => `${w}: ${fmtP(q[i])}`)} barWidth={34} height={80} />
+          <Bars values={q} max={1} color="var(--series-2)" labels={WORDS.map((w) => w.slice(0, 6))} titles={WORDS.map((w, i) => `${w}: ${fmtP(q[i])}`)} barWidth={40} height={110} />
         </BarRow>
       )}
       <div className="kv-tiles">

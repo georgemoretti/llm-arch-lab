@@ -42,7 +42,9 @@ $$
 n, & n < e \\
 \min\Big(e + \Big\lfloor \dfrac{\ln(n / e)}{\ln(d_{\max} / e)}\,(N' - e) \Big\rfloor,\; N' - 1\Big), & n \ge e
 \end{cases}
-\qquad
+$$
+
+$$
 \text{bucket}(r) = \tfrac{N}{2}\,[r > 0] + \text{bucket}(|r|).
 $$
 
