@@ -1,0 +1,20 @@
+id: A18-minigpt
+title: "Проект: мини-GPT на символах корпуса курса"
+short_title: "Проект: мини-GPT"
+block: A
+module: module-4-gpt
+type: project
+difficulty: hard
+depends_on: [A17-block, A09-training-loop]
+diff_from: A10-char-lm
+tags: [gpt, language-model, training, generation, project]
+entrypoint: [MiniGPT, get_batch, train]
+time_estimate_min: 60
+papers: [gpt2, attention-is-all-you-need]
+reading:
+  - title: "Andrej Karpathy: nanoGPT (минимальная реализация и обучение GPT)"
+    url: https://github.com/karpathy/nanoGPT
+  - title: "Sebastian Raschka: Build a Large Language Model (From Scratch), репозиторий с кодом книги"
+    url: https://github.com/rasbt/LLMs-from-scratch
+viz: [training-curve, sampling]
+questions: [minigpt-*]

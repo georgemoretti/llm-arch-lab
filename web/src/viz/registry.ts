@@ -30,6 +30,7 @@ import Sampling from "./Sampling";
 import SoftmaxCe from "./SoftmaxCe";
 import SsdDecay from "./SsdDecay";
 import StateMemory from "./StateMemory";
+import TrainingCurve from "./TrainingCurve";
 
 export const VIZ_REGISTRY: Record<string, ComponentType> = {
   "activations": Activations,
@@ -59,4 +60,5 @@ export const VIZ_REGISTRY: Record<string, ComponentType> = {
   "softmax-ce": SoftmaxCe,
   "ssd-decay": SsdDecay,
   "state-memory": StateMemory,
+  "training-curve": TrainingCurve,
 };

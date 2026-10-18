@@ -1,0 +1,5 @@
+id: training-curve
+title: "Обучение мини-GPT: кривые лосса и образцы текста"
+description: >
+  Предзаписанный прогон эталона A18 на корпусе курса (данные — content/viz/training-curve.data.json, записаны
+  командой `solution.py --record`). Train- и val-лосс по шагам, минимум val, образец генерации на выбранном шаге.
