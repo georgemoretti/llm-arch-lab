@@ -6,6 +6,7 @@ import type { ComponentType } from "react";
 import Activations from "./Activations";
 import AutogradGraph from "./AutogradGraph";
 import BigramTable from "./BigramTable";
+import Bpe from "./Bpe";
 import CausalMask from "./CausalMask";
 import GqaGroups from "./GqaGroups";
 import GradCheck from "./GradCheck";
@@ -34,6 +35,7 @@ export const VIZ_REGISTRY: Record<string, ComponentType> = {
   "activations": Activations,
   "autograd-graph": AutogradGraph,
   "bigram-table": BigramTable,
+  "bpe": Bpe,
   "causal-mask": CausalMask,
   "gqa-groups": GqaGroups,
   "gradcheck": GradCheck,

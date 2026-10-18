@@ -2601,3 +2601,48 @@ a.btn:hover {
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* --- V-bpe --- */
+.bpe-text {
+  font-size: 12.5px;
+  line-height: 1.9;
+  padding: 8px;
+  background: var(--panel-2);
+  border-radius: 6px;
+  word-break: break-all;
+  max-height: 220px;
+  overflow-y: auto;
+}
+.bpe-tok {
+  padding: 1px 0;
+  margin-right: 1px;
+  border-radius: 3px;
+  white-space: pre;
+}
+.bpe-tok-0 {
+  background: color-mix(in srgb, var(--series-1) 20%, transparent);
+}
+.bpe-tok-1 {
+  background: color-mix(in srgb, var(--series-2) 20%, transparent);
+}
+.bpe-tok-2 {
+  background: color-mix(in srgb, var(--series-3) 20%, transparent);
+}
+.bpe-new {
+  outline: 2px solid var(--series-2);
+}
+.bpe-merges {
+  font-size: 12px;
+  border-collapse: collapse;
+  flex: 0 1 260px;
+}
+.bpe-merges th,
+.bpe-merges td {
+  padding: 2px 8px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.bpe-merges th {
+  color: var(--muted);
+  font-weight: 500;
+}
