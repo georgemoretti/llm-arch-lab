@@ -63,11 +63,13 @@ y [B, T, C]
 ## backward
 dy [B, T, C]
 fork
-branch dγ = Σ_{B,T} dy·x̂
+> Σ по B, T от dy·x̂
 dgamma [C]
-branch dβ = Σ_{B,T} dy
+branch
+> Σ по B, T от dy
 dbeta [C]
-branch g = dy·γ; dx = rstd·(g − mean_C g − x̂·mean_C(g·x̂))
+branch
+> g = dy·γ; dx = rstd·(g − mean_C g − x̂·mean_C(g·x̂))
 dx [B, T, C]
 join
 ```
