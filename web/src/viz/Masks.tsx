@@ -37,11 +37,16 @@ function MaskView() {
   const [T, setT] = useState(12);
   const [W, setW] = useState(4);
   const [swa, setSwa] = useState(true);
+  const [bi, setBi] = useState(false);
   const [row, setRow] = useState<number | null>(null);
   const win = swa ? Math.min(W, T) : T;
+  const half = Math.floor(W / 2);
   const cell = T > 16 ? 18 : T > 10 ? 24 : 30;
 
-  const kind = (t: number, s: number) => (s > t ? "future" : t - s >= win ? "outside" : "allowed");
+  // энкодер (ModernBERT): окно симметричное, |p − j| ≤ W/2; декодер: causal и окно назад
+  const kind = (t: number, s: number) =>
+    bi ? (swa && Math.abs(t - s) > half ? "outside" : "allowed") : s > t ? "future" : t - s >= win ? "outside" : "allowed";
+  const seen = (t: number) => Array.from({ length: T }, (_, s) => kind(t, s)).filter((k) => k === "allowed").length;
 
   return (
     <>
@@ -52,6 +57,9 @@ function MaskView() {
         </label>
         <label className="check">
           <input type="checkbox" checked={swa} onChange={(e) => setSwa(e.target.checked)} /> скользящее окно
+        </label>
+        <label className="check">
+          <input type="checkbox" checked={bi} onChange={(e) => setBi(e.target.checked)} /> энкодер (двунаправленное, ModernBERT)
         </label>
         <label style={{ opacity: swa ? 1 : 0.4 }}>
           W = {W}
@@ -66,7 +74,16 @@ function MaskView() {
           </div>
         ))}
         {Array.from({ length: T }, (_, t) => (
-          <Row key={t} t={t} T={T} cell={cell} kind={kind} active={row === t} onHover={setRow} />
+          <Row
+            key={t}
+            t={t}
+            T={T}
+            cell={cell}
+            kind={kind}
+            active={row === t}
+            onHover={setRow}
+            tip={bi ? (p, j, k) => `|p − j| = ${Math.abs(p - j)}${k === "outside" ? ` > W/2 = ${half}: за окном` : ": видно"}` : undefined}
+          />
         ))}
       </div>
       <div className="mask-legend">
@@ -74,14 +91,26 @@ function MaskView() {
           <i className="mask-swatch allowed" /> можно смотреть
         </span>
         <span>
-          <i className="mask-swatch outside" /> прошлое за окном
+          <i className="mask-swatch outside" /> {bi ? "за окном" : "прошлое за окном"}
         </span>
-        <span>
-          <i className="mask-swatch future" /> будущее (causal)
-        </span>
+        {!bi && (
+          <span>
+            <i className="mask-swatch future" /> будущее (causal)
+          </span>
+        )}
       </div>
       <p className="viz-caption">
-        {swa ? (
+        {bi ? (
+          swa ? (
+            <>
+              Энкодер смотрит в обе стороны, и окно симметричное: запрос p видит ключи p − {half} … p + {half}, условие{" "}
+              <code>|p − j| ≤ W / 2</code> (у ModernBERT local_attention = 128 → ±64, 129 ключей). Разрешённых ячеек:{" "}
+              {Array.from({ length: T }, (_, t) => seen(t)).reduce((a, b) => a + b, 0)} вместо {T * T}.
+            </>
+          ) : (
+            <>Глобальный слой энкодера: каждый запрос видит все T ключей, слева и справа.</>
+          )
+        ) : swa ? (
           <>
             Окно из W = {W} позиций включает сам токен: запрос на позиции p видит ключи p − W + 1 … p, условие{" "}
             <code>0 ≤ p − j &lt; W</code>. При W ≥ T маска совпадает с обычной causal. Число разрешённых ячеек:{" "}
@@ -93,8 +122,14 @@ function MaskView() {
         {row !== null && (
           <>
             {" "}
-            Сейчас: q<sub>{row}</sub> видит {Math.min(row + 1, win)} из {row + 1} прошлых позиций
-            {swa && row + 1 > win ? ` (ключи ${row - win + 1}…${row})` : ""}.
+            {bi ? (
+              <>Сейчас: q<sub>{row}</sub> видит {seen(row)} из {T} ключей.</>
+            ) : (
+              <>
+                Сейчас: q<sub>{row}</sub> видит {Math.min(row + 1, win)} из {row + 1} прошлых позиций
+                {swa && row + 1 > win ? ` (ключи ${row - win + 1}…${row})` : ""}.
+              </>
+            )}
           </>
         )}
       </p>
@@ -141,6 +176,7 @@ interface Schedule {
   layers: number;
   window: number | null; // null — sliding-слоёв нет
   pattern: number; // каждый pattern-й слой (с 1) — full; 0 — все слои sliding; 1 — все full
+  firstFull?: boolean; // full — слои 0, pattern, 2·pattern, … (ModernBERT)
   nopeInterval?: number; // каждый N-й слой (с 1) — без RoPE
   source: string;
   note: string;
@@ -151,10 +187,11 @@ const SCHEDULES: Schedule[] = [
   { id: "mistral", name: "Mistral 7B v0.1", layers: 32, window: 4096, pattern: 0, source: "mistralai/Mistral-7B-v0.1", note: "sliding_window = 4096 во всех слоях" },
   { id: "gemma2", name: "Gemma 2 9B", layers: 42, window: 4096, pattern: 2, source: "google/gemma-2-9b", note: "sliding и full чередуются 1 : 1" },
   { id: "gemma3", name: "Gemma 3 27B", layers: 62, window: 1024, pattern: 6, source: "google/gemma-3-27b-pt", note: "sliding_window_pattern = 6 → 5 sliding : 1 full" },
+  { id: "modernbert", name: "ModernBERT-base (энкодер)", layers: 22, window: 128, pattern: 3, firstFull: true, source: "answerdotai/ModernBERT-base", note: "global_attn_every_n_layers = 3 → full: 0, 3, …, 21; окно 128 = ±64 в обе стороны" },
   { id: "smollm3", name: "SmolLM3 3B", layers: 36, window: null, pattern: 1, nopeInterval: 4, source: "HuggingFaceTB/SmolLM3-3B", note: "все слои full, каждый 4-й — без RoPE (NoPE)" },
 ];
 
-const isFull = (s: Schedule, i: number) => s.pattern !== 0 && (i + 1) % s.pattern === 0;
+const isFull = (s: Schedule, i: number) => s.pattern !== 0 && (s.firstFull ? i % s.pattern === 0 : (i + 1) % s.pattern === 0);
 const isNope = (s: Schedule, i: number) => !!s.nopeInterval && (i + 1) % s.nopeInterval === 0;
 
 function LayersView() {

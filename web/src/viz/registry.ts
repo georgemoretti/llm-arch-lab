@@ -10,6 +10,7 @@ import Bpe from "./Bpe";
 import CausalMask from "./CausalMask";
 import CrossAttention from "./CrossAttention";
 import DistillTemperature from "./DistillTemperature";
+import EmbeddingSpace from "./EmbeddingSpace";
 import EncdecMasks from "./EncdecMasks";
 import GqaGroups from "./GqaGroups";
 import GradCheck from "./GradCheck";
@@ -37,6 +38,7 @@ import SsdDecay from "./SsdDecay";
 import StateMemory from "./StateMemory";
 import T5Buckets from "./T5Buckets";
 import TrainingCurve from "./TrainingCurve";
+import Unpadding from "./Unpadding";
 import Wordpiece from "./Wordpiece";
 
 export const VIZ_REGISTRY: Record<string, ComponentType> = {
@@ -47,6 +49,7 @@ export const VIZ_REGISTRY: Record<string, ComponentType> = {
   "causal-mask": CausalMask,
   "cross-attention": CrossAttention,
   "distill-temperature": DistillTemperature,
+  "embedding-space": EmbeddingSpace,
   "encdec-masks": EncdecMasks,
   "gqa-groups": GqaGroups,
   "gradcheck": GradCheck,
@@ -74,5 +77,6 @@ export const VIZ_REGISTRY: Record<string, ComponentType> = {
   "state-memory": StateMemory,
   "t5-buckets": T5Buckets,
   "training-curve": TrainingCurve,
+  "unpadding": Unpadding,
   "wordpiece": Wordpiece,
 };

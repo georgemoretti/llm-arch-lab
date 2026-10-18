@@ -1,0 +1,22 @@
+id: B20-mini-search
+title: "Проект: мини-поиск по корпусу курса — bi-encoder на ModernBERT против TF-IDF"
+short_title: "Проект: мини-поиск"
+block: B
+module: module-4-modernbert
+type: project
+difficulty: medium
+depends_on: [B19-infonce, B16-modernbert-layer]
+diff_from: B19-infonce
+tags: [embeddings, retrieval, contrastive, tf-idf, project]
+entrypoint: [ict_pair, idf_weights, tfidf_vectors, train_step, hit_at_k]
+time_estimate_min: 50
+papers: [dpr, e5]
+reading:
+  - title: "Lee, Chang, Toutanova 2019: Latent Retrieval for Weakly Supervised Open Domain QA (inverse cloze task)"
+    url: https://arxiv.org/abs/1906.00300
+  - title: "BAAI/bge-m3 на Hugging Face (многоязычная модель для сравнения)"
+    url: https://huggingface.co/BAAI/bge-m3
+  - title: "scikit-learn: TfidfVectorizer (сглаженный idf)"
+    url: https://scikit-learn.org/stable/modules/feature_extraction.html#tfidf-term-weighting
+viz: [embedding-space]
+questions: [search-project-*, iv-retrieval-04, iv-retrieval-05]

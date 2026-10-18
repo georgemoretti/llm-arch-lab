@@ -1,0 +1,21 @@
+id: B-P4-sbert-modernbert-e5
+title: "Статьи: Sentence-BERT, ModernBERT, E5 (и DPR)"
+short_title: "Статьи: SBERT, ModernBERT, E5"
+block: B
+module: module-4-modernbert
+type: paper
+difficulty: medium
+depends_on: [B16-modernbert-layer, B19-infonce]
+diff_from: null
+tags: [paper, modernbert, embeddings, contrastive, retrieval]
+time_estimate_min: 60
+papers: [sentence-bert, modernbert, e5, dpr]
+reading:
+  - title: "Hugging Face blog: Finally, a Replacement for BERT (ModernBERT)"
+    url: https://huggingface.co/blog/modernbert
+  - title: "Sentence Transformers: документация и обучение моделей эмбеддингов"
+    url: https://sbert.net/
+  - title: "MTEB: Massive Text Embedding Benchmark (лидерборд)"
+    url: https://huggingface.co/spaces/mteb/leaderboard
+viz: [unpadding, embedding-space]
+questions: [paper-sbert-*, paper-modernbert-*, paper-e5-*, paper-dpr-*]
