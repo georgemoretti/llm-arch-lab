@@ -1,0 +1,7 @@
+id: seq2seq-sutskever
+title: "Sequence to Sequence Learning with Neural Networks"
+authors: "Sutskever, Vinyals, Le"
+year: 2014
+venue: NeurIPS
+url: https://arxiv.org/abs/1409.3215
+tags: [seq2seq, rnn, translation]

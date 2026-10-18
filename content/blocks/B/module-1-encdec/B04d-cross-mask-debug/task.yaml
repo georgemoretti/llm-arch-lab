@@ -1,0 +1,18 @@
+id: B04d-cross-mask-debug
+title: "Отладка: перевод начинается правильно только у коротких фраз"
+short_title: "Найди баг: cross-attention"
+block: B
+module: module-1-encdec
+type: debug
+difficulty: easy
+depends_on: [B04-decoder]
+diff_from: B04-decoder
+tags: [cross-attention, masks, debug]
+entrypoint: [causal_mask, target_mask, DecoderLayer, Decoder]
+time_estimate_min: 15
+papers: []
+reading:
+  - title: "PyTorch: nn.TransformerDecoderLayer (какие маски принимает forward)"
+    url: https://pytorch.org/docs/stable/generated/torch.nn.TransformerDecoderLayer.html
+viz: []
+questions: [encdec-cross-*]

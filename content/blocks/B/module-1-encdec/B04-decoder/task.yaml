@@ -1,0 +1,20 @@
+id: B04-decoder
+title: "Декодер Transformer и cross-attention"
+short_title: "Декодер и cross-attention"
+block: B
+module: module-1-encdec
+type: implement
+difficulty: medium
+depends_on: [B03-encoder]
+diff_from: B03-encoder
+tags: [decoder, cross-attention, causal-mask, encoder-decoder]
+entrypoint: [causal_mask, target_mask, DecoderLayer, Decoder]
+time_estimate_min: 40
+papers: [attention-is-all-you-need, bahdanau-2014]
+reading:
+  - title: "PyTorch: nn.TransformerDecoderLayer (порядок подслоёв и маски)"
+    url: https://pytorch.org/docs/stable/generated/torch.nn.TransformerDecoderLayer.html
+  - title: "Jay Alammar: The Illustrated Transformer, раздел The Decoder Side"
+    url: https://jalammar.github.io/illustrated-transformer/
+viz: [encdec-masks]
+questions: [encdec-cross-*, encdec-decoder-*, iv-architecture-02, iv-architecture-03]

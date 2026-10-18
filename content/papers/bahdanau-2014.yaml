@@ -1,0 +1,7 @@
+id: bahdanau-2014
+title: "Neural Machine Translation by Jointly Learning to Align and Translate"
+authors: "Bahdanau, Cho, Bengio"
+year: 2014
+venue: ICLR 2015
+url: https://arxiv.org/abs/1409.0473
+tags: [attention, seq2seq, translation]

@@ -1,0 +1,21 @@
+id: B03-encoder
+title: "Энкодер Transformer: слой Post-LN и стопка"
+short_title: "Энкодер"
+block: B
+module: module-1-encdec
+type: implement
+difficulty: medium
+depends_on: [B02-sinusoidal]
+recommended_after: [A17-block]
+diff_from: A17-block
+tags: [encoder, layernorm, post-ln, residual]
+entrypoint: [FeedForward, EncoderLayer, Encoder]
+time_estimate_min: 35
+papers: [attention-is-all-you-need, layernorm-placement]
+reading:
+  - title: "PyTorch: nn.TransformerEncoderLayer (параметр norm_first)"
+    url: https://pytorch.org/docs/stable/generated/torch.nn.TransformerEncoderLayer.html
+  - title: "Harvard NLP: The Annotated Transformer, раздел Encoder"
+    url: https://nlp.seas.harvard.edu/annotated-transformer/
+viz: [encdec-masks, norm-placement]
+questions: [encdec-encoder-*, iv-architecture-01]

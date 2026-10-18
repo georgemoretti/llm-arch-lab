@@ -1,0 +1,7 @@
+id: label-smoothing
+title: "Rethinking the Inception Architecture for Computer Vision (раздел 7: label smoothing)"
+authors: "Szegedy, Vanhoucke, Ioffe, Shlens, Wojna"
+year: 2016
+venue: CVPR
+url: https://arxiv.org/abs/1512.00567
+tags: [regularization, label-smoothing, loss]

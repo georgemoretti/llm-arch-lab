@@ -1,0 +1,7 @@
+id: label-smoothing-when
+title: "When Does Label Smoothing Help?"
+authors: "Müller, Kornblith, Hinton"
+year: 2019
+venue: NeurIPS
+url: https://arxiv.org/abs/1906.02629
+tags: [regularization, label-smoothing, calibration]
