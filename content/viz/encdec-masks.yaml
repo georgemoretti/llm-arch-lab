@@ -1,0 +1,6 @@
+id: encdec-masks
+title: "Маски энкодер-декодера: padding, causal, cross"
+description: >
+  Батч из двух пар «источник → цель» разной длины. Веса softmax(q·k/√D + M) для случайных q, k в трёх видах
+  attention: self-attention энкодера (только padding), self-attention декодера (causal и padding), cross-attention
+  (прямоугольная матрица T × S, только padding источника). Переключатель показывает ошибку «маска по запросам».

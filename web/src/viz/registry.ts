@@ -8,6 +8,8 @@ import AutogradGraph from "./AutogradGraph";
 import BigramTable from "./BigramTable";
 import Bpe from "./Bpe";
 import CausalMask from "./CausalMask";
+import CrossAttention from "./CrossAttention";
+import EncdecMasks from "./EncdecMasks";
 import GqaGroups from "./GqaGroups";
 import GradCheck from "./GradCheck";
 import Hybrid from "./Hybrid";
@@ -27,6 +29,7 @@ import QkNorm from "./QkNorm";
 import RmsNorm from "./RmsNorm";
 import RopeRotation from "./RopeRotation";
 import Sampling from "./Sampling";
+import Sinusoidal from "./Sinusoidal";
 import SoftmaxCe from "./SoftmaxCe";
 import SsdDecay from "./SsdDecay";
 import StateMemory from "./StateMemory";
@@ -38,6 +41,8 @@ export const VIZ_REGISTRY: Record<string, ComponentType> = {
   "bigram-table": BigramTable,
   "bpe": Bpe,
   "causal-mask": CausalMask,
+  "cross-attention": CrossAttention,
+  "encdec-masks": EncdecMasks,
   "gqa-groups": GqaGroups,
   "gradcheck": GradCheck,
   "hybrid": Hybrid,
@@ -57,6 +62,7 @@ export const VIZ_REGISTRY: Record<string, ComponentType> = {
   "rmsnorm": RmsNorm,
   "rope-rotation": RopeRotation,
   "sampling": Sampling,
+  "sinusoidal": Sinusoidal,
   "softmax-ce": SoftmaxCe,
   "ssd-decay": SsdDecay,
   "state-memory": StateMemory,

@@ -1,0 +1,6 @@
+id: cross-attention
+title: "Cross-attention обученного seq2seq: число → слова"
+description: >
+  Предзаписанный прогон эталона B06 (данные — content/viz/cross-attention.data.json, записаны командой
+  `solution.py --record`): exact match на отложенных числах по шагам и карта весов cross-attention последнего слоя
+  для примеров, включая ошибки модели.
