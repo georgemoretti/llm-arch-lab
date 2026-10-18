@@ -1,0 +1,7 @@
+id: backprop-1986
+title: "Learning representations by back-propagating errors"
+authors: "Rumelhart, Hinton, Williams"
+year: 1986
+venue: Nature 323
+url: https://www.nature.com/articles/323533a0
+tags: [backprop, autograd]

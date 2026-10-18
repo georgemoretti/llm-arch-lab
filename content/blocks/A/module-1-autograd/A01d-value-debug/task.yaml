@@ -1,0 +1,18 @@
+id: A01d-value-debug
+title: "Отладка: градиенты верны на простых выражениях и врут на сложных"
+short_title: "Найди баг: autograd"
+block: A
+module: module-1-autograd
+type: debug
+difficulty: easy
+depends_on: [A01-value]
+diff_from: A01-value
+tags: [autograd, backprop, debug]
+entrypoint: Value
+time_estimate_min: 15
+papers: []
+reading:
+  - title: "PyTorch docs: torch.Tensor.grad и накопление градиентов"
+    url: https://pytorch.org/docs/stable/generated/torch.Tensor.grad.html
+viz: [autograd-graph]
+questions: [autograd-accumulate-*, autograd-topo-*]

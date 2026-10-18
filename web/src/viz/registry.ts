@@ -4,6 +4,7 @@
 // затем `:::viz <id>:::` в README задачи и/или `viz: [<id>]` в task.yaml.
 import type { ComponentType } from "react";
 import Activations from "./Activations";
+import AutogradGraph from "./AutogradGraph";
 import CausalMask from "./CausalMask";
 import GqaGroups from "./GqaGroups";
 import Hybrid from "./Hybrid";
@@ -23,6 +24,7 @@ import StateMemory from "./StateMemory";
 
 export const VIZ_REGISTRY: Record<string, ComponentType> = {
   "activations": Activations,
+  "autograd-graph": AutogradGraph,
   "causal-mask": CausalMask,
   "gqa-groups": GqaGroups,
   "hybrid": Hybrid,

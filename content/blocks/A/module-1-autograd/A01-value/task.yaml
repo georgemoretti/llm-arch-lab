@@ -1,0 +1,22 @@
+id: A01-value
+title: "Value: autograd на скалярах"
+short_title: "Autograd: Value"
+block: A
+module: module-1-autograd
+type: implement
+difficulty: medium
+depends_on: []
+diff_from: scalar-math
+tags: [autograd, backprop, chain-rule]
+entrypoint: Value
+time_estimate_min: 45
+papers: [backprop-1986, autodiff-survey]
+reading:
+  - title: "micrograd (Andrej Karpathy) — минимальный скалярный autograd, на который похожа эта задача"
+    url: https://github.com/karpathy/micrograd
+  - title: "CS231n: Backpropagation, Intuitions"
+    url: https://cs231n.github.io/optimization-2/
+  - title: "PyTorch: A Gentle Introduction to torch.autograd"
+    url: https://pytorch.org/tutorials/beginner/blitz/autograd_tutorial.html
+viz: [autograd-graph]
+questions: [autograd-*]

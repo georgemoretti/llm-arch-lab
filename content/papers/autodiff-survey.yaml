@@ -1,0 +1,7 @@
+id: autodiff-survey
+title: "Automatic Differentiation in Machine Learning: a Survey"
+authors: "Baydin, Pearlmutter, Radul, Siskind"
+year: 2018
+venue: JMLR 18
+url: https://arxiv.org/abs/1502.05767
+tags: [autograd, backprop]
