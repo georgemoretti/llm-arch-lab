@@ -1,0 +1,22 @@
+id: A08-lr-schedule
+title: "Расписание learning rate и gradient clipping"
+short_title: "Warmup, cosine, clipping"
+block: A
+module: module-2-training
+type: implement
+difficulty: easy
+depends_on: [A07-optimizers]
+diff_from: A07-optimizers
+tags: [lr-schedule, warmup, cosine, gradient-clipping, training]
+entrypoint: [lr_at, clip_grad_norm_]
+time_estimate_min: 30
+papers: [sgdr]
+reading:
+  - title: "nanoGPT: get_lr в train.py (warmup + cosine)"
+    url: https://github.com/karpathy/nanoGPT/blob/master/train.py
+  - title: "PyTorch docs: torch.nn.utils.clip_grad_norm_"
+    url: https://pytorch.org/docs/stable/generated/torch.nn.utils.clip_grad_norm_.html
+  - title: "MiniCPM: расписание warmup-stable-decay (WSD)"
+    url: https://arxiv.org/abs/2404.06395
+viz: [lr-schedule]
+questions: [schedule-*, clip-*]

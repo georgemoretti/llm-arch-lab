@@ -1,0 +1,7 @@
+id: sgdr
+title: "SGDR: Stochastic Gradient Descent with Warm Restarts"
+authors: "Loshchilov, Hutter"
+year: 2017
+venue: ICLR
+url: https://arxiv.org/abs/1608.03983
+tags: [lr-schedule]

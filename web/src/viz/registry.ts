@@ -13,6 +13,7 @@ import InitDepth from "./InitDepth";
 import KvCache from "./KvCache";
 import LayerNormGrad from "./LayerNormGrad";
 import Masks from "./Masks";
+import LrSchedule from "./LrSchedule";
 import MlpBoundary from "./MlpBoundary";
 import MoeRouting from "./MoeRouting";
 import Mtp from "./Mtp";
@@ -39,6 +40,7 @@ export const VIZ_REGISTRY: Record<string, ComponentType> = {
   "kv-cache": KvCache,
   "layernorm-grad": LayerNormGrad,
   "masks": Masks,
+  "lr-schedule": LrSchedule,
   "mlp-boundary": MlpBoundary,
   "moe-routing": MoeRouting,
   "mtp": Mtp,

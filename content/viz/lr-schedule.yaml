@@ -1,0 +1,4 @@
+id: lr-schedule
+title: "Расписания learning rate: warmup + cosine, WSD, константа"
+description: >
+  Как warmup, min_lr и длина фазы спада меняют форму расписания. Те же формулы, что lr_at в задаче.
