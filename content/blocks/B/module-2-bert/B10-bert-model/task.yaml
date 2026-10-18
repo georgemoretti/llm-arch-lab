@@ -1,0 +1,23 @@
+id: B10-bert-model
+title: "Модель BERT: слой Post-LN с GELU, pooler, MLM-голова"
+short_title: "Модель BERT"
+block: B
+module: module-2-bert
+type: implement
+difficulty: medium
+depends_on: [B09-mlm-masking]
+recommended_after: [B03-encoder]
+diff_from: B03-encoder
+tags: [bert, encoder, mlm, post-ln, gelu, weight-tying]
+entrypoint: [BertSelfAttention, BertLayer, BertModel, BertForMaskedLM]
+time_estimate_min: 50
+papers: [bert, gelu]
+reading:
+  - title: "Hugging Face transformers: modeling_bert.py (исходный код, сверка имён)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/models/bert/modeling_bert.py
+  - title: "bert-base-uncased: config.json на Hugging Face"
+    url: https://huggingface.co/google-bert/bert-base-uncased/blob/main/config.json
+  - title: "Jay Alammar: The Illustrated BERT, ELMo, and co."
+    url: https://jalammar.github.io/illustrated-bert/
+viz: [mlm-masking]
+questions: [bert-model-*, iv-bert-01]
