@@ -48,8 +48,8 @@ export default function GradCheck() {
         xs={HS}
         logX
         series={[
-          { id: "fwd", label: "(f(x+h) − f(x)) / h", color: "var(--series-2)", ys: fwd },
-          { id: "cen", label: "(f(x+h) − f(x−h)) / 2h", color: "var(--series-1)", ys: cen },
+          { id: "fwd", label: "односторонняя", color: "var(--series-2)", ys: fwd },
+          { id: "cen", label: "центральная", color: "var(--series-1)", ys: cen },
         ]}
         xTicks={[1e-14, 1e-11, 1e-8, 1e-5, 1e-2]}
         xFormat={(v) => `1e${Math.round(Math.log10(v))}`}
