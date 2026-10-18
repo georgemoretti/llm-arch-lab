@@ -1,0 +1,20 @@
+id: B19-infonce
+title: "Контрастивное обучение: InfoNCE с in-batch негативами, температура, recall@k"
+short_title: "InfoNCE"
+block: B
+module: module-4-modernbert
+type: implement
+difficulty: medium
+depends_on: [B18-sentence-embeddings]
+diff_from: B18-sentence-embeddings
+tags: [embeddings, contrastive, infonce, retrieval, training]
+entrypoint: [info_nce, symmetric_info_nce, recall_at_k]
+time_estimate_min: 30
+papers: [infonce-cpc, dpr, e5]
+reading:
+  - title: "Sentence Transformers: MultipleNegativesRankingLoss (InfoNCE с in-batch негативами)"
+    url: https://sbert.net/docs/package_reference/sentence_transformer/losses.html#multiplenegativesrankingloss
+  - title: "Lilian Weng: Contrastive Representation Learning (обзор)"
+    url: https://lilianweng.github.io/posts/2021-05-31-contrastive/
+viz: [embedding-space]
+questions: [contrastive-*, iv-retrieval-06]
