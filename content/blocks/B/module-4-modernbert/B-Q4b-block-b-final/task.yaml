@@ -1,0 +1,13 @@
+id: B-Q4b-block-b-final
+title: "Итоговый квиз блока B: от Transformer к ModernBERT и эмбеддингам"
+short_title: "Итоговый квиз блока B"
+block: B
+module: module-4-modernbert
+type: quiz
+difficulty: medium
+depends_on: [B-Q4-modernbert-quiz]
+diff_from: null
+tags: [quiz, interview, final, encoder]
+time_estimate_min: 40
+papers: []
+questions: [block-b-final-*, encdec-padding-axis-01, encdec-cross-qkv-01, encdec-decoder-vs-gpt-01, encdec-seq2seq-encode-once-01, encdec-smoothing-why-01, bert-wordpiece-vs-bpe-01, bert-mlm-80-10-10-01, bert-mlm-vs-clm-01, bert-model-postln-gelu-01, bert-heads-qa-span-01, distill-temperature-01, distill-t2-01, t5-bias-why-01, t5-layer-no-scale-01, t5-span-vs-mlm-01, modernbert-layer-diff-01, modernbert-layer-window-01, unpadding-why-01, unpadding-positions-01, embed-pool-pad-01, embed-bi-cross-01, contrastive-in-batch-01, contrastive-temperature-01, search-project-bm25-01, iv-bert-01, iv-retrieval-02]

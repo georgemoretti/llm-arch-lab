@@ -1,0 +1,13 @@
+id: B-Q4-modernbert-quiz
+title: "Квиз модуля: ModernBERT и эмбеддинги текста"
+short_title: "Квиз: ModernBERT и эмбеддинги"
+block: B
+module: module-4-modernbert
+type: quiz
+difficulty: medium
+depends_on: [B18-sentence-embeddings, B19-infonce]
+diff_from: null
+tags: [quiz, modernbert, embeddings, retrieval, interview]
+time_estimate_min: 35
+papers: []
+questions: [modernbert-layer-*, unpadding-*, embed-*, contrastive-*, search-project-*, iv-retrieval-*, iv-embeddings-*]

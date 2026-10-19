@@ -296,3 +296,35 @@
     B20 средний косинус случайных пар упал с 0.18 до 0.03, а косинус «своих» пар вырос с 0.52 до 0.77. L2-нормировка
     уравнивает длины, но конус не раскрывает.
   source: course
+- id: block-b-final-enc-vs-dec-01
+  topic: architecture
+  tasks: [B-Q4b-block-b-final]
+  difficulty: medium
+  kind: open
+  question: "Для каких задач в проде до сих пор берут энкодер (BERT, ModernBERT), а не LLM-декодер, и почему?"
+  answer: >
+    Классификация и разметка токенов (модерация, NER, интенты), эмбеддинги для поиска и RAG, reranking. Энкодер видит
+    текст целиком в обе стороны за один проход, поэтому на каждом токене у него есть контекст справа, что важно для
+    разметки и для вектора всего текста. Он маленький (100–400 М параметров против миллиардов), не генерирует токен за
+    токеном и не держит KV-cache: на миллионах документов в день это дешевле на порядки, и латентность предсказуема.
+    Декодер берут, когда нужна генерация, рассуждение или задача без размеченных данных (zero-shot по инструкции).
+    Часто их совмещают: энкодер находит и фильтрует, LLM отвечает.
+  source: course
+- id: block-b-final-shared-01
+  topic: architecture
+  tasks: [B-Q4b-block-b-final]
+  difficulty: medium
+  kind: mcq
+  question: "Что из перечисленного у ModernBERT устроено так же, как у Llama 3, а не как у BERT?"
+  options:
+    - "двунаправленное attention и цель MLM"
+    - "RoPE, GLU-FFN, отсутствие bias, Pre-LN с финальной нормой"
+    - "token type embeddings и pooler"
+    - "Post-LN и обучаемые позиционные эмбеддинги"
+  correct: 1
+  answer: >
+    ModernBERT взял у современных декодеров RoPE (у Llama 3 θ = 500 000, у глобальных слоёв ModernBERT — 160 000),
+    GLU-FFN (SwiGLU у Llama, GeGLU у ModernBERT), линейные слои без bias и Pre-LN с финальной нормой (у Llama это
+    RMSNorm, у ModernBERT — LayerNorm без bias). От BERT остались двунаправленное attention и MLM. Token type
+    embeddings и pooler ModernBERT убрал, а Post-LN и таблица позиций — это как раз BERT.
+  source: course
