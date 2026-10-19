@@ -52,7 +52,7 @@ Node.js не нужен: собранный интерфейс лежит в р�
 | A3. Токенизация | byte-level BPE: обучение, encode по рангам, decode через байты, пре-токенизация GPT-2, спецтокены, загрузка `merges.txt` GPT-2 (= `tokenizers`) | 8 |
 | A4. Свой GPT | эмбеддинги и позиции, weight tying, attention с causal-маской, блок pre-LN / post-LN, мини-GPT на корпусе курса: обучение (~30 с на CPU) и генерация | 8 |
 
-**Блок B — энкодеры (необязательный, в работе).** Вторая ветка трансформеров: исходный энкодер-декодер, дальше
+**Блок B — энкодеры (необязательный).** Вторая ветка трансформеров: исходный энкодер-декодер, дальше
 BERT, DistilBERT, T5, ModernBERT и эмбеддинги для поиска. Для блока C не нужен.
 
 | модуль | что реализуешь | задач |
@@ -60,6 +60,7 @@ BERT, DistilBERT, T5, ModernBERT и эмбеддинги для поиска. Д
 | B1. Transformer: энкодер и декодер | padding-маска и multi-head, синусоидальные позиции, энкодер Post-LN, cross-attention, seq2seq с label smoothing и greedy decode, проект «число цифрами → число словами» (~25 с на CPU) | 11 |
 | B2. BERT | WordPiece (= `tokenizers`), вход с сегментами, MLM 80/10/10 и whole word masking, модель BERT (= `transformers`, настоящие веса bert-base-uncased заполняют `[MASK]`), головы классификации, NER и extractive QA | 9 |
 | B3. DistilBERT и T5 | дистилляция (T²·KL, смесь с hard loss, cosine-loss, ученик из слоёв учителя), относительный bias T5 (= `transformers`), слой T5 (= `transformers`, настоящие веса t5-small заполняют `<extra_id_0>`), span corruption | 8 |
+| B4. ModernBERT и эмбеддинги | слой ModernBERT: RoPE, GeGLU, локальное окно ±64 (= `transformers`, настоящие веса ModernBERT-base заполняют `[MASK]`), unpadding с `cu_seqlens`, mean / CLS pooling, bi- и cross-encoder (MiniLM и bge-small в своём BERT), InfoNCE, проект «поиск по корпусу курса» против TF-IDF; итоговый квиз и таблица «энкодеры → декодеры» | 10 |
 
 **Блок C — эволюция декодеров.**
 

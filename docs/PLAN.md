@@ -399,7 +399,7 @@ cross; длины и паддинг ползунками), **V-sinusoidal** (т�
 | B18 | Sentence-эмбеддинги: mean pooling по маске, CLS pooling, L2-нормировка, косинус; bi-encoder и cross-encoder | implement |
 | B19 | Контрастивное обучение: InfoNCE с in-batch негативами и температурой, симметричный вариант; recall@k | implement |
 | B20 | Проект: мини-поиск по корпусу курса — bi-encoder на B16, обучение на парах «фрагмент ↔ абзац», сравнение с мешком слов | project |
-| B17d | `cu_seqlens` со сдвигом на 1: соседние тексты видят друг друга | debug |
+| B17d | Граница `cu_seqlens` на единицу (номер текста через «>» вместо «≥»): соседние тексты видят друг друга | debug |
 | B18d | Mean pooling усредняет и PAD: эмбеддинг зависит от длины паддинга | debug |
 | B-P4 | Статьи: Sentence-BERT (Reimers & Gurevych 2019), ModernBERT (Warner et al. 2024), E5 / контрастивное предобучение | paper |
 | B-Q4 | Квиз по модулю + итоговый по блоку | quiz |

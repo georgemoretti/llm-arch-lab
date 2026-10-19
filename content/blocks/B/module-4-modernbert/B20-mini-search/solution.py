@@ -258,7 +258,7 @@ def main() -> None:
                   f"{snaps[-1]['r_q']:.2f}  средний cos {snaps[-1]['aniso']:.2f}  {time.time() - t0:.0f} с")
     final = snaps[-1]
     print(f"{sum(p.numel() for p in model.parameters()) / 1e6:.2f} М параметров, словарь {len(stoi)}")
-    results["bi-encoder (ModernBERT, 1 мин)"] = report("bi-encoder (наш)", final["scores"], sets)
+    results["bi-encoder (ModernBERT, 1.5 мин)"] = report("bi-encoder (наш)", final["scores"], sets)
     hybrid = {s: 0.2 * final["scores"][s] + 0.8 * tfidf_scores[s] for s in sets}
     results["гибрид 0.2 · наш + 0.8 · TF-IDF"] = report("гибрид 0.2 · наш + 0.8 · TF-IDF", hybrid, sets)
 

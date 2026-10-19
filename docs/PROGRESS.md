@@ -3,20 +3,17 @@
 > Обновляется в конце КАЖДОЙ сессии Claude Code. Пиши кратко и конкретно.
 
 ## Текущая фаза
-**Фаза B3 завершена** (2026-10-18): блок B, модуль 3 «DistilBERT и T5» (8 задач). Ждёт просмотра пользователем.
+**Фаза B4 завершена** (2026-10-19): блок B, модуль 4 «ModernBERT и эмбеддинги текста» (10 задач); блок B закончен,
+выпуск **v0.3.0**. Ждёт просмотра пользователем.
 
-Предыдущее: Фаза B2 (модуль «BERT»).
+Предыдущее: Фаза B3 (модуль «DistilBERT и T5»).
 
 ## Следующий шаг (точный)
-Фаза **B4** — модуль 4 «ModernBERT и эмбеддинги текста» (`content/blocks/B/module-4-modernbert/`, id модуля уже в
-block.yaml): B16 слой ModernBERT (RoPE, GeGLU, без bias, Pre-LN, чередование global / local — окно и шаг из
-`answerdotai/ModernBERT-base` config.json; == `transformers.ModernBertModel` на случайных весах, если класс есть в
-установленной версии), B17 unpadding (`cu_seqlens`, блочно-диагональная маска == батч с паддингом), B18 sentence-эмбеддинги
-(mean / CLS pooling, L2, bi- и cross-encoder), B19 InfoNCE с in-batch негативами, B20 проект «мини-поиск по корпусу курса»,
-B17d (`cu_seqlens` со сдвигом), B18d (mean pooling с PAD), B-P4, B-Q4 (+ итоговый по блоку), V-unpadding,
-V-embedding-space. В конце B4 — таблица «энкодеры → декодеры», CHANGELOG, выпуск v0.3.0. Вопросы user-db
-`iv-retrieval-*`, `iv-embeddings-*` — привязать глобами. В кеше HF уже есть `sentence-transformers/all-MiniLM-L6-v2`,
-`BAAI/bge-small-en-v1.5` — можно взять для weights-тестов B18.
+Все фазы из порядка `/next` (0 … 9, A1–A4, B1–B4) выполнены. Блок D (обучение и инференс: SFT, LoRA, DPO, GRPO,
+квантизация, speculative decoding) в PLAN.md упомянут одной строкой и не расписан по фазам. Варианты: (1) пользователь
+просит расписать блок D (`/next расписать блок D`) — тогда план D1…Dn в PLAN.md по образцу блока B и порядок в
+`.claude/commands/next.md`; (2) сессия ревью (промпт «Ревью» в PROMPTS.md) по блокам A и B — последнее ревью было
+2026-10-17, только по блоку C. Тег `v0.3.0` поставлен локально; GitHub Release не создавался (нужно решение пользователя).
 
 ## Сделано
 **Фаза 0:**
@@ -535,7 +532,48 @@ V-embedding-space. В конце B4 — таблица «энкодеры → д
   проходит; скриншоты страниц B12–B15, B-Q3 и обеих визуализаций (светлая 1440, тёмная 860) — ошибок в консоли нет (исправлены
   широкая формула бакетов и широкий пример t5-small); `pytest tests/` 165 + 1 skip; `validate --all` — 117 задач.
 
+**Фаза B4 (блок B, модуль 4 «ModernBERT и эмбеддинги текста»):**
+- `llmlab/core/modernbert.py` — эталоны B16–B19 (ModernBertConfig, layer_types, local_window_mask, ModernBertEmbeddings / MLP /
+  Attention / EncoderLayer / Model / ForMaskedLM, unpad_input, pack, unpack, packed_position_ids, varlen_mask,
+  varlen_attention, padding_savings, mean_pool, cls_pool, l2_normalize, cosine_matrix, BiEncoder, CrossEncoder, info_nce,
+  symmetric_info_nce, recall_at_k); RoPE — из `core/llama.py`; `tests/test_core_modernbert.py` (+ debug-копии).
+- Задачи: **B16** слой ModernBERT (11 тестов: расписание слоёв, окно |i − j| ≤ W/2 с диагностом ±W / строгой границы / causal,
+  GeGLU с диагностом SwiGLU / tanh / перепутанных половин, attention (RoPE с θ слоя, √D, нарезка Wqkv), строка без видимых
+  ключей не даёт nan (finfo.min), Pre-LN, локальные слои видят только окно, длинный PAD-хвост, == `transformers.ModernBertModel`
+  (eager) при T > окна; weights: ModernBERT-base → «Paris», логиты = transformers), **B17** unpadding (8: cu_seqlens int32,
+  паддинг слева и пустой текст, roundtrip, позиции с нуля, блочная маска с окном, == батч с паддингом, правка текста не
+  течёт к соседям, слой ModernBERT на упаковке == на паддинге, доли экономии), **B17d** (номер текста через «>»: падает 4/8),
+  **B18** эмбеддинги (8: mean по маске с PAD-мусором и пустым текстом, CLS, L2 и косинусы без F.normalize, инвариантность к
+  паддингу на ModernBERT и BERT, режимы pooling, cross-encoder с token type; weights: all-MiniLM-L6-v2 (mean) и bge-small-en-v1.5
+  (CLS, по 1_Pooling/config.json) в `BertModel` курса == transformers, парафразы ближе чужой темы), **B18d** (`hidden.mean(1)`:
+  падает 3/8), **B19** InfoNCE (7: формула и 4 диагноста, градиент (p − onehot)d/(τN), log M и 0, hard negatives, симметричный,
+  recall@k, игрушечный bi-encoder на «синонимах» 0.02 → ≥ 0.9 за 60 шагов), **B20** проект (6: ICT, idf/tf-idf, hit@k с
+  несколькими gold, train_step == эталон за 3 шага, 40 шагов на 16 абзацах ≥ 75 %), **B-P4** (SBERT, DPR, E5, ModernBERT;
+  8 вопросов, факты сверены с PDF), **B-Q4**, **B-Q4b** (итоговый, таблица «энкодеры → декодеры»). Мутационная проверка:
+  B16 — 16, B17 — 11, B18 — 12, B19 — 11, B20 — 13 мутантов, все убиты.
+- B20 `main` (1200 шагов, 88 с, 0.51 М параметров): вопросы r@1 / r@5 / r@10 — TF-IDF по словам 0.49 / 0.78 / 0.86, по основам
+  0.53 / 0.83 / 0.90, наш bi-encoder 0.35 / 0.59 / 0.71, гибрид 0.55 / 0.83 / 0.91, bge-m3 0.61 / 0.88 / 0.94, bge-m3 + TF-IDF
+  0.61 / 0.89 / 0.95; фрагменты r@1: TF-IDF 0.95, наш 0.91, bge-m3 0.68. Средний cos случайных пар 0.18 → 0.03.
+  `--record` пишет `content/viz/embedding-space.data.json`.
+- Статьи: `modernbert`, `sentence-bert`, `e5`, `dpr`, `infonce-cpc`. Вопросы: `content/questions/modernbert-embeddings.yaml` (22),
+  `papers-block-b.yaml` (+8); user-db `iv-retrieval-*`, `iv-embeddings-*` → B18, B19, B20, B-Q4, B-Q4b.
+- Визуализации: `unpadding` (батч / упаковка / маска, позиции, экономия, переключатель ошибки B17d), `embedding-space` (PCA
+  до/после, гистограммы косинусов, кривые, таблица методов); в `masks` — двунаправленное окно и расписание ModernBERT-base.
+- README (строка B4), CHANGELOG → v0.3.0, версия 0.3.0 (pyproject, `__init__`, uv.lock), тег `v0.3.0`.
+- Проверено: weights-тесты B16 (ModernBERT-base, ~600 МБ) и B18 (MiniLM, bge-small) проходят; 22 внешние ссылки отвечают 200
+  (одна битая заменена); скриншоты страниц B16–B-Q4b, трёх визуализаций (светлая 1440, тёмная 860) — ошибок в консоли и KaTeX
+  нет; `pytest tests/` 172 + 1 skip; `validate --all` — 127 задач.
+
 ## Не сделано / долги
+- B4: тесты B17d / B18d — копии тестов B17 / B18 без диагностов, называющих баг; при правке тестов B17 / B18 синхронизировать.
+- B4: числа в README B20, вопросах `search-project-*` и `embedding-space.data.json` зависят от снимка
+  `content/data/course-search.json` и гиперпараметров `main`. Пересборка снимка (`--rebuild-corpus`) изменит их — тогда
+  перезаписать: `python content/blocks/B/module-4-modernbert/B20-mini-search/solution.py --record content/viz/embedding-space.data.json --pretrained`.
+- B4: bge-m3 в B20 (`--pretrained`) — только в `main`, не в тестах (2.3 ГБ); его строки в таблице — из одного прогона.
+- B4: `varlen_attention` строит маску [N, N] (O(N²) памяти) — учебная замена `flash_attn_varlen_func`, оговорено в README B17.
+- A18: `CORPUS = Path(__file__).parents[4] / "data"` в solution/starter верен только для файла в `content/…`; из
+  `workspace/A18-minigpt/solution.py` он указывает на `~/data/corpus-ru.txt`, и `main` рабочей копии упадёт (тесты берут путь
+  от своего файла и не затронуты). В B20 корень ищется вверх до `content/data` — так же стоит поправить A18 (вне фазы B4).
 - A4: тесты A16d — копия тестов A16 без ветки диагноста про маску после softmax; при правке тестов A16 синхронизировать.
   `llmlab/core/minigpt.py` дублирует эталоны A15–A17 (страховка — `tests/test_core_minigpt.py`).
 - A4: мини-GPT переобучается после ~1000 шагов (данных ~21 тыс. символов обучения); dropout в блоке нет. Числа в README
@@ -1016,6 +1054,25 @@ V-embedding-space. В конце B4 — таблица «энкодеры → д
 - **B15d — граничное значение сдвига маски (`new_ones` вместо `new_zeros`)**, а не «перевёрнутый порядок sentinel-ов»: вход
   остаётся правильным, а цель съезжает на кусок — правдоподобная ошибка на единицу.
 
+- **B4: RoPE ModernBERT — из `core/llama.py` (C03)**, а не своя копия: блок B импортирует эталон блока C, но только готовую
+  функцию; C03 стоит в `recommended_after`, задача решается и без неё.
+- **B16: маска — `finfo.min`, а не −inf**: у PAD-запроса в локальном слое окно может целиком состоять из PAD, и −inf даёт nan,
+  который через 0 · nan расходится по слоям (так же делает HF). Есть отдельный тест и вопрос.
+- **B16: модель строит две маски (PAD и PAD & окно), слой берёт свою по `attention_type`** — как в HF; θ RoPE хранится в
+  attention. Сверка с transformers — через `attn_implementation="eager"`.
+- **B17d — граница при разборе `cu_seqlens` («>» вместо «≥»), а не сдвиг самих `cu_seqlens`**: сдвиг `cu − 1` ломает N и даёт
+  ошибку формы, а не задуманный симптом «соседи видят друг друга». PLAN исправлен.
+- **B18d — `hidden.mean(1)`, а не деление на T**: при обнулённых PAD деление на T только масштабирует вектор, и после L2
+  эмбеддинг тот же — такой «баг» не проявляется. Скрытые состояния PAD ненулевые, их усреднение меняет направление.
+- **B19: игрушка на «синонимах»** (запрос из отдельного словаря): на общих словах случайный мешок эмбеддингов уже находит
+  документ (recall 0.97 до обучения), и тест ничего не проверял бы.
+- **B20: корпус — снимок README и вопросов курса в `content/data/course-search.json`**, а не живое чтение README: иначе числа
+  в README задачи меняются с каждой новой фазой. Оценка — вопросы курса (написаны отдельно от README), обучение без разметки
+  (ICT). Токенизатор — «основа из 5 букв + ##окончание»: обученного русского токенизатора в курсе нет, а грубая морфология
+  помогает и TF-IDF. Честный результат «маленькая модель проигрывает TF-IDF, гибрид лучше обоих» оставлен как вывод.
+- **Таблица «энкодеры → декодеры» — в README итогового квиза B-Q4b**, а не в `architectures.yaml`: та таблица про декодеры
+  (MoE, чередование слоёв), строки энкодеров в ней были бы пустыми.
+
 ## Известные проблемы
 - Холодный старт subprocess с torch ≈ 1–1.5 с на прогон — приемлемо для UI, но заметно.
 
@@ -1048,3 +1105,4 @@ V-embedding-space. В конце B4 — таблица «энкодеры → д
 | 2026-10-18 | B1 | План блока B (B1–B4), B01–B06 + B01d, B04d, B05d, B-P1, B-Q1, core/encdec.py, 3 визуализации, 24 вопроса, 4 статьи, 153 теста, 100 задач | см. `git log` |
 | 2026-10-18 | B2 | B07–B11 + B09d, B11d, B-P2, B-Q2, core/bert.py (== transformers/tokenizers), 2 визуализации, 20 вопросов, 5 статей, weights-тесты bert-base-uncased, 159 тестов, 109 задач | см. `git log` |
 | 2026-10-18 | B3 | B12–B15 + B13d, B15d, B-P3, B-Q3, core/t5.py (== transformers T5), 2 визуализации, 22 вопроса, 4 статьи, weights-тест t5-small, 165 тестов, 117 задач | см. `git log` |
+| 2026-10-19 | B4 | B16–B20 + B17d, B18d, B-P4, B-Q4, B-Q4b, core/modernbert.py (== transformers ModernBERT), 2 визуализации + режим энкодера в V-masks, 30 вопросов, 5 статей, снимок корпуса, v0.3.0, 172 теста, 127 задач | см. `git log` |

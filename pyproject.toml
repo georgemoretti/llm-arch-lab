@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "llmlab"
-version = "0.2.0"
+version = "0.3.0"
 description = "LLM Arch Lab — локальный интерактивный курс по эволюции LLM-архитектур (GPT-2 → Llama → MoE → гибриды)"
 readme = "README.md"
 license = { file = "LICENSE" }
