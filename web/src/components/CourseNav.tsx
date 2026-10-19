@@ -1,13 +1,13 @@
 // Навигация по курсу со страницы задачи: выезжающая слева панель «модули → задачи» и кнопки
 // «предыдущая / следующая», чтобы не возвращаться на карту ради перехода к соседней задаче.
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api, type CourseData, type TaskSummary } from "../api";
 import { taskHref } from "../router";
 import { TYPE_ICON, taskLabel, withDebugUnderParent } from "../courseIndex";
 import { usePersistent } from "../theme";
 import { StatusIcon } from "./StatusIcon";
 
-type ModuleNav = { id: string; title: string; num: string; tasks: TaskSummary[] };
+type ModuleNav = { id: string; block: string; title: string; num: string; tasks: TaskSummary[] };
 
 function useCourse(reloadKey: unknown): CourseData | null {
   const [data, setData] = useState<CourseData | null>(null);
@@ -19,7 +19,7 @@ function useCourse(reloadKey: unknown): CourseData | null {
 
 function modulesOf(data: CourseData): ModuleNav[] {
   return data.blocks.flatMap((b) =>
-    b.modules.filter((m) => m.tasks.length).map((m) => ({ id: m.id, title: m.title, num: `${b.id}${m.number}`, tasks: withDebugUnderParent(m.tasks) })),
+    b.modules.filter((m) => m.tasks.length).map((m) => ({ id: m.id, block: b.id, title: m.title, num: `${b.id}${m.number}`, tasks: withDebugUnderParent(m.tasks) })),
   );
 }
 
@@ -32,6 +32,17 @@ export function CourseNav({ currentId, progressKey }: { currentId: string; progr
   const i = flat.findIndex((t) => t.id === currentId);
   const prev = i > 0 ? flat[i - 1] : undefined;
   const next = i >= 0 && i < flat.length - 1 ? flat[i + 1] : undefined;
+  const currentBlock = modules.find((m) => m.tasks.some((t) => t.id === currentId))?.block;
+  // в панели — модули одного блока (по умолчанию блок текущей задачи), другие — переключателем вверху
+  const [block, setBlock] = useState<string | undefined>();
+  const shownBlock = block ?? currentBlock ?? data?.blocks[0]?.id;
+  const navRef = useRef<HTMLElement>(null);
+
+  useEffect(() => {
+    if (!open) return setBlock(undefined);
+    // текущая задача сразу в зоне видимости, без ручной прокрутки
+    navRef.current?.querySelector('[aria-current="page"]')?.scrollIntoView({ block: "center" });
+  }, [open, data]);
 
   useEffect(() => {
     if (!open) return;
@@ -57,9 +68,26 @@ export function CourseNav({ currentId, progressKey }: { currentId: string; progr
       </span>
       {open && (
         <div className="course-nav-backdrop" onMouseDown={(e) => e.target === e.currentTarget && setOpen(false)}>
-          <nav className="course-nav" aria-label="Модули и задачи курса">
+          <nav className="course-nav" aria-label="Модули и задачи курса" ref={navRef}>
             <div className="course-nav-head">
               <a href="#/">Карта курса</a>
+              <span className="course-nav-spacer" />
+              {data && data.blocks.length > 1 && (
+                <span className="course-nav-blocks" role="tablist" aria-label="Блоки">
+                  {data.blocks.map((b) => (
+                    <button
+                      key={b.id}
+                      role="tab"
+                      aria-selected={b.id === shownBlock}
+                      className={`course-nav-block ${b.id === shownBlock ? "active" : ""} ${b.id === currentBlock ? "current" : ""}`}
+                      onClick={() => setBlock(b.id)}
+                      title={b.title}
+                    >
+                      {b.id}
+                    </button>
+                  ))}
+                </span>
+              )}
               <button className="icon-btn" onClick={() => setOpen(false)} aria-label="Закрыть">
                 ×
               </button>
@@ -67,7 +95,14 @@ export function CourseNav({ currentId, progressKey }: { currentId: string; progr
             {!data ? (
               <div className="muted course-nav-empty">Загрузка…</div>
             ) : (
-              modules.map((m) => <ModuleSection key={m.id} m={m} currentId={currentId} />)
+              <>
+                {data.blocks.length > 1 && <div className="course-nav-block-title muted">{data.blocks.find((b) => b.id === shownBlock)?.title}</div>}
+                {modules
+                  .filter((m) => m.block === shownBlock)
+                  .map((m) => (
+                    <ModuleSection key={m.id} m={m} currentId={currentId} />
+                  ))}
+              </>
             )}
           </nav>
         </div>
