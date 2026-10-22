@@ -44,12 +44,16 @@ def test_basic_tokenize(impl):
         "«Ёлка» — это\tдерево\n": ["«", "елка", "»", "—", "это", "дерево"],
         "a​b\x00c  ": ["abc"],
         "": [],
+        "price: $5+3=8 <ok> a^b `x` |y| ~z": ["price", ":", "$", "5", "+", "3", "=", "8", "<", "ok", ">", "a", "^",
+                                             "b", "`", "x", "`", "|", "y", "|", "~", "z"],
+        "a!b/c:d@e[f`g{h~i0": ["a", "!", "b", "/", "c", ":", "d", "@", "e", "[", "f", "`", "g", "{", "h", "~", "i0"],
     }
     for text, want in cases.items():
         got = impl.basic_tokenize(text)
         assert got == want, f"basic_tokenize({text!r}) = {got}, ждём {want}"
     assert impl.basic_tokenize("Café, Ёж!", lower=False) == ["Café", ",", "Ёж", "!"], (
         "при lower=False регистр и диакритика сохраняются (так работает bert-base-cased)")
+    assert impl.basic_tokenize("Zoo AZ", lower=False) == ["Zoo", "AZ"], "заглавные A … Z — буквы, а не пунктуация"
 
 
 def test_wordpiece_greedy(impl):

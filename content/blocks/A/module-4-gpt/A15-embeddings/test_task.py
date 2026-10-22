@@ -35,6 +35,10 @@ def test_embedding_sum(impl, ref):
     idx = _idx()
     out = b(idx)
     assert out.shape == (3, 10, C), f"[B, T] = [3, 10] → [B, T, C] = [3, 10, {C}], получено {tuple(out.shape)}"
+    fresh = impl.TokenPositionEmbedding(V, BLOCK, C)                 # своя инициализация, без весов эталона
+    for name in ("wte", "wpe"):
+        std = getattr(fresh, name).weight.std().item()
+        assert abs(std - 0.02) < 0.004, f"{name}: std {std:.4f}, ждём N(0, 0.02²), как в GPT-2 (готовый код __init__)"
     want = a.wte.weight[idx] + a.wpe.weight[:10]
     if torch.allclose(out, a.wte.weight[idx]):
         pytest.fail("позиции не добавлены: выход равен одному wte(idx). Без позиций модель не отличит «кот съел "

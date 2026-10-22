@@ -45,3 +45,41 @@ def test_bert_smoke():
     logits = core.BertForMaskedLM(cfg)(inputs, batch["token_type_ids"], batch["attention_mask"])
     assert logits.shape == (2, 8, 30)
     assert core.SequenceClassifier(cfg, 2)(inputs).shape == (2, 2)
+
+
+# Фразы, на которых в README B19 посчитана анизотропия «голого» BERT и модели эмбеддингов.
+ANISOTROPY_PHRASES = [
+    "The cat is sleeping on the warm windowsill.",
+    "Interest rates rose again this quarter.",
+    "Add two cups of flour and stir slowly.",
+    "The striker scored in the final minute.",
+    "Photosynthesis converts light into chemical energy.",
+    "Please restart the server after the update.",
+    "The novel is set in nineteenth-century Paris.",
+    "Heavy rain is expected over the weekend.",
+]
+
+
+def _mean_pair_cosine(e: torch.Tensor) -> float:
+    e = torch.nn.functional.normalize(e, dim=-1)
+    n = len(e)
+    return float(((e @ e.T).sum() - n) / (n * n - n))
+
+
+@pytest.mark.weights
+@pytest.mark.parametrize("name, pooling, want", [
+    ("google-bert/bert-base-uncased", "mean", 0.51),
+    ("google-bert/bert-base-uncased", "cls", 0.74),
+    ("sentence-transformers/all-MiniLM-L6-v2", "mean", 0.03),
+])
+def test_anisotropy_numbers_in_b19(name, pooling, want):
+    """Числа анизотропии из README B19: средний косинус пар на восьми фразах ANISOTROPY_PHRASES."""
+    transformers = pytest.importorskip("transformers")
+    tok = transformers.AutoTokenizer.from_pretrained(name)
+    model = transformers.AutoModel.from_pretrained(name).eval()
+    batch = tok(ANISOTROPY_PHRASES, padding=True, return_tensors="pt")
+    with torch.no_grad():
+        h = model(**batch).last_hidden_state
+    m = batch["attention_mask"].unsqueeze(-1).float()
+    emb = (h * m).sum(1) / m.sum(1) if pooling == "mean" else h[:, 0]
+    assert abs(_mean_pair_cosine(emb) - want) < 0.01, f"{name} {pooling}: {_mean_pair_cosine(emb):.3f}, в README {want}"

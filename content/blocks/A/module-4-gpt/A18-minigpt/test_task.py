@@ -71,6 +71,14 @@ def test_initial_loss_is_log_vocab(impl, ref):
     _, b = _models(impl, ref)
     _, loss = b(_idx(B=8, T=BLOCK, seed=2), _idx(B=8, T=BLOCK, seed=3))
     assert abs(loss.item() - math.log(V)) < 0.1, f"стартовый loss {loss.item():.3f}, ждём ≈ ln {V} = {math.log(V):.3f}"
+    torch.manual_seed(0)
+    m = impl.MiniGPT(_cfg(impl, n_layer=4, n_embd=64))             # своя инициализация, без весов эталона
+    for name, p in m.named_parameters():
+        if name.endswith("weight") and p.dim() == 2 and "emb" not in name:
+            want = 0.02 / math.sqrt(2 * 4) if name.endswith("c_proj.weight") else 0.02
+            assert abs(p.std().item() - want) < 0.15 * want, (
+                f"{name}: std {p.std().item():.4f}, а по схеме GPT-2 нужно {want:.4f} (выходные проекции c_proj — "
+                "0.02 / √(2·n_layer), остальные матрицы — 0.02). Не меняй готовую инициализацию в __init__.")
 
 
 def test_causal(impl, ref):

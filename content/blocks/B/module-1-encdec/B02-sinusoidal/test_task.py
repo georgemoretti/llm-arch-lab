@@ -111,6 +111,10 @@ def test_embedding_forward(impl):
     torch.testing.assert_close(out, want, atol=1e-5, rtol=1e-5, msg="tok(ids) · √d_model + PE[0 … T−1]")
     with pytest.raises(ValueError):
         emb(torch.ones(1, 13, dtype=torch.long))
+    assert emb(torch.ones(1, 12, dtype=torch.long)).shape == (1, 12, DM), "T = max_len = 12 ещё помещается"
+    std = emb.tok.weight.std().item()
+    assert abs(std - DM ** -0.5) < 0.2 * DM ** -0.5, (
+        f"tok: std {std:.3f}, ждём 1/√d_model = {DM ** -0.5:.3f} (готовый код __init__): тогда tok · √d_model ~ 1")
     assert not any("pe" in n for n, _ in emb.named_parameters()), (
         "позиции — не параметр: синусоиды не обучаются (buffer, а не nn.Parameter)")
 
