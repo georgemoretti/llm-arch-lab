@@ -140,3 +140,19 @@ def test_whole_word_masking(impl):
     assert abs(picked / total - 0.15) < 0.02, f"выбрано {picked / total:.1%} слов, ждём 15 %"
     masked = (inputs[chosen] == MASK).float().mean().item()
     assert abs(masked - 0.8) < 0.04, f"80 / 10 / 10 применяется к каждому выбранному подтокену: [MASK] у {masked:.0%}"
+
+
+def test_prob_one_chooses_everything(impl):
+    """prob = 1: выбраны все обычные токены и все слова (включая слово 0), спецтокены — нет"""
+    ids = _batch(B=8, T=32)
+    _, labels = _run(impl, ids, prob=1.0)
+    normal = ~torch.isin(ids, torch.tensor(SPECIAL))
+    missed = int((labels[normal] == -100).sum())
+    assert missed == 0, (
+        f"при prob = 1 не выбрано {missed} обычных токенов: выбор — rand < prob, при prob = 1 он верен всегда")
+    ids, wids = _words(B=4, n_words=6)
+    _, labels = _run(impl, ids, prob=1.0, word_ids=wids)
+    for w in range(6):
+        if (labels[wids == w] == -100).any():
+            pytest.fail(f"при prob = 1 слово {w} выбрано не целиком или не выбрано. Номера слов в word_ids идут с 0, "
+                        "и решение «выбрать слово» должно действовать для каждого номера ≥ 0.", pytrace=False)

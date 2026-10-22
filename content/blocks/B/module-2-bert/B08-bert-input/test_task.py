@@ -27,6 +27,8 @@ def test_truncate_pair_examples(impl):
     assert got == (a[:5], b), f"a из 10, b из 3, бюджет 8: b цел (3 ≤ 4), a обрезан до 5; получено {got}"
     assert a == list(range(10, 20)), "truncate_pair не должен менять входные списки"
     assert impl.truncate_pair(a[:3], b, 8) == (a[:3], b), "влезает — ничего не режем"
+    got = impl.truncate_pair(a[:5], b, 8)
+    assert got == (a[:5], b), f"5 + 3 = 8 ровно по бюджету — тоже влезает, ничего не режем (≤, а не <); получено {got}"
     got = impl.truncate_pair(a[:7], list(range(30, 36)), 9)
     assert got == (a[:5], list(range(30, 34))), f"a 7, b 6, бюджет 9: половина 4 → b 4, a 5; получено {got}"
     got = impl.truncate_pair(a[:4], list(range(30, 34)), 5)
