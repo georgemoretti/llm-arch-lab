@@ -132,7 +132,8 @@ def _manual(att, x, mask=None, theta=None, scale=True, rope=True):
 def test_attention(impl):
     """Wqkv → q, k, v; RoPE с θ своего типа слоя; q·kᵀ/√D; маска; Wo"""
     g, loc = _att(impl, 0), _att(impl, 1)
-    assert g.attention_type == "full_attention" and loc.attention_type == "sliding_attention"
+    assert g.attention_type == "full_attention" and loc.attention_type == "sliding_attention", (
+        "слой 0 — глобальный (full_attention), слой 1 — локальный (sliding_attention): глобальный каждый третий")
     x = torch.randn(2, 7, C, generator=torch.Generator().manual_seed(1))
     mask = torch.tensor([[1, 1, 1, 1, 1, 0, 0], [1] * 7]).bool()[:, None, None, :]
     out = g(x, mask)

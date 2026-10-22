@@ -61,7 +61,8 @@ def test_wordpiece_greedy(impl):
     assert got == ["una", "##ff", "##able"], (
         f"получено {got}. С позиции 0 самый длинный кусок — «una» (а не «un»), затем «##ff», «##able». Жадность не "
         "ищет лучшего разбиения: «un ##aff ##able» тоже возможно, но алгоритм его не найдёт.")
-    assert impl.wordpiece("playing", VOCAB) == ["play", "##ing"]
+    assert impl.wordpiece("playing", VOCAB) == ["play", "##ing"], (
+        f"«playing» → play ##ing, получено {impl.wordpiece('playing', VOCAB)}")
     assert impl.wordpiece("привет", VOCAB) == ["при", "##вет"], "у кириллицы так же: при + ##вет"
     assert impl.wordpiece("мир", VOCAB) == ["мир"], "слово целиком в словаре — один токен без ##"
 
@@ -76,7 +77,8 @@ def test_wordpiece_unknown(impl):
     got = impl.wordpiece("unпри", VOCAB)
     assert got == ["[UNK]"], (f"получено {got}: «при» есть в словаре, но как начало слова. Продолжение ищется только в "
                               "виде «##при», которого нет.")
-    assert impl.wordpiece("азбука", VOCAB) == ["аз", "##бук", "##а"]
+    assert impl.wordpiece("азбука", VOCAB) == ["аз", "##бук", "##а"], (
+        f"кириллица режется так же: аз ##бук ##а, получено {impl.wordpiece('азбука', VOCAB)}")
     assert impl.wordpiece("un" * 60, {**VOCAB, "##un": 99}) == ["[UNK]"], "слово длиннее max_chars = 100 → [UNK]"
     assert impl.wordpiece("x", VOCAB, unk="<unk>") == ["<unk>"], "токен неизвестного слова — параметр unk"
 
@@ -117,7 +119,7 @@ def test_bert_base_uncased_vocab(impl):
     tok = pytest.importorskip("tokenizers", reason="нужен tokenizers: uv sync --extra weights")
     path = hub.hf_hub_download("google-bert/bert-base-uncased", "vocab.txt")
     vocab = {line.rstrip("\n"): i for i, line in enumerate(Path(path).read_text(encoding="utf-8").splitlines())}
-    assert len(vocab) == 30522
+    assert len(vocab) == 30522, f"vocab.txt bert-base-uncased — 30 522 строки, прочитано {len(vocab)}"
     oracle = tok.Tokenizer.from_pretrained("google-bert/bert-base-uncased")
     for text in ["The unaffable tokenizer isn't playing!", "Transformers: attention is all you need (2017).",
                  "Привет, мир! Йогурт и ёжик.", CORPUS.read_text(encoding="utf-8")[:3000]]:

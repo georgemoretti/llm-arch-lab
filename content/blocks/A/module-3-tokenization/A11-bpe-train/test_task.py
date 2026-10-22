@@ -59,10 +59,11 @@ def test_merge_pair(impl):
         pytest.fail("[5, 5, 5] → [7, 7]: средняя пятёрка использована дважды. После замены перепрыгни через оба "
                     "элемента пары: правильно [7, 5].", pytrace=False)
     assert got == [7, 5], f"[5, 5, 5] с парой (5, 5) → 7 должно стать [7, 5], а получено {got}"
-    assert impl.merge_pair([5, 5, 5, 5], (5, 5), 7) == [7, 7]
+    assert impl.merge_pair([5, 5, 5, 5], (5, 5), 7) == [7, 7], (
+        "[5, 5, 5, 5] с парой (5, 5) → [7, 7]: две непересекающиеся пары, обе заменяются")
     assert impl.merge_pair([1, 3, 1], (1, 2), 9) == [1, 3, 1], "пары нет — список не меняется"
     assert impl.merge_pair([4, 1, 2], (1, 2), 9) == [4, 9], "пара в самом конце тоже сливается"
-    assert impl.merge_pair([], (1, 2), 9) == []
+    assert impl.merge_pair([], (1, 2), 9) == [], "пустая последовательность остаётся пустой"
 
 
 def test_train_toy(impl, ref):
@@ -115,7 +116,8 @@ def test_corpus_matches_reference(impl, ref, corpus_bytes, corpus_merges):
         if g != w:
             pytest.fail(f"слияние №{k} отличается: ждём {w}, получено {g}. Самая частая пара считается заново "
                         "после каждого слияния, по текущей (уже слитой) последовательности.", pytrace=False)
-    assert got_items == want_items
+    assert got_items == want_items, (
+        f"слияний {len(got_items)}, а у эталона {len(want_items)}: проверь условие остановки (vocab_size и «пар больше нет»)")
 
 
 def test_build_vocab(impl, ref, corpus_bytes, corpus_merges):

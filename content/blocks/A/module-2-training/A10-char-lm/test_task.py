@@ -39,7 +39,7 @@ def test_encode_decode_roundtrip(impl, text):
     assert isinstance(ids, torch.Tensor) and ids.dtype == torch.long, (
         f"encode возвращает torch.long тензор, а получено {type(ids).__name__} {getattr(ids, 'dtype', '')}: "
         "nn.Embedding и cross_entropy принимают только целые индексы")
-    assert ids.shape == (300,)
+    assert ids.shape == (300,), f"300 символов → 300 id, форма [300]; получено {tuple(ids.shape)}"
     assert impl.decode(ids, itos) == text[:300], "decode(encode(s)) должен вернуть исходную строку"
     assert impl.decode(ids.tolist(), itos) == text[:300], "decode должен принимать и список индексов"
 

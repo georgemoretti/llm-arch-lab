@@ -108,7 +108,8 @@ def test_encode_matches_oracle(impl, toy, text):
     assert tok.encode(s, allowed_special=False) == _oracle(toy, s, allowed_special=False), (
         "allowed_special=False: «<|endoftext|>» кодируется как обычный текст (так безопаснее для текста от "
         "пользователя: он не сможет вставить служебный токен)")
-    assert toy["special"][EOT] not in tok.encode(s, allowed_special=False)
+    assert toy["special"][EOT] not in tok.encode(s, allowed_special=False), (
+        "при allowed_special=False id спецтокена не должен появиться в выходе")
 
 
 def test_encode_respects_chunks(impl, tmp_path):
@@ -149,8 +150,11 @@ def gpt2_files():
 def test_gpt2_sizes(impl, gpt2_files):
     """GPT-2: 50 000 слияний + 256 байтов + <|endoftext|> (id 50 256) = 50 257 токенов; «Hello world» → [15496, 995]"""
     tok = impl.GPT2Tokenizer(gpt2_files[0], gpt2_files[1])
-    assert len(tok.merges) == 50_000 and tok.special == {EOT: 50256} and len(tok.to_gpt2) == 50_256
-    assert tok.encode("Hello world") == [15496, 995]
+    assert len(tok.merges) == 50_000 and tok.special == {EOT: 50256} and len(tok.to_gpt2) == 50_256, (
+        f"ждём 50 000 слияний, special = {{EOT: 50256}} и 50 256 обычных токенов; получено {len(tok.merges)}, "
+        f"{tok.special}, {len(tok.to_gpt2)}: проверь чтение merges.txt (первая строка — версия) и vocab.json")
+    assert tok.encode("Hello world") == [15496, 995], (
+        f"«Hello world» в GPT-2 — [15496, 995] («Hello», « world»), получено {tok.encode('Hello world')}")
 
 
 @pytest.mark.weights
@@ -165,4 +169,4 @@ def test_gpt2_matches_tokenizers(impl, gpt2_files, text):
         assert got == want, (f"на {s[:30]!r} расхождение с tokenizers"
                              + (f" в позиции {k}: {got[k]} против {want[k]}" if k is not None else
                                 f": длина {len(got)} против {len(want)}"))
-        assert tok.decode(got) == s
+        assert tok.decode(got) == s, f"decode(encode(s)) должен вернуть исходную строку {s[:30]!r}"

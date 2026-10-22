@@ -91,7 +91,8 @@ def test_align_labels(impl):
     if len(got) == len(want) and got[0] != -100:
         pytest.fail("у спецтокенов ([CLS], [SEP]) word_id = None — им метка −100.", pytrace=False)
     assert got == want, f"получено {got}, ждём {want}"
-    assert impl.align_labels([None, 0, 1, 1, 1, None, None], [3, 4]) == [-100, 3, 4, -100, -100, -100, -100]
+    assert impl.align_labels([None, 0, 1, 1, 1, None, None], [3, 4]) == [-100, 3, 4, -100, -100, -100, -100], (
+        "метка — только у первого подтокена слова; продолжения слова и спецтокены — −100")
     assert impl.align_labels([None, 0, None, 1, None], [7, 8]) == [-100, 7, -100, 8, -100], (
         "пара сегментов: слово 0 и слово 1 разделены спецтокеном — у каждого своя метка")
 

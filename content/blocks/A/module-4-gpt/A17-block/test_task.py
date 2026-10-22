@@ -80,7 +80,7 @@ def test_pre_norm_block(impl, ref):
     a, b = _blocks(impl, ref, pre_norm=True)
     x = _x(1)
     out = b(x)
-    assert out.shape == (B, T, C)
+    assert out.shape == (B, T, C), f"блок сохраняет форму [B, T, C] = {(B, T, C)}, получено {tuple(out.shape)}"
     if not torch.allclose(out, a(x), atol=1e-5, rtol=1e-4):
         pytest.fail(_diagnose_pre(a, x, out), pytrace=False)
 

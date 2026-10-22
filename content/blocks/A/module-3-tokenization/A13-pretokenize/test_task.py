@@ -130,7 +130,8 @@ def test_split_special(impl):
     assert impl.split_special(f"a{EOT}b", {}) == [f"a{EOT}b"], "без спецтокенов весь текст — один кусок"
     assert impl.split_special("", sp) == [] and impl.split_special("", {}) == [], "пустая строка → []"
     two = {EOT: 400, "<|pad|>": 401}
-    assert impl.split_special(f"<|pad|>hi{EOT}", two) == ["<|pad|>", "hi", EOT]
+    assert impl.split_special(f"<|pad|>hi{EOT}", two) == ["<|pad|>", "hi", EOT], (
+        "несколько спецтокенов: режем по каждому из них, сами спецтокены — отдельные куски")
 
 
 def test_encode_with_special(impl, merges, special):
@@ -147,7 +148,7 @@ def test_encode_with_special(impl, merges, special):
     assert got == by_chunks(left) + [eot] + by_chunks(right), "ждём: куски левой части, спецтокен, куски правой"
     plain = impl.encode_with_special(s, merges, {})
     assert eot not in plain, "без словаря спецтокенов «<|endoftext|>» — обычный текст, его id не появляется"
-    assert impl.encode_with_special("", merges, special) == []
+    assert impl.encode_with_special("", merges, special) == [], "пустая строка → пустой список id"
     # слияние «a + пробел» обучение с пре-токенизацией не выучит, но encode обязан уважать куски при любых merges
     got = impl.encode_with_special("a b", {(97, 32): 256}, {})
     if got == [256, 98]:
@@ -160,14 +161,15 @@ def test_encode_with_special(impl, merges, special):
 def test_decode_with_special(impl, vocab, special):
     """decode_with_special: спецтокены возвращаются строкой, символы, разрезанные между токенами, — целыми"""
     eot = special[EOT]
-    assert impl.decode_with_special([72, 105, eot, 33], vocab, special) == f"Hi{EOT}!"
+    assert impl.decode_with_special([72, 105, eot, 33], vocab, special) == f"Hi{EOT}!", (
+        "id спецтокена декодируется в его строку «<|endoftext|>», остальные id — через vocab: ждём «Hi<|endoftext|>!»")
     emoji = list("🙂".encode("utf-8"))                     # 4 байта, на корпусе не сливаются
     got = impl.decode_with_special(emoji + [eot], vocab, special)
     if "�" in got:
         pytest.fail(f"эмодзи 🙂 = 4 байта = 4 токена, а decode вернул {got!r}: токены декодированы по одному. "
                     "Склей байты всей последовательности (спецтокены — как их строку в UTF-8) и декодируй "
                     "один раз.", pytrace=False)
-    assert got == "🙂" + EOT
+    assert got == "🙂" + EOT, f"ждём эмодзи и «<|endoftext|>», получено {got!r}"
 
 
 def test_roundtrip(impl, text, merges, vocab, special):

@@ -38,7 +38,8 @@ def _forbid_nn_init(monkeypatch):
 
 def test_gain(impl):
     """gain: linear → 1, relu → √2, tanh → 5/3"""
-    assert impl.gain("linear") == 1.0
+    assert impl.gain("linear") == 1.0, (
+        f"gain('linear') = 1: без нелинейности дисперсию сигнала поправлять не нужно, получено {impl.gain('linear')}")
     g = impl.gain("relu")
     if math.isclose(g, 2.0):
         pytest.fail("gain(relu) = 2 — это множитель для ДИСПЕРСИИ. gain умножает std, поэтому √2.", pytrace=False)

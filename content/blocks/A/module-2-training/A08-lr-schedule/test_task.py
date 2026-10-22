@@ -102,7 +102,7 @@ def test_clip_keeps_small_gradients(impl):
     ps = _params(0.01)
     before = [p.grad.clone() for p in ps[:2]]
     n = impl.clip_grad_norm_(ps, 1.0)
-    assert n < 1.0
+    assert n < 1.0, f"clip_grad_norm_ возвращает норму ДО обрезки: здесь она {n:.4g} и меньше max_norm = 1"
     for p, b0 in zip(ps[:2], before):
         assert torch.equal(p.grad, b0), (
             "градиенты с нормой меньше max_norm изменились: обрезка только уменьшает, а не нормирует к max_norm")

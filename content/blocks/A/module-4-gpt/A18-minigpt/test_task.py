@@ -154,4 +154,5 @@ def test_generate(impl, ref):
     assert torch.equal(s1, s2), "сэмплирование: torch.multinomial(softmax(логиты / temperature), 1, generator=generator)"
     long = b.generate(_idx(B=1, T=BLOCK), 2 * BLOCK, 0)
     assert long.shape == (1, 3 * BLOCK), "генерация длиннее block_size: в модель идут только последние block_size токенов"
-    assert torch.equal(long, a.generate(_idx(B=1, T=BLOCK), 2 * BLOCK, 0))
+    assert torch.equal(long, a.generate(_idx(B=1, T=BLOCK), 2 * BLOCK, 0)), (
+        "генерация с temperature = 0 детерминирована: два прогона с одного начала должны совпасть")

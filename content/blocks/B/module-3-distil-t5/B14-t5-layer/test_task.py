@@ -209,8 +209,10 @@ def _batch():
 def test_stack_shares_bias(impl, ref):
     """T5Stack: таблица bias только у блока 0, остальные блоки получают его bias; финальная норма"""
     a, b = _models(impl, ref)
-    assert hasattr(b.encoder.block[0].layer[0].SelfAttention, "relative_attention_bias")
-    assert not hasattr(b.encoder.block[1].layer[0].SelfAttention, "relative_attention_bias")
+    assert hasattr(b.encoder.block[0].layer[0].SelfAttention, "relative_attention_bias"), (
+        "таблица relative_attention_bias есть у блока 0 (так устроен T5)")
+    assert not hasattr(b.encoder.block[1].layer[0].SelfAttention, "relative_attention_bias"), (
+        "у блоков 1 и дальше своей таблицы нет: они получают bias блока 0")
     src, am, _, _ = _batch()
     seen = []
     orig = b.encoder.block[1].forward

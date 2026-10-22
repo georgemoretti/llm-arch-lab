@@ -84,7 +84,8 @@ def test_pad_batch(impl):
     assert set(out) >= {"input_ids", "token_type_ids", "attention_mask"}, f"ключи: input_ids, token_type_ids, attention_mask; есть {sorted(out)}"
     for k in ("input_ids", "token_type_ids", "attention_mask"):
         assert out[k].shape == (3, 5) and out[k].dtype == torch.long, f"{k}: long [3, 5], получено {out[k].dtype} {tuple(out[k].shape)}"
-    assert out["input_ids"].tolist() == [[CLS, 10, SEP, 20, SEP], [CLS, 11, 12, SEP, PAD], [CLS, SEP, PAD, PAD, PAD]]
+    assert out["input_ids"].tolist() == [[CLS, 10, SEP, 20, SEP], [CLS, 11, 12, SEP, PAD], [CLS, SEP, PAD, PAD, PAD]], (
+        f"PAD добавляется справа до самого длинного примера; получено {out['input_ids'].tolist()}")
     assert out["token_type_ids"].tolist() == [[0, 0, 0, 1, 1], [0, 0, 0, 0, 0], [0, 0, 0, 0, 0]], "на PAD тип 0"
     assert out["attention_mask"].tolist() == [[1] * 5, [1, 1, 1, 1, 0], [1, 1, 0, 0, 0]], "1 у настоящих токенов, 0 у PAD"
 
