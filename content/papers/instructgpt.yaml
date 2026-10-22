@@ -1,0 +1,7 @@
+id: instructgpt
+title: "Training language models to follow instructions with human feedback"
+authors: "Ouyang, Wu, Jiang, Almeida, Wainwright, Mishkin, Zhang, Agarwal, Slama, Ray, et al."
+year: 2022
+venue: NeurIPS
+url: https://arxiv.org/abs/2203.02155
+tags: [sft, rlhf, reward-model, alignment, instructions]

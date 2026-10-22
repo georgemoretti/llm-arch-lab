@@ -1,0 +1,7 @@
+id: flan
+title: "Finetuned Language Models Are Zero-Shot Learners"
+authors: "Wei, Bosma, Zhao, Guu, Yu, Lester, Du, Dai, Le"
+year: 2021
+venue: ICLR 2022
+url: https://arxiv.org/abs/2109.01652
+tags: [sft, instruction-tuning, zero-shot]

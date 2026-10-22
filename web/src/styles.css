@@ -2684,3 +2684,72 @@ a.btn:hover {
   color: var(--muted);
   font-weight: 500;
 }
+
+/* --- V-chat-template --- */
+.chat-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  margin: 4px 0 8px;
+  font-size: 12px;
+}
+.chat-flow {
+  padding: 8px 10px;
+  background: var(--panel-2);
+  border-radius: 6px;
+  overflow-x: auto;
+  margin-bottom: 10px;
+}
+.chat-line {
+  display: flex;
+  flex-wrap: wrap;
+  row-gap: 4px;
+  min-height: 34px;
+}
+.chat-cell {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  margin-right: 1px;
+  cursor: default;
+}
+.chat-tok {
+  display: inline-block;
+  min-width: 13px;
+  padding: 1px 2px;
+  border-radius: 3px;
+  font: 12px var(--mono);
+  text-align: center;
+  white-space: pre;
+}
+.chat-tok.special {
+  background: color-mix(in srgb, var(--warn) 22%, transparent);
+  color: var(--warn);
+  font-size: 10.5px;
+}
+.chat-tok.context {
+  color: var(--muted);
+}
+.chat-tok.answer {
+  background: color-mix(in srgb, var(--series-1) 25%, transparent);
+  color: var(--text);
+}
+.chat-label {
+  font: 10px var(--mono);
+  color: var(--series-1);
+  white-space: pre;
+  min-height: 13px;
+}
+.chat-label.none {
+  color: var(--border-strong);
+}
+.chat-label.bad {
+  color: var(--bad);
+}
+.chat-cell.seen .chat-tok {
+  outline: 1px dashed color-mix(in srgb, var(--muted) 50%, transparent);
+}
+.chat-cell.hl .chat-tok {
+  outline: 2px solid var(--accent);
+}

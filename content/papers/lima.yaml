@@ -1,0 +1,7 @@
+id: lima
+title: "LIMA: Less Is More for Alignment"
+authors: "Zhou, Liu, Xu, Iyer, Sun, Mao, Ma, Efrat, Yu, Yu, et al."
+year: 2023
+venue: NeurIPS
+url: https://arxiv.org/abs/2305.11206
+tags: [sft, data-quality, alignment]

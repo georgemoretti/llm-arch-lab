@@ -1,0 +1,21 @@
+id: D02-loss-mask
+title: "Маска лосса SFT: метки только на ответе, сдвиг на токен, упаковка диалогов"
+short_title: "Маска лосса и упаковка"
+block: D
+module: module-1-sft
+type: implement
+difficulty: medium
+depends_on: [D01-chat-template]
+recommended_after: [B17-unpadding]
+diff_from: D01-chat-template
+tags: [sft, loss-mask, packing, labels]
+entrypoint: [assistant_mask, sft_targets, pack, packed_causal_mask]
+time_estimate_min: 35
+papers: [instructgpt]
+reading:
+  - title: "TRL: SFTTrainer — assistant_only_loss, completion_only_loss и packing"
+    url: https://huggingface.co/docs/trl/main/en/sft_trainer
+  - title: "Hugging Face blog: Improving Hugging Face Training Efficiency Through Packing with Flash Attention 2"
+    url: https://huggingface.co/blog/packing-with-FA2
+viz: [chat-template]
+questions: [sft-mask-*, sft-packing-*]

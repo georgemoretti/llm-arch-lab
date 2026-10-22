@@ -8,6 +8,7 @@ import AutogradGraph from "./AutogradGraph";
 import BigramTable from "./BigramTable";
 import Bpe from "./Bpe";
 import CausalMask from "./CausalMask";
+import ChatTemplate from "./ChatTemplate";
 import CrossAttention from "./CrossAttention";
 import DistillTemperature from "./DistillTemperature";
 import EmbeddingSpace from "./EmbeddingSpace";
@@ -47,6 +48,7 @@ export const VIZ_REGISTRY: Record<string, ComponentType> = {
   "bigram-table": BigramTable,
   "bpe": Bpe,
   "causal-mask": CausalMask,
+  "chat-template": ChatTemplate,
   "cross-attention": CrossAttention,
   "distill-temperature": DistillTemperature,
   "embedding-space": EmbeddingSpace,

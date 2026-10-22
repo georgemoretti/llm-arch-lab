@@ -1,0 +1,18 @@
+id: D03d-grad-accum-debug
+title: "Отладка: с накоплением градиентов модель учится иначе, чем с большим батчем"
+short_title: "Найди баг: накопление градиентов"
+block: D
+module: module-1-sft
+type: debug
+difficulty: medium
+depends_on: [D03-sft-step]
+diff_from: D03-sft-step
+tags: [sft, gradient-accumulation, debug]
+entrypoint: [masked_ce_sum, accumulate_gradients, sft_step]
+time_estimate_min: 20
+papers: []
+reading:
+  - title: "Hugging Face blog: Fixing Gradient Accumulation"
+    url: https://huggingface.co/blog/gradient_accumulation
+viz: [sft-curves]
+questions: [sft-accum-*]

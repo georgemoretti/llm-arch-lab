@@ -1,0 +1,18 @@
+id: D02d-shift-debug
+title: "Отладка: лосс SFT падает почти до нуля, а модель не отвечает"
+short_title: "Найди баг: сдвиг меток"
+block: D
+module: module-1-sft
+type: debug
+difficulty: easy
+depends_on: [D02-loss-mask]
+diff_from: D02-loss-mask
+tags: [sft, labels, debug]
+entrypoint: [assistant_mask, sft_targets, pack, packed_causal_mask]
+time_estimate_min: 15
+papers: []
+reading:
+  - title: "transformers: как causal LM сдвигает labels внутри forward (ForCausalLMLoss)"
+    url: https://github.com/huggingface/transformers/blob/main/src/transformers/loss/loss_utils.py
+viz: [chat-template]
+questions: [sft-shift-*]

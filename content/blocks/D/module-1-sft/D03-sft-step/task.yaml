@@ -1,0 +1,21 @@
+id: D03-sft-step
+title: "Шаг SFT: накопление градиентов с честной нормировкой на токены ответа"
+short_title: "Шаг SFT"
+block: D
+module: module-1-sft
+type: implement
+difficulty: medium
+depends_on: [D02-loss-mask]
+recommended_after: [A09-training-loop, A08-lr-schedule]
+diff_from: D02-loss-mask
+tags: [sft, gradient-accumulation, training, loss-normalization]
+entrypoint: [masked_ce_sum, accumulate_gradients, sft_step]
+time_estimate_min: 35
+papers: []
+reading:
+  - title: "Hugging Face blog: Fixing Gradient Accumulation (нормировка лосса при накоплении)"
+    url: https://huggingface.co/blog/gradient_accumulation
+  - title: "Unsloth: Bug Fixes in LLM Training — Gradient Accumulation"
+    url: https://unsloth.ai/blog/gradient
+viz: [sft-curves]
+questions: [sft-accum-*]

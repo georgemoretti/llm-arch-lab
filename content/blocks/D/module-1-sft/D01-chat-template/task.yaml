@@ -1,0 +1,21 @@
+id: D01-chat-template
+title: "Chat-шаблон: от списка сообщений к строке со служебными токенами ролей"
+short_title: "Chat-шаблон"
+block: D
+module: module-1-sft
+type: implement
+difficulty: easy
+depends_on: []
+recommended_after: [C25-qwen3-project, A14-gpt2-tokenizer]
+diff_from: pretrained-lm
+tags: [sft, chat-template, tokenization, special-tokens]
+entrypoint: [render_chat, split_special, encode_chat]
+time_estimate_min: 35
+papers: [instructgpt]
+reading:
+  - title: "Hugging Face: Chat templates (документация transformers)"
+    url: https://huggingface.co/docs/transformers/main/en/chat_templating
+  - title: "Qwen/Qwen3-0.6B: tokenizer_config.json (поле chat_template)"
+    url: https://huggingface.co/Qwen/Qwen3-0.6B/blob/main/tokenizer_config.json
+viz: [chat-template]
+questions: [chat-template-*]
