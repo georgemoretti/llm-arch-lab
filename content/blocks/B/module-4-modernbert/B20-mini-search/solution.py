@@ -22,8 +22,10 @@ from pathlib import Path
 import torch
 
 from llmlab.core.modernbert import BiEncoder, ModernBertConfig, ModernBertModel, info_nce
+from llmlab.paths import project_root
 
-ROOT = next(p for p in Path(__file__).resolve().parents if (p / "content" / "data").is_dir())   # и из workspace/
+# корень курса: вверх от файла (и из workspace/), иначе — LLMLAB_ROOT / текущая папка (понятная ошибка, если нет)
+ROOT = next((p for p in Path(__file__).resolve().parents if (p / "content" / "data").is_dir()), None) or project_root()
 CORPUS = ROOT / "content" / "data" / "course-search.json"
 PAD, UNK, CLS = 0, 1, 2
 
