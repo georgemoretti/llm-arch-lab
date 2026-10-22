@@ -115,6 +115,14 @@ def test_train_loop_matches_reference(impl, ref):
         assert math.isclose(a, b, rel_tol=1e-5), f"валидационный лосс на шаге {s}: {a:.5f} ≠ {b:.5f}"
 
 
+def test_eval_after_last_step(impl):
+    """Валидация и после последнего шага, даже если он не кратен eval_every"""
+    hist, _, _ = _run(impl, steps=50)
+    steps = [s for s, _ in hist["val"]]
+    assert steps == [39, 49], (
+        f"при steps = 50 и eval_every = 40 валидация должна быть после шагов [39, 49], а была после {steps}. "
+        "Последний шаг (steps − 1) валидируется всегда — иначе итоговое качество модели неизвестно.")
+
 def test_lr_and_clip_applied_before_step(impl):
     """В момент step(): lr уже равен lr_fn(step), глобальная норма градиента ≤ max_grad_norm"""
     _, seen, _ = _run(impl)
