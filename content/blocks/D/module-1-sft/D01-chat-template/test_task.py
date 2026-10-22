@@ -116,6 +116,10 @@ def test_split_special(impl):
         f"'</think>' — свой служебный токен, а не '<' + '/think>' или кусок текста; получено {got}")
     assert impl.split_special("<|im_end|><|im_start|>", sp) == ["<|im_end|>", "<|im_start|>"], (
         "два служебных токена подряд — два куска, без пустой строки между ними")
+    nested = ["<|im|>", "<|im|>end"]                    # один служебный токен — префикс другого
+    got = impl.split_special("a<|im|>endb<|im|>c", nested)
+    assert got == ["a", "<|im|>end", "b", "<|im|>", "c"], (
+        f"если токены — префиксы друг друга, сначала пробуй длинные (sorted по длине, по убыванию); получено {got}")
     assert impl.split_special("просто текст", sp) == ["просто текст"]
     assert impl.split_special("", sp) == [], "пустая строка → пустой список"
 

@@ -1,0 +1,13 @@
+id: D-Q1-sft-quiz
+title: "Квиз модуля: SFT — от продолжения текста к диалогу"
+short_title: "Квиз: SFT"
+block: D
+module: module-1-sft
+type: quiz
+difficulty: medium
+depends_on: [D03-sft-step, D04-sft-project]
+diff_from: null
+tags: [quiz, sft, chat-template, interview]
+time_estimate_min: 30
+papers: []
+questions: [chat-template-*, sft-*, iv-finetuning-05, iv-finetuning-06, iv-finetuning-07]

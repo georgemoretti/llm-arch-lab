@@ -32,6 +32,7 @@ import ParamBudget from "./ParamBudget";
 import QkNorm from "./QkNorm";
 import RmsNorm from "./RmsNorm";
 import RopeRotation from "./RopeRotation";
+import SftCurves from "./SftCurves";
 import Sampling from "./Sampling";
 import Sinusoidal from "./Sinusoidal";
 import SoftmaxCe from "./SoftmaxCe";
@@ -72,6 +73,7 @@ export const VIZ_REGISTRY: Record<string, ComponentType> = {
   "qk-norm": QkNorm,
   "rmsnorm": RmsNorm,
   "rope-rotation": RopeRotation,
+  "sft-curves": SftCurves,
   "sampling": Sampling,
   "sinusoidal": Sinusoidal,
   "softmax-ce": SoftmaxCe,

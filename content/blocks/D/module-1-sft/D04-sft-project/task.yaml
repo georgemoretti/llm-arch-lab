@@ -1,0 +1,21 @@
+id: D04-sft-project
+title: "Проект: SFT игрушечной модели — формат от SFT, знания от предобучения"
+short_title: "Проект: SFT"
+block: D
+module: module-1-sft
+type: project
+difficulty: medium
+depends_on: [D03-sft-step]
+recommended_after: [A18-minigpt]
+diff_from: D03-sft-step
+tags: [sft, project, evaluation, instruction-tuning]
+entrypoint: [build_example, check_answer, chat_answer, evaluate]
+time_estimate_min: 50
+papers: [lima, instructgpt]
+reading:
+  - title: "LIMA: Less Is More for Alignment (Superficial Alignment Hypothesis)"
+    url: https://arxiv.org/abs/2305.11206
+  - title: "TRL: SFTTrainer (как то же делает библиотека)"
+    url: https://huggingface.co/docs/trl/main/en/sft_trainer
+viz: [sft-curves, chat-template]
+questions: [sft-project-*, iv-finetuning-05, iv-finetuning-06, iv-finetuning-07]

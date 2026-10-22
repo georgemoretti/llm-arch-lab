@@ -2753,3 +2753,11 @@ a.btn:hover {
 .chat-cell.hl .chat-tok {
   outline: 2px solid var(--accent);
 }
+
+/* --- V-sft-curves --- */
+.budget-table th {
+  padding: 3px 14px 3px 0;
+  text-align: left;
+  font-weight: 500;
+  color: var(--muted);
+}

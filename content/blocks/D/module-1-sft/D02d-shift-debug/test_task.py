@@ -143,8 +143,11 @@ def test_pack_rows(impl):
     cu = r0["cu_seqlens"]
     assert cu.dtype == torch.int32 and cu.tolist() == [0, 5, 9], f"cu_seqlens = [0, 5, 9] int32, получено {cu}"
     assert r1["input_ids"].tolist() == list(range(20, 26)) and r1["cu_seqlens"].tolist() == [0, 6]
+    exact = impl.pack([(list(range(6)), [IGNORE] * 6), (list(range(4)), [IGNORE] * 4)], max_len=10)
+    assert len(exact) == 1, "6 + 4 = 10 = max_len: помещается в одну строку (≤, а не <)"
+    assert len(impl.pack([(list(range(10)), [IGNORE] * 10)], max_len=10)) == 1, "пример длиной ровно max_len помещается"
     with pytest.raises(ValueError):
-        impl.pack([(list(range(12)), [IGNORE] * 12)], max_len=10)
+        impl.pack([(list(range(11)), [IGNORE] * 11)], max_len=10)
 
 
 def test_packed_causal_mask(impl):

@@ -1,0 +1,19 @@
+id: D-P1-instructgpt-flan-lima
+title: "Статьи: InstructGPT (SFT и данные), FLAN, LIMA"
+short_title: "Статьи: InstructGPT, FLAN, LIMA"
+block: D
+module: module-1-sft
+type: paper
+difficulty: medium
+depends_on: [D02-loss-mask]
+diff_from: null
+tags: [paper, sft, instruction-tuning, alignment, data]
+time_estimate_min: 60
+papers: [instructgpt, flan, lima]
+reading:
+  - title: "Hugging Face blog: Illustrating Reinforcement Learning from Human Feedback (RLHF)"
+    url: https://huggingface.co/blog/rlhf
+  - title: "Sebastian Raschka: LLM Training — RLHF and Its Alternatives"
+    url: https://magazine.sebastianraschka.com/p/llm-training-rlhf-and-its-alternatives
+viz: [chat-template]
+questions: [paper-instructgpt-*, paper-flan-*, paper-lima-*]
