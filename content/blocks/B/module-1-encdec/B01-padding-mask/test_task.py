@@ -81,7 +81,7 @@ def test_padding_mask(impl):
     assert m.shape == (B, 1, 1, S), (
         f"форма [B, 1, 1, S] = [{B}, 1, 1, {S}], получено {tuple(m.shape)}. Оси 1 и 2 (головы и запросы) — "
         "размера 1, чтобы маска растягивалась по ним, а различалась только по ключам.")
-    torch.testing.assert_close(m[:, 0, 0], ids != PAD, msg="True там, где токен не PAD")
+    torch.testing.assert_close(m[:, 0, 0], ids != PAD, msg="True там, где токен не PAD", atol=0, rtol=0)
 
 
 def test_attention_cross_shapes_no_mask(impl):
@@ -94,7 +94,8 @@ def test_attention_cross_shapes_no_mask(impl):
     want = _oracle(q, k, v, None)
     if not torch.allclose(out, want, atol=1e-5, rtol=1e-4):
         pytest.fail(_diagnose(out, q, k, v, None), pytrace=False)
-    torch.testing.assert_close(w.sum(-1), torch.ones(B, H, T), msg="веса каждого запроса суммируются в 1")
+    torch.testing.assert_close(w.sum(-1), torch.ones(B, H, T), atol=1e-6, rtol=1e-5,
+                               msg="веса каждого запроса суммируются в 1")
 
 
 def test_attention_padding_mask(impl):
@@ -105,7 +106,8 @@ def test_attention_padding_mask(impl):
     if not torch.allclose(out, _oracle(q, k, v, mask), atol=1e-5, rtol=1e-4):
         pytest.fail(_diagnose(out, q, k, v, mask), pytrace=False)
     assert torch.all(w[0, :, :, 4:] == 0), "веса PAD-ключей должны быть ровно 0"
-    torch.testing.assert_close(w.sum(-1), torch.ones(B, H, T), msg="каждая строка весов суммируется в 1")
+    torch.testing.assert_close(w.sum(-1), torch.ones(B, H, T), atol=1e-6, rtol=1e-5,
+                               msg="каждая строка весов суммируется в 1")
 
 
 def test_attention_general_mask(impl):

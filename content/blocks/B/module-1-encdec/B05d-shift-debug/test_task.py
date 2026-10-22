@@ -191,7 +191,7 @@ def test_greedy_max_len_and_reference(impl, ref):
     src, _ = _batch()
     got = impl.greedy_decode(b.eval(), src, 6)
     torch.testing.assert_close(got, ref.greedy_decode(a.eval(), src, 6),
-                               msg="на каждом шаге — argmax логитов ПОСЛЕДНЕЙ позиции")
+                               msg="на каждом шаге — argmax логитов ПОСЛЕДНЕЙ позиции", atol=0, rtol=0)
     assert not got.requires_grad, "генерация без графа градиентов (@torch.no_grad)"
 
 

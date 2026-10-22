@@ -188,7 +188,8 @@ def test_something(impl, ref):
 
 - игрушечные размеры (`d_model ≤ 64`, `T ≤ 32`), каждый тест < 2 с на CPU;
 - сравнение через `torch.testing.assert_close(..., atol=…, rtol=…, msg=…)` или
-  `torch.allclose` + `pytest.fail(…, pytrace=False)`;
+  `torch.allclose` + `pytest.fail(…, pytrace=False)`; `assert_close` без явных `atol` и `rtol` — ошибка
+  `llmlab validate` (`check_tolerances` в загрузчике). Данные (маски, id, перестановки) — `atol=0, rtol=0`;
 - проверять: формы, численное совпадение (с `ref` или с независимым оракулом), **свойства
   механизма** (causal-маска не пропускает будущее; RoPE сохраняет норму; KV-cache == полный
   прогон; веса роутера суммируются в 1 …);

@@ -83,7 +83,8 @@ def test_feedforward(impl):
     if torch.allclose(out, ffn.linear2(F.gelu(ffn.linear1(x))), atol=1e-6):
         pytest.fail("активация GELU, а в статье (и в nn.TransformerEncoderLayer по умолчанию) — ReLU. GELU придёт с "
                     "BERT (B10).", pytrace=False)
-    torch.testing.assert_close(out, ffn.linear2(F.relu(ffn.linear1(x))), msg="linear1 → ReLU → linear2")
+    torch.testing.assert_close(out, ffn.linear2(F.relu(ffn.linear1(x))), atol=1e-6, rtol=1e-5,
+                               msg="linear1 → ReLU → linear2")
 
 
 @pytest.mark.parametrize("norm_first", [False, True], ids=["post-ln", "pre-ln"])

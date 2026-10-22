@@ -53,8 +53,8 @@ def test_table_values(impl):
     assert pe.dtype == torch.float32, f"float32, получено {pe.dtype}"
     if not torch.allclose(pe.double(), _oracle(), atol=1e-5):
         pytest.fail(_diagnose_table(pe), pytrace=False)
-    torch.testing.assert_close(pe[0, 0::2], torch.zeros(DM // 2), msg="позиция 0: все sin = 0")
-    torch.testing.assert_close(pe[0, 1::2], torch.ones(DM // 2), msg="позиция 0: все cos = 1")
+    torch.testing.assert_close(pe[0, 0::2], torch.zeros(DM // 2), msg="позиция 0: все sin = 0", atol=1e-6, rtol=1e-5)
+    torch.testing.assert_close(pe[0, 1::2], torch.ones(DM // 2), msg="позиция 0: все cos = 1", atol=1e-6, rtol=1e-5)
 
 
 def test_table_properties(impl):
@@ -121,7 +121,7 @@ def test_embedding_positions(impl):
     ids = torch.tensor([[7, 3, 3, 7], [7, 3, 0, 0]])
     out = emb(ids)
     torch.testing.assert_close(out[0, :2], out[1, :2], msg="одинаковое начало текстов → одинаковые векторы: позиции "
-                                                           "у каждого текста с нуля")
+                                                           "у каждого текста с нуля", atol=1e-6, rtol=1e-5)
     assert not torch.allclose(out[0, 0], out[0, 3], atol=1e-3), "токен 7 в позициях 0 и 3 должен давать разные векторы"
     torch.testing.assert_close(out[1, 2:], _oracle(12, DM).float()[2:4], atol=1e-5, rtol=1e-5,
                                msg="эмбеддинг PAD нулевой (padding_idx) → на PAD-позиции остаётся только PE")

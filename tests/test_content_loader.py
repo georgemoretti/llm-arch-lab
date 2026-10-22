@@ -3,7 +3,7 @@ from pathlib import Path
 import yaml
 
 from toycourse import write_task
-from llmlab.content_loader import check_shapes, find_cycles, load_course
+from llmlab.content_loader import check_shapes, check_tolerances, find_cycles, load_course
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
@@ -155,3 +155,18 @@ def test_shapes_error_is_attached_to_task(toy_root):
     course = load_course(toy_root)
     (issue,) = [i for i in course.errors if "shapes" in i.message]
     assert "Z01-add" in Path(issue.where).parts and "README.md" in issue.where
+
+
+def test_check_tolerances():
+    ok = "torch.testing.assert_close(a, b, atol=0, rtol=0)\nassert_close(a, b, msg='x', rtol=1e-5, atol=1e-6)\n"
+    assert check_tolerances(ok) == []
+    bad = "import torch\ntorch.testing.assert_close(a, b)\nassert_close(a, b, atol=1e-6)\n"
+    errors = check_tolerances(bad)
+    assert [e.split(":")[0] for e in errors] == ["строка 2", "строка 3"]
+
+
+def test_tolerance_error_is_attached_to_task(toy_root):
+    write_task(toy_root, "Z01-add", files={"test_task.py": "def test_x(impl):\n    torch.testing.assert_close(1, 1)\n"})
+    course = load_course(toy_root)
+    (issue,) = [i for i in course.errors if "assert_close" in i.message]
+    assert "Z01-add" in Path(issue.where).parts and issue.where.endswith("test_task.py")

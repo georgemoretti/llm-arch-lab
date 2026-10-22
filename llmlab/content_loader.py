@@ -16,6 +16,7 @@
 
 from __future__ import annotations
 
+import ast
 import fnmatch
 import re
 from dataclasses import dataclass, field
@@ -93,6 +94,24 @@ def check_shapes(text: str) -> list[str]:
         if tensors == 0:
             errors.append(f"shapes #{block_no}: в схеме нет ни одного тензора")
     return errors
+
+
+def check_tolerances(source: str) -> list[str]:
+    """Вызовы ``assert_close`` без явных ``atol`` и ``rtol`` (правило CLAUDE.md: допуски всегда явные)."""
+    try:
+        tree = ast.parse(source)
+    except SyntaxError as e:
+        return [f"синтаксическая ошибка в тестах: {e}"]
+    errors = []
+    for node in ast.walk(tree):
+        if not isinstance(node, ast.Call):
+            continue
+        name = node.func.attr if isinstance(node.func, ast.Attribute) else getattr(node.func, "id", "")
+        if name == "assert_close" and not {"atol", "rtol"} <= {k.arg for k in node.keywords}:
+            errors.append(f"строка {node.lineno}: assert_close без явных atol и rtol "
+                          "(данные — atol=0, rtol=0; численные сравнения — свои допуски)")
+    return errors
+
 
 TASK_ID_RE = re.compile(r"^[A-Z]\d{2}[a-z]?(-[a-z0-9]+)+$|^[A-Z]-[A-Z]\d+[a-z]?(-[a-z0-9]+)*$")
 
@@ -507,6 +526,9 @@ def _check_references(course: Course) -> None:
         directives = VIZ_DIRECTIVE_RE.findall(readme_text)
         for err in check_shapes(readme_text):
             course.issues.append(Issue("error", _rel(readme, course.root), err))
+        if task.has_code and task.test_file.exists():
+            for err in check_tolerances(task.test_file.read_text(encoding="utf-8")):
+                course.issues.append(Issue("error", _rel(task.test_file, course.root), err))
         for vid in [*task.viz, *directives]:
             if vid not in course.viz:
                 course.issues.append(Issue("error", where, f"viz: нет content/viz/{vid}.yaml"))

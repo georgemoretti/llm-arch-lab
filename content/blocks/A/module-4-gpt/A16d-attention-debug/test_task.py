@@ -75,8 +75,9 @@ def test_attention_without_mask(impl):
         f"out [B, T, D] и weights [B, T, T], получено {tuple(out.shape)} и {tuple(w.shape)}")
     if not torch.allclose(out, _SDPA(q, k, v), atol=1e-5, rtol=1e-4):
         pytest.fail(_diagnose(out, q, k, v, causal=False), pytrace=False)
-    torch.testing.assert_close(w.sum(-1), torch.ones(B, T), msg="веса каждого запроса суммируются в 1")
-    torch.testing.assert_close(w @ v, out, msg="out = weights @ v")
+    torch.testing.assert_close(w.sum(-1), torch.ones(B, T), atol=1e-6, rtol=1e-5,
+                               msg="веса каждого запроса суммируются в 1")
+    torch.testing.assert_close(w @ v, out, msg="out = weights @ v", atol=1e-6, rtol=1e-5)
 
 
 def test_attention_with_causal_mask(impl):
@@ -87,8 +88,10 @@ def test_attention_with_causal_mask(impl):
     if not torch.allclose(out, _SDPA(q, k, v, is_causal=True), atol=1e-5, rtol=1e-4):
         pytest.fail(_diagnose(out, q, k, v, causal=True), pytrace=False)
     assert torch.all(w.masked_select(~mask.expand(B, T, T)) == 0), "веса будущих ключей должны быть ровно 0"
-    torch.testing.assert_close(w.sum(-1), torch.ones(B, T), msg="каждая строка весов суммируется в 1")
-    torch.testing.assert_close(out[:, 0], v[:, 0], msg="позиция 0 видит только себя: её выход — ровно v[0]")
+    torch.testing.assert_close(w.sum(-1), torch.ones(B, T), atol=1e-6, rtol=1e-5,
+                               msg="каждая строка весов суммируется в 1")
+    torch.testing.assert_close(out[:, 0], v[:, 0], atol=1e-6, rtol=1e-5,
+                               msg="позиция 0 видит только себя: её выход — ровно v[0]")
 
 
 def test_value_dim_and_large_scores(impl):
@@ -132,4 +135,5 @@ def test_head_no_future_leak(impl, ref):
             pytest.fail(f"выход на позиции ≤ {t} зависит от входа в позиции {t + 1} и дальше → утечка будущего "
                         "через маску. При обучении модель подсмотрит правильный ответ.", pytrace=False)
     other = b(torch.cat([x[:1], torch.randn(1, T, C, generator=g)]))
-    torch.testing.assert_close(other[0], b(x)[0], msg="примеры батча не должны влиять друг на друга")
+    torch.testing.assert_close(other[0], b(x)[0], atol=1e-6, rtol=1e-5,
+                               msg="примеры батча не должны влиять друг на друга")

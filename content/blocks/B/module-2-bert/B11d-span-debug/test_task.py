@@ -106,7 +106,8 @@ def test_qa_loss(impl):
     assert got.dim() == 0, "лосс — скаляр"
     if torch.allclose(got, 2 * want):
         pytest.fail("сумма двух cross-entropy без деления на 2: в BertForQuestionAnswering — среднее.", pytrace=False)
-    torch.testing.assert_close(got, want, msg="(cross_entropy(start_logits, start) + cross_entropy(end_logits, end)) / 2")
+    torch.testing.assert_close(got, want, atol=1e-6, rtol=1e-5,
+                               msg="(cross_entropy(start_logits, start) + cross_entropy(end_logits, end)) / 2")
 
 
 def _brute(s, e, mask, L):

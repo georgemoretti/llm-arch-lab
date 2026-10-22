@@ -37,7 +37,7 @@ def test_causal_mask(impl):
     m = impl.causal_mask(4)
     assert m.dtype == torch.bool and m.shape == (4, 4), f"bool [4, 4], получено {m.dtype} {tuple(m.shape)}"
     torch.testing.assert_close(m, torch.tril(torch.ones(4, 4, dtype=torch.bool)),
-                               msg="строка — запрос, столбец — ключ; разрешено ключ ≤ запрос")
+                               msg="строка — запрос, столбец — ключ; разрешено ключ ≤ запрос", atol=0, rtol=0)
 
 
 def test_target_mask(impl):

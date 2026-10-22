@@ -111,10 +111,11 @@ def test_zero_sublayers(impl, ref):
         out = b(x)
         if pre:
             torch.testing.assert_close(out, x, msg="pre-LN при нулевых attention и MLP должен вернуть x без изменений: "
-                                                   "остаточная связь передаёт вход напрямую")
+                                                   "остаточная связь передаёт вход напрямую", atol=1e-6, rtol=1e-5)
         else:
             assert not torch.allclose(out, x, atol=1e-2), "post-LN нормализует сумму, даже при нулевых подслоях выход ≠ x"
-            torch.testing.assert_close(out, b.ln_2(b.ln_1(x)), msg="post-LN при нулевых подслоях = ln_2(ln_1(x))")
+            torch.testing.assert_close(out, b.ln_2(b.ln_1(x)), atol=1e-6, rtol=1e-5,
+                                       msg="post-LN при нулевых подслоях = ln_2(ln_1(x))")
 
 
 def test_post_norm_output_is_normalized(impl):

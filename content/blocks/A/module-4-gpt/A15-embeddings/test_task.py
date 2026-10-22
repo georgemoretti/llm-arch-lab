@@ -52,8 +52,8 @@ def test_positions_shared_across_batch_and_shorter_T(impl, ref):
     idx = torch.full((2, 5), 7)
     out = b(idx)
     assert not torch.allclose(out[0, 0], out[0, 1]), "одинаковый токен на позициях 0 и 1 должен давать разные векторы"
-    torch.testing.assert_close(out[0], out[1], msg="позиции одинаковы для каждого примера батча")
-    torch.testing.assert_close(out[0, 3] - out[0, 0], b.wpe.weight[3] - b.wpe.weight[0])
+    torch.testing.assert_close(out[0], out[1], msg="позиции одинаковы для каждого примера батча", atol=0, rtol=0)
+    torch.testing.assert_close(out[0, 3] - out[0, 0], b.wpe.weight[3] - b.wpe.weight[0], atol=1e-6, rtol=1e-5)
 
 
 def test_too_long_raises(impl, ref):
@@ -81,7 +81,8 @@ def test_tie_weights(impl):
     w1 = wte.weight.detach().clone().requires_grad_()
     w2 = wte.weight.detach().clone().requires_grad_()
     (F.embedding(idx, w1) @ w2.T).sum().backward()
-    torch.testing.assert_close(grad, w1.grad + w2.grad, msg="у связанного веса градиент — сумма вкладов входа и выхода")
+    torch.testing.assert_close(grad, w1.grad + w2.grad, atol=1e-6, rtol=1e-5,
+                               msg="у связанного веса градиент — сумма вкладов входа и выхода")
 
 
 def test_count_params(impl, ref):
